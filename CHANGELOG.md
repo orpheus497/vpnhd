@@ -66,6 +66,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Command injection vulnerabilities by removing shell=True from subprocess.run() calls
 - Unsafe command execution enabling arbitrary code injection through user inputs
 - Missing input validation allowing malicious hostnames, IPs, and paths
+- Bare except clauses in phase4, phase5, and phase6 verify() methods catching SystemExit
+- Missing capture_output parameter in phase8_security.py verify() method
+- Command injection in files.py chmod and rm commands using f-strings
+- Command injection in fail2ban_config.py across 5 fail2ban-client commands
+- Command injection in ssh_config.py service discovery using shell pipe
+- Command injection in commands.py get_command_version() using f-string
+- Missing input validation in network/testing.py ping_host() and traceroute()
+- Missing port validation in phase8_security.py _configure_ufw() method
 
 ### Enhanced
 - Phase 4 (Linux Desktop Client Always-On) now automatically adds peer to server
@@ -91,13 +99,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Created security module with dedicated validators for all input types
 - Implemented custom exception hierarchy replacing bare except clauses
 - Added detailed security documentation in command execution function docstrings
+- Integrated security validators into network testing and firewall configuration
+- Replaced bare except with specific Exception handling in all phase verify() methods
+- Converted all remaining f-string commands to secure array format
+- Eliminated shell pipe usage in ssh_config.py using systemctl exit codes
+- Added proper logging for exception cases instead of silent failures
 
 ### Security
-- Eliminated 18 critical command injection vulnerabilities across codebase
+- Eliminated 26 critical command injection vulnerabilities across codebase
 - Implemented comprehensive input validation framework preventing injection attacks
 - Created structured exception handling replacing unsafe bare except clauses
 - Added security-focused logging throughout command execution paths
 - Validated all dependencies as 100% FOSS and royalty-free
+- Fixed 3 bare except clauses that could hide SystemExit and KeyboardInterrupt
+- Added hostname/IP validation preventing malicious input in network operations
+- Added port range validation preventing invalid or privileged port usage
+- Eliminated all shell pipe usage replacing with native command options
+- Converted all f-string command construction to safe array format
 - Ensured no shell=True usage in any subprocess operations
 
 ### Documentation
