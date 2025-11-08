@@ -84,6 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ServiceStatus enum compared to string instead of enum value (fail2ban_config.py)
 - TOCTOU race condition in file creation (utils/helpers.py)
 - Imports inside functions reducing performance (4 instances removed)
+- Code duplication between phase4 and phase5 (~150 lines of duplicate logic)
 
 ### Removed
 - Deprecated phase4_fedora.py (replaced by distribution-agnostic phase4_linux_client.py)
@@ -126,6 +127,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moved 4 function-level imports to module level improving performance
 - Fixed TOCTOU race condition using atomic file creation (open with 'x' mode)
 - Improved code organization following Python best practices
+- Created distribution_helpers module extracting common distribution selection logic
+- Eliminated ~150 lines of duplicated code between phase4 and phase5
+- Centralized WireGuard installation instructions in reusable helper functions
 
 ### Security
 - Eliminated 30 critical command injection vulnerabilities across codebase
