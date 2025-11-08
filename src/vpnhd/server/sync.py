@@ -2,14 +2,11 @@
 
 import asyncio
 import hashlib
-import json
-from typing import Optional, Dict, Any, List, Set
+from typing import Optional, Dict, Any, List
 from datetime import datetime
-from pathlib import Path
 
 from ..utils.logging import get_logger
-from ..config.manager import ConfigManager
-from .models import SyncConfiguration, ServerProfile
+from .models import SyncConfiguration
 from .manager import ServerManager
 
 logger = get_logger(__name__)
@@ -462,6 +459,7 @@ class ConfigSync:
             try:
                 await self._task
             except asyncio.CancelledError:
+                # Expected when task is cancelled
                 pass
             self._task = None
 

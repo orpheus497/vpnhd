@@ -3,8 +3,7 @@
 import asyncio
 import time
 import psutil
-from typing import Optional, Dict, Any, List
-from datetime import datetime
+from typing import Optional, Dict
 from pathlib import Path
 
 from ..utils.logging import get_logger
@@ -402,6 +401,7 @@ class MetricsCollector:
             try:
                 await self._task
             except asyncio.CancelledError:
+                # Expected when task is cancelled
                 pass
             self._task = None
 

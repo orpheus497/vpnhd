@@ -3,7 +3,7 @@
 import asyncio
 import signal
 from typing import Optional
-from prometheus_client import start_http_server, REGISTRY, generate_latest
+from prometheus_client import REGISTRY, generate_latest
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import threading
 
@@ -196,7 +196,7 @@ async def main_async() -> None:
     """Main entry point for async metrics exporter."""
     # Setup logging
     from ..utils.logging import setup_logging
-    setup_logging(level='INFO')
+    setup_logging(log_level='INFO')
 
     # Load configuration
     config = ConfigManager()

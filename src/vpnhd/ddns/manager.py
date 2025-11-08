@@ -2,7 +2,7 @@
 
 import asyncio
 from typing import Optional, Dict, Any, Type
-from datetime import datetime, timedelta
+from datetime import datetime
 from ..utils.logging import get_logger
 from ..config.manager import ConfigManager
 from .providers.base import DDNSProvider

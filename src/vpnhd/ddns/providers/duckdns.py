@@ -1,7 +1,6 @@
 """Duck DNS provider implementation."""
 
 import httpx
-from typing import Optional
 from .base import DDNSProvider
 from ...utils.logging import get_logger
 

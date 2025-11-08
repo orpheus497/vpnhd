@@ -3,7 +3,7 @@
 import asyncio
 import httpx
 from typing import Optional, List, Dict, Any, Callable, Awaitable
-from datetime import datetime, timedelta
+from datetime import datetime
 from ..utils.logging import get_logger
 from ..config.manager import ConfigManager
 
@@ -231,6 +231,7 @@ class IPChangeDetector:
             try:
                 await self._task
             except asyncio.CancelledError:
+                # Expected when task is cancelled
                 pass
             self._task = None
 

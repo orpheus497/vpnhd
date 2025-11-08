@@ -3,19 +3,13 @@
 import asyncio
 import asyncssh
 from typing import Optional, Dict, Any, List
-from datetime import datetime
-from pathlib import Path
-import json
 
 from ..utils.logging import get_logger
 from ..config.manager import ConfigManager
 from .models import (
     ServerProfile,
-    ServerStatus,
-    ServerMetrics,
     ServerGroup,
     ServerOperation,
-    ServerConnection,
 )
 
 logger = get_logger(__name__)
@@ -324,6 +318,7 @@ class ServerManager:
                 try:
                     uptime = int(float(uptime_output.split()[0]))
                 except (ValueError, IndexError):
+                    # Invalid uptime format, keep as None
                     pass
 
             # Update status
@@ -370,6 +365,7 @@ class ServerManager:
                 try:
                     active_clients = int(output.strip())
                 except ValueError:
+                    # Invalid number format, keep default 0
                     pass
 
             # Get traffic statistics (simplified - would need parsing)

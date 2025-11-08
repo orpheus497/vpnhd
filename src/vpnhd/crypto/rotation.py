@@ -1,11 +1,9 @@
 """Automated cryptographic key rotation for VPN and SSH."""
 
 import asyncio
-import secrets
-from typing import Optional, Dict, Any, List, Callable, Awaitable
-from datetime import datetime, timedelta
+from typing import Optional, Dict, Any
+from datetime import datetime
 from pathlib import Path
-import base64
 
 from ..utils.logging import get_logger
 from ..config.manager import ConfigManager
@@ -511,6 +509,7 @@ class KeyRotationManager:
             try:
                 await self._task
             except asyncio.CancelledError:
+                # Expected when task is cancelled
                 pass
             self._task = None
 
