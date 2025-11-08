@@ -70,9 +70,18 @@ class Phase1Debian(Phase):
             return False
 
     def _check_debian_installed(self) -> bool:
-        """Check if Debian is installed."""
-        result = execute_command("cat /etc/os-release | grep -i debian", check=False)
-        return result.success
+        """Check if Debian is installed by parsing /etc/os-release."""
+        try:
+            os_release_path = Path("/etc/os-release")
+            if not os_release_path.exists():
+                return False
+
+            content = os_release_path.read_text().lower()
+            return 'debian' in content
+
+        except Exception as e:
+            logger.error(f"Error checking Debian installation: {e}")
+            return False
 
     def _get_debian_version(self) -> str:
         """Get Debian version."""

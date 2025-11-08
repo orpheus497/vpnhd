@@ -9,7 +9,7 @@ from typing import Optional
 import subprocess
 import tempfile
 
-from ..system.commands import execute_command, check_command_exists
+from ..system.commands import execute_command, check_command_exists, run_command_with_input
 from ..utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -38,7 +38,7 @@ def generate_qr_code(config_text: str, output_path: Optional[str] = None) -> boo
         if output_path:
             # Generate QR code and save to file
             cmd = f"qrencode -t PNG -o {output_path} -l L"
-            result = execute_command(cmd, stdin_data=config_text)
+            result = run_command_with_input(cmd, input_data=config_text)
 
             if result.success:
                 logger.info(f"QR code saved to {output_path}")
@@ -87,14 +87,14 @@ def display_qr_terminal(config_text: str) -> bool:
         # -t ANSIUTF8 creates colored terminal output
         # -t UTF8 creates black and white terminal output
         # We'll use ANSIUTF8 for better visibility
-        result = execute_command("qrencode -t ANSIUTF8", stdin_data=config_text)
+        result = run_command_with_input("qrencode -t ANSIUTF8", input_data=config_text)
 
         if result.success:
             print(result.stdout)
             return True
         else:
             # Fallback to UTF8 if ANSIUTF8 not supported
-            result = execute_command("qrencode -t UTF8", stdin_data=config_text)
+            result = run_command_with_input("qrencode -t UTF8", input_data=config_text)
             if result.success:
                 print(result.stdout)
                 return True
@@ -153,16 +153,16 @@ def install_qrencode() -> bool:
     try:
         # Try to detect package manager and install
         if check_command_exists("apt"):
-            result = execute_command("apt install -y qrencode")
+            result = execute_command(["apt", "install", "-y", "qrencode"], sudo=True)
             return result.success
         elif check_command_exists("dnf"):
-            result = execute_command("dnf install -y qrencode")
+            result = execute_command(["dnf", "install", "-y", "qrencode"], sudo=True)
             return result.success
         elif check_command_exists("yum"):
-            result = execute_command("yum install -y qrencode")
+            result = execute_command(["yum", "install", "-y", "qrencode"], sudo=True)
             return result.success
         elif check_command_exists("pacman"):
-            result = execute_command("pacman -S --noconfirm qrencode")
+            result = execute_command(["pacman", "-S", "--noconfirm", "qrencode"], sudo=True)
             return result.success
         else:
             logger.error("Could not detect package manager to install qrencode")
