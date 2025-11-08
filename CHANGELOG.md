@@ -75,6 +75,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Missing input validation in network/testing.py ping_host() and traceroute()
 - Missing port validation in phase8_security.py _configure_ufw() method
 - Method name mismatch in ssh_config.py calling restart() instead of restart_service()
+- Command injection in network/testing.py check_port_forwarding() using shell pipe
+- Command injection in network/testing.py measure_latency() using f-string
+- Command injection in network/testing.py test_vpn_connectivity() using f-string
+- Missing input validation in test_connectivity() and test_port_open()
 
 ### Removed
 - Deprecated phase4_fedora.py (replaced by distribution-agnostic phase4_linux_client.py)
@@ -116,7 +120,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed method name mismatch preventing AttributeError in SSH service restart
 
 ### Security
-- Eliminated 26 critical command injection vulnerabilities across codebase
+- Eliminated 29 critical command injection vulnerabilities across codebase
 - Implemented comprehensive input validation framework preventing injection attacks
 - Created structured exception handling replacing unsafe bare except clauses
 - Added security-focused logging throughout command execution paths
@@ -124,9 +128,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed 3 bare except clauses that could hide SystemExit and KeyboardInterrupt
 - Added hostname/IP validation preventing malicious input in network operations
 - Added port range validation preventing invalid or privileged port usage
+- Added interface name validation for VPN operations
 - Eliminated all shell pipe usage replacing with native command options
 - Converted all f-string command construction to safe array format
 - Ensured no shell=True usage in any subprocess operations
+- Extended validation coverage to all network testing functions
 
 ### Documentation
 - Updated README.md with distribution-agnostic language
