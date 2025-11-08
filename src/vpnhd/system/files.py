@@ -116,7 +116,11 @@ class FileManager:
                     return False
 
                 # Set permissions
-                execute_command(f"chmod {oct(mode)[2:]} {file_path}", sudo=True, check=False)
+                execute_command(
+                    ["chmod", oct(mode)[2:], str(file_path)],
+                    sudo=True,
+                    check=False
+                )
 
             else:
                 # Write directly
@@ -218,7 +222,11 @@ class FileManager:
                 return True
 
             if sudo:
-                result = execute_command(f"rm -f {file_path}", sudo=True, check=False)
+                result = execute_command(
+                    ["rm", "-f", str(file_path)],
+                    sudo=True,
+                    check=False
+                )
                 return result.success
 
             else:

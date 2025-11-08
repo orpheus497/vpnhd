@@ -245,12 +245,12 @@ backend = systemd
         try:
             if jail_name:
                 # Get banned IPs for specific jail
-                result = execute_command(f"fail2ban-client status {jail_name}")
+                result = execute_command(["fail2ban-client", "status", jail_name])
                 if result.success:
                     banned_ips.extend(self._parse_banned_ips(result.stdout, jail_name))
             else:
                 # Get all active jails
-                result = execute_command("fail2ban-client status")
+                result = execute_command(["fail2ban-client", "status"])
                 if result.success:
                     # Extract jail names from status output
                     import re
@@ -261,7 +261,7 @@ backend = systemd
 
                         # Get banned IPs for each jail
                         for jail in jails:
-                            jail_result = execute_command(f"fail2ban-client status {jail}")
+                            jail_result = execute_command(["fail2ban-client", "status", jail])
                             if jail_result.success:
                                 banned_ips.extend(
                                     self._parse_banned_ips(jail_result.stdout, jail)
@@ -314,7 +314,9 @@ backend = systemd
         """
         try:
             if jail_name:
-                result = execute_command(f"fail2ban-client set {jail_name} unbanip {ip}")
+                result = execute_command(
+                    ["fail2ban-client", "set", jail_name, "unbanip", ip]
+                )
                 if result.success:
                     logger.info(f"Unbanned {ip} from {jail_name}")
                     return True
@@ -324,7 +326,7 @@ backend = systemd
             else:
                 # Unban from all jails
                 # Get list of active jails
-                result = execute_command("fail2ban-client status")
+                result = execute_command(["fail2ban-client", "status"])
                 if result.success:
                     import re
 
@@ -334,7 +336,9 @@ backend = systemd
 
                         success = True
                         for jail in jails:
-                            result = execute_command(f"fail2ban-client set {jail} unbanip {ip}")
+                            result = execute_command(
+                                ["fail2ban-client", "set", jail, "unbanip", ip]
+                            )
                             if result.success:
                                 logger.info(f"Unbanned {ip} from {jail}")
                             else:
@@ -385,7 +389,7 @@ backend = systemd
             Dictionary with jail status information, or None on error
         """
         try:
-            result = execute_command(f"fail2ban-client status {jail_name}")
+            result = execute_command(["fail2ban-client", "status", jail_name])
             if not result.success:
                 return None
 

@@ -313,7 +313,7 @@ def get_command_version(command: str, version_flag: str = "--version") -> Option
     if not check_command_exists(command):
         return None
 
-    result = execute_command(f"{command} {version_flag}", check=False)
+    result = execute_command([command, version_flag], check=False)
     if result.success:
         return result.stdout.strip().split('\n')[0]
 
