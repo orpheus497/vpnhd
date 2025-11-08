@@ -324,7 +324,8 @@ to your VPN. Configuration is done via QR code for quick and easy setup.
         try:
             server_config_mgr = ServerConfigManager()
             return server_config_mgr.verify_peer_exists(public_key)
-        except:
+        except Exception as e:
+            logger.warning(f"Could not verify peer exists on server: {e}")
             return True
 
     def rollback(self) -> bool:

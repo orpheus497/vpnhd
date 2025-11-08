@@ -291,7 +291,8 @@ for enhanced security. Use `vpn-up` to connect and `vpn-down` to disconnect.
         try:
             server_config_mgr = ServerConfigManager()
             return server_config_mgr.verify_peer_exists(public_key)
-        except:
+        except Exception as e:
+            logger.warning(f"Could not verify peer exists on server: {e}")
             return True
 
     def rollback(self) -> bool:

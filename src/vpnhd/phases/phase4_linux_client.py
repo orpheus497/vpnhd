@@ -289,8 +289,9 @@ CentOS, RHEL, Arch Linux, Manjaro, and other modern Linux distributions."""
         try:
             server_config_mgr = ServerConfigManager()
             return server_config_mgr.verify_peer_exists(public_key)
-        except:
+        except Exception as e:
             # If we can't verify, assume it's okay
+            logger.warning(f"Could not verify peer exists on server: {e}")
             return True
 
     def rollback(self) -> bool:
