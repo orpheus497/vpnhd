@@ -40,10 +40,18 @@ def ensure_file_exists(path: Path, content: str = "", mode: int = 0o600) -> bool
         bool: True if file exists or was created successfully
     """
     try:
-        if not path.exists():
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(content)
+        # Create parent directory if needed (exist_ok=True handles race conditions)
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Use 'x' mode to atomically create file only if it doesn't exist
+        # This prevents TOCTOU race conditions
+        try:
+            with path.open('x') as f:
+                f.write(content)
             path.chmod(mode)
+        except FileExistsError:
+            # File already exists, which is fine
+            pass
         return True
     except Exception:
         return False

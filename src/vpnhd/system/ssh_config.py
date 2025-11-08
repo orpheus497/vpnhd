@@ -225,11 +225,16 @@ class SSHConfigManager:
             service_names = ["sshd", "ssh"]
 
             for service_name in service_names:
-                # Check if service exists
-                result = execute_command(f"systemctl list-units --type=service | grep {service_name}")
-                if result.success:
+                # Check if service exists using systemctl status
+                result = execute_command(
+                    ["systemctl", "status", service_name],
+                    check=False,
+                    capture_output=True
+                )
+                # systemctl status returns 0-4 for loaded services, >4 for not found
+                if result.exit_code <= 4:
                     # Restart the service
-                    if self.service_manager.restart(service_name):
+                    if self.service_manager.restart_service(service_name):
                         logger.info(f"SSH service ({service_name}) restarted successfully")
                         return True
 

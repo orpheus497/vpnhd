@@ -5,8 +5,12 @@ from jinja2 import Template
 from .base import Phase
 from ..crypto.wireguard import generate_keypair
 from ..crypto.server_config import ServerConfigManager
-from ..utils.constants import TEMPLATE_DIR, SUPPORTED_CLIENT_DISTROS, WIREGUARD_PACKAGES
+from ..utils.constants import TEMPLATE_DIR
 from ..utils.logging import get_logger
+from ..utils.distribution_helpers import (
+    prompt_for_distribution,
+    generate_wireguard_install_instructions
+)
 
 logger = get_logger(__name__)
 
@@ -49,7 +53,7 @@ CentOS, RHEL, Arch Linux, Manjaro, and other modern Linux distributions."""
             self.show_introduction()
 
             # Prompt for distribution
-            distro = self._prompt_for_distribution()
+            distro = prompt_for_distribution(self.display, self.prompts)
             if not distro:
                 self.mark_failed("No distribution selected")
                 return False
@@ -86,7 +90,11 @@ CentOS, RHEL, Arch Linux, Manjaro, and other modern Linux distributions."""
                 self.display.error("Failed to add peer to server - you'll need to add manually")
 
             # Show installation instructions
-            self._show_installation_instructions(distro, config_text)
+            self.display.newline()
+            self.display.heading("Installation Instructions")
+            instructions = generate_wireguard_install_instructions(distro, always_on=True)
+            self.display.markdown(instructions)
+            self.prompts.pause()
 
             # Save client configuration
             self.config.set("clients.linux_desktop_always_on.public_key", public_key)
@@ -104,34 +112,6 @@ CentOS, RHEL, Arch Linux, Manjaro, and other modern Linux distributions."""
             logger.exception("Error in Phase 4 execution")
             self.mark_failed(str(e))
             return False
-
-    def _prompt_for_distribution(self) -> str:
-        """Prompt user to select their Linux distribution."""
-        self.display.heading("Select Your Linux Distribution")
-        self.display.newline()
-
-        # Build choices from supported distributions
-        choices = []
-        for key, info in SUPPORTED_CLIENT_DISTROS.items():
-            choices.append(f"{info['name']} ({key})")
-
-        choices.append("Other (generic Linux)")
-
-        choice = self.prompts.choice(
-            "Which Linux distribution are you using?",
-            choices
-        )
-
-        # Extract distribution key from choice
-        if choice == "Other (generic Linux)":
-            return "linux"
-
-        # Extract key from choice (e.g., "Fedora (fedora)" -> "fedora")
-        for key, info in SUPPORTED_CLIENT_DISTROS.items():
-            if f"({key})" in choice:
-                return key
-
-        return "linux"
 
     def _prompt_for_client_name(self) -> str:
         """Prompt user for a client device name."""
@@ -207,77 +187,6 @@ CentOS, RHEL, Arch Linux, Manjaro, and other modern Linux distributions."""
             logger.exception(f"Error adding peer to server: {e}")
             return False
 
-    def _show_installation_instructions(self, distro: str, config_text: str):
-        """Show distribution-specific installation instructions.
-
-        Args:
-            distro: Distribution key (e.g., 'fedora', 'ubuntu')
-            config_text: WireGuard configuration content
-        """
-        self.display.newline()
-        self.display.heading("Installation Instructions")
-
-        # Get package manager
-        pkg_manager = SUPPORTED_CLIENT_DISTROS.get(distro, {}).get("package_manager", "apt")
-
-        # Get WireGuard packages for this package manager
-        wg_packages = WIREGUARD_PACKAGES.get(pkg_manager, ["wireguard-tools"])
-        pkg_list = " ".join(wg_packages)
-
-        instructions = f"""
-**On your Linux desktop/laptop ({distro}):**
-
-1. **Install WireGuard:**
-
-   ```bash
-   """
-
-        if pkg_manager == "apt":
-            instructions += f"sudo apt update\n   sudo apt install -y {pkg_list}"
-        elif pkg_manager == "dnf":
-            instructions += f"sudo dnf install -y {pkg_list}"
-        elif pkg_manager == "yum":
-            instructions += f"sudo yum install -y {pkg_list}"
-        elif pkg_manager == "pacman":
-            instructions += f"sudo pacman -S --noconfirm {pkg_list}"
-
-        instructions += """
-   ```
-
-2. **Create configuration file:**
-
-   ```bash
-   sudo nano /etc/wireguard/wg0.conf
-   ```
-
-   Paste the configuration shown above.
-
-3. **Set permissions:**
-
-   ```bash
-   sudo chmod 600 /etc/wireguard/wg0.conf
-   ```
-
-4. **Enable and start WireGuard:**
-
-   ```bash
-   sudo systemctl enable wg-quick@wg0
-   sudo systemctl start wg-quick@wg0
-   ```
-
-5. **Verify connection:**
-
-   ```bash
-   sudo wg show
-   curl ifconfig.me  # Should show your server's public IP
-   ```
-
-**Note:** This configuration routes ALL your traffic through the VPN for maximum privacy.
-"""
-
-        self.display.markdown(instructions)
-        self.prompts.pause()
-
     def verify(self) -> bool:
         """Verify that the phase completed successfully."""
         # Check that client public key is saved
@@ -289,8 +198,9 @@ CentOS, RHEL, Arch Linux, Manjaro, and other modern Linux distributions."""
         try:
             server_config_mgr = ServerConfigManager()
             return server_config_mgr.verify_peer_exists(public_key)
-        except:
+        except Exception as e:
             # If we can't verify, assume it's okay
+            logger.warning(f"Could not verify peer exists on server: {e}")
             return True
 
     def rollback(self) -> bool:

@@ -3,7 +3,7 @@
 import subprocess
 import shlex
 from dataclasses import dataclass
-from typing import Optional, List
+from typing import Optional, List, Union
 from pathlib import Path
 
 from ..utils.logging import get_logger
@@ -25,7 +25,7 @@ class CommandResult:
 
 
 def execute_command(
-    command: str,
+    command: Union[str, List[str]],
     sudo: bool = False,
     check: bool = True,
     capture_output: bool = True,
@@ -34,10 +34,10 @@ def execute_command(
     env: Optional[dict] = None
 ) -> CommandResult:
     """
-    Execute shell command safely.
+    Execute command safely without shell injection vulnerabilities.
 
     Args:
-        command: Command to execute
+        command: Command to execute (string or list of arguments)
         sudo: Whether to use sudo
         check: Raise exception on non-zero exit
         capture_output: Capture stdout/stderr
@@ -47,24 +47,37 @@ def execute_command(
 
     Returns:
         CommandResult: Execution result
+
+    Security:
+        This function uses array-based command execution (shell=False)
+        to prevent command injection attacks. Commands are never executed
+        through a shell unless absolutely necessary.
     """
     logger = get_logger("commands")
 
+    # Parse command if string
+    if isinstance(command, str):
+        command_list = shlex.split(command)
+    else:
+        command_list = list(command)
+
     # Prepend sudo if requested
     if sudo:
-        command = f"sudo {command}"
+        command_list = ["sudo"] + command_list
 
     # Use default timeout if not specified
     if timeout is None:
         timeout = COMMAND_TIMEOUT_DEFAULT
 
-    logger.debug(f"Executing command: {command}")
+    # Log command for debugging (join list for readability)
+    command_str = " ".join(command_list)
+    logger.debug(f"Executing command: {command_str}")
 
     try:
-        # Execute command
+        # Execute command safely WITHOUT shell=True
         result = subprocess.run(
-            command,
-            shell=True,
+            command_list,
+            shell=False,  # SECURITY: Prevents command injection
             capture_output=capture_output,
             text=True,
             timeout=timeout,
@@ -76,14 +89,14 @@ def execute_command(
         success = result.returncode == 0
 
         if not success:
-            logger.warning(f"Command failed with exit code {result.returncode}: {command}")
+            logger.warning(f"Command failed with exit code {result.returncode}: {command_str}")
             if result.stderr:
                 logger.warning(f"  stderr: {result.stderr.strip()}")
 
         if check and not success:
             raise subprocess.CalledProcessError(
                 result.returncode,
-                command,
+                command_str,
                 output=result.stdout,
                 stderr=result.stderr
             )
@@ -93,17 +106,17 @@ def execute_command(
             stdout=result.stdout if capture_output else "",
             stderr=result.stderr if capture_output else "",
             success=success,
-            command=command
+            command=command_str
         )
 
     except subprocess.TimeoutExpired as e:
-        logger.error(f"Command timed out after {timeout}s: {command}")
+        logger.error(f"Command timed out after {timeout}s: {command_str}")
         return CommandResult(
             exit_code=-1,
             stdout="",
             stderr=f"Command timed out after {timeout} seconds",
             success=False,
-            command=command
+            command=command_str
         )
 
     except Exception as e:
@@ -113,7 +126,7 @@ def execute_command(
             stdout="",
             stderr=str(e),
             success=False,
-            command=command
+            command=command_str
         )
 
 
@@ -174,39 +187,52 @@ def check_command_exists(command: str) -> bool:
 
 
 def run_command_with_input(
-    command: str,
+    command: Union[str, List[str]],
     input_data: str,
     sudo: bool = False,
-    timeout: Optional[int] = None
+    timeout: Optional[int] = None,
+    capture_output: bool = True
 ) -> CommandResult:
     """
-    Run command with stdin input.
+    Run command with stdin input safely.
 
     Args:
-        command: Command to execute
+        command: Command to execute (string or list of arguments)
         input_data: Data to send to stdin
         sudo: Whether to use sudo
         timeout: Command timeout in seconds
+        capture_output: Capture stdout/stderr
 
     Returns:
         CommandResult: Execution result
+
+    Security:
+        Uses array-based command execution to prevent injection attacks.
     """
     logger = get_logger("commands")
 
+    # Parse command if string
+    if isinstance(command, str):
+        command_list = shlex.split(command)
+    else:
+        command_list = list(command)
+
+    # Prepend sudo if requested
     if sudo:
-        command = f"sudo {command}"
+        command_list = ["sudo"] + command_list
 
     if timeout is None:
         timeout = COMMAND_TIMEOUT_DEFAULT
 
-    logger.debug(f"Executing command with input: {command}")
+    command_str = " ".join(command_list)
+    logger.debug(f"Executing command with input: {command_str}")
 
     try:
         result = subprocess.run(
-            command,
-            shell=True,
+            command_list,
+            shell=False,  # SECURITY: Prevents command injection
             input=input_data,
-            capture_output=True,
+            capture_output=capture_output,
             text=True,
             timeout=timeout,
             check=False
@@ -216,10 +242,20 @@ def run_command_with_input(
 
         return CommandResult(
             exit_code=result.returncode,
-            stdout=result.stdout,
-            stderr=result.stderr,
+            stdout=result.stdout if capture_output else "",
+            stderr=result.stderr if capture_output else "",
             success=success,
-            command=command
+            command=command_str
+        )
+
+    except subprocess.TimeoutExpired as e:
+        logger.error(f"Command with input timed out after {timeout}s: {command_str}")
+        return CommandResult(
+            exit_code=-1,
+            stdout="",
+            stderr=f"Command timed out after {timeout} seconds",
+            success=False,
+            command=command_str
         )
 
     except Exception as e:
@@ -229,7 +265,7 @@ def run_command_with_input(
             stdout="",
             stderr=str(e),
             success=False,
-            command=command
+            command=command_str
         )
 
 
@@ -277,7 +313,7 @@ def get_command_version(command: str, version_flag: str = "--version") -> Option
     if not check_command_exists(command):
         return None
 
-    result = execute_command(f"{command} {version_flag}", check=False)
+    result = execute_command([command, version_flag], check=False)
     if result.success:
         return result.stdout.strip().split('\n')[0]
 

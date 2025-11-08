@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Optional, List, Dict
 import re
 
-from ..system.commands import execute_command
+from ..system.commands import execute_command, run_command_with_input
 from ..system.files import FileManager
 from ..utils.logging import get_logger
 
@@ -155,24 +155,34 @@ class ServerConfigManager:
         """Reload WireGuard server configuration without disconnecting peers.
 
         Uses `wg syncconf` to apply configuration changes without interrupting
-        existing connections.
+        existing connections. Avoids process substitution by using stdin.
 
         Returns:
             True if reload was successful, False otherwise
         """
         try:
-            # First, try syncconf (graceful reload)
-            result = execute_command(
-                f"wg syncconf wg0 <(wg-quick strip wg0)", shell=True, use_bash=True
+            # First, get the stripped configuration
+            strip_result = execute_command(
+                ["wg-quick", "strip", "wg0"],
+                sudo=True,
+                capture_output=True
             )
 
-            if result.success:
-                logger.info("WireGuard server configuration reloaded (syncconf)")
-                return True
+            if strip_result.success:
+                # Apply the stripped config via stdin
+                sync_result = run_command_with_input(
+                    ["wg", "syncconf", "wg0", "/dev/stdin"],
+                    input_data=strip_result.stdout,
+                    sudo=True
+                )
+
+                if sync_result.success:
+                    logger.info("WireGuard server configuration reloaded (syncconf)")
+                    return True
 
             # If syncconf fails, try restarting the service
             logger.warning("syncconf failed, attempting service restart")
-            result = execute_command("systemctl restart wg-quick@wg0")
+            result = execute_command(["systemctl", "restart", "wg-quick@wg0"], sudo=True)
 
             if result.success:
                 logger.info("WireGuard server restarted successfully")

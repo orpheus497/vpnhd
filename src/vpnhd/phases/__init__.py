@@ -10,11 +10,6 @@ from .phase6_mobile import Phase6Mobile
 from .phase7_ssh_keys import Phase7SSHKeys
 from .phase8_security import Phase8Security
 
-# Legacy imports for backwards compatibility (deprecated)
-from .phase4_fedora import Phase4Fedora
-from .phase5_popos import Phase5PopOS
-from .phase6_termux import Phase6Termux
-
 __all__ = [
     'Phase',
     'PhaseStatus',
@@ -25,11 +20,7 @@ __all__ = [
     'Phase5LinuxClientOnDemand',
     'Phase6Mobile',
     'Phase7SSHKeys',
-    'Phase8Security',
-    # Legacy (deprecated)
-    'Phase4Fedora',
-    'Phase5PopOS',
-    'Phase6Termux'
+    'Phase8Security'
 ]
 
 

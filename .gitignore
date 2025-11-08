@@ -143,5 +143,5 @@ backups/
 logs/
 *.log
 
-# Don't ignore .devdocs (we want to keep documentation)
-!.devdocs/
+# AI-generated development documentation (excluded from repository)
+.dev-docs/
