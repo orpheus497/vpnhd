@@ -19,9 +19,9 @@ class DDNSManager:
 
     # Registry of available DDNS providers
     PROVIDERS: Dict[str, Type[DDNSProvider]] = {
-        'cloudflare': CloudflareDDNS,
-        'duckdns': DuckDNS,
-        'noip': NoIPDDNS,
+        "cloudflare": CloudflareDDNS,
+        "duckdns": DuckDNS,
+        "noip": NoIPDDNS,
     }
 
     def __init__(
@@ -47,10 +47,7 @@ class DDNSManager:
         self._initialize_provider()
 
         # IP change detector
-        self.detector = IPChangeDetector(
-            config_manager=self.config,
-            check_interval=check_interval
-        )
+        self.detector = IPChangeDetector(config_manager=self.config, check_interval=check_interval)
 
         # Register IP change callbacks
         if self.provider:
@@ -64,7 +61,7 @@ class DDNSManager:
 
     def _initialize_provider(self) -> None:
         """Initialize DDNS provider from configuration."""
-        provider_name = self.config.get('server.ddns_provider')
+        provider_name = self.config.get("server.ddns_provider")
 
         if not provider_name:
             self.logger.info("No DDNS provider configured")
@@ -97,18 +94,20 @@ class DDNSManager:
         self.logger.info(f"Updating IPv4 DNS record: {old_ip} -> {new_ip}")
 
         try:
-            success = await self.provider.update_record(new_ip, record_type='A')
+            success = await self.provider.update_record(new_ip, record_type="A")
 
             if success:
                 self.last_ipv4_update = datetime.now()
-                self._add_to_history({
-                    'timestamp': self.last_ipv4_update,
-                    'record_type': 'A',
-                    'old_ip': old_ip,
-                    'new_ip': new_ip,
-                    'success': True,
-                    'provider': self.provider.provider_name,
-                })
+                self._add_to_history(
+                    {
+                        "timestamp": self.last_ipv4_update,
+                        "record_type": "A",
+                        "old_ip": old_ip,
+                        "new_ip": new_ip,
+                        "success": True,
+                        "provider": self.provider.provider_name,
+                    }
+                )
 
                 # Verify update
                 await asyncio.sleep(5)  # Wait for DNS propagation
@@ -119,14 +118,16 @@ class DDNSManager:
                     self.logger.warning(f"IPv4 DNS record verification failed for {new_ip}")
             else:
                 self.logger.error(f"Failed to update IPv4 DNS record to {new_ip}")
-                self._add_to_history({
-                    'timestamp': datetime.now(),
-                    'record_type': 'A',
-                    'old_ip': old_ip,
-                    'new_ip': new_ip,
-                    'success': False,
-                    'provider': self.provider.provider_name,
-                })
+                self._add_to_history(
+                    {
+                        "timestamp": datetime.now(),
+                        "record_type": "A",
+                        "old_ip": old_ip,
+                        "new_ip": new_ip,
+                        "success": False,
+                        "provider": self.provider.provider_name,
+                    }
+                )
         except Exception as e:
             self.logger.exception(f"Error updating IPv4 DNS record: {e}")
 
@@ -142,26 +143,26 @@ class DDNSManager:
 
         # Check if provider supports IPv6
         if not await self.provider.supports_ipv6():
-            self.logger.warning(
-                f"Provider {self.provider.provider_name} does not support IPv6"
-            )
+            self.logger.warning(f"Provider {self.provider.provider_name} does not support IPv6")
             return
 
         self.logger.info(f"Updating IPv6 DNS record: {old_ip} -> {new_ip}")
 
         try:
-            success = await self.provider.update_record(new_ip, record_type='AAAA')
+            success = await self.provider.update_record(new_ip, record_type="AAAA")
 
             if success:
                 self.last_ipv6_update = datetime.now()
-                self._add_to_history({
-                    'timestamp': self.last_ipv6_update,
-                    'record_type': 'AAAA',
-                    'old_ip': old_ip,
-                    'new_ip': new_ip,
-                    'success': True,
-                    'provider': self.provider.provider_name,
-                })
+                self._add_to_history(
+                    {
+                        "timestamp": self.last_ipv6_update,
+                        "record_type": "AAAA",
+                        "old_ip": old_ip,
+                        "new_ip": new_ip,
+                        "success": True,
+                        "provider": self.provider.provider_name,
+                    }
+                )
 
                 # Verify update
                 await asyncio.sleep(5)  # Wait for DNS propagation
@@ -172,14 +173,16 @@ class DDNSManager:
                     self.logger.warning(f"IPv6 DNS record verification failed for {new_ip}")
             else:
                 self.logger.error(f"Failed to update IPv6 DNS record to {new_ip}")
-                self._add_to_history({
-                    'timestamp': datetime.now(),
-                    'record_type': 'AAAA',
-                    'old_ip': old_ip,
-                    'new_ip': new_ip,
-                    'success': False,
-                    'provider': self.provider.provider_name,
-                })
+                self._add_to_history(
+                    {
+                        "timestamp": datetime.now(),
+                        "record_type": "AAAA",
+                        "old_ip": old_ip,
+                        "new_ip": new_ip,
+                        "success": False,
+                        "provider": self.provider.provider_name,
+                    }
+                )
         except Exception as e:
             self.logger.exception(f"Error updating IPv6 DNS record: {e}")
 
@@ -195,10 +198,7 @@ class DDNSManager:
             self.update_history = self.update_history[-100:]
 
     async def update_dns(
-        self,
-        ip_address: Optional[str] = None,
-        record_type: str = 'A',
-        force: bool = False
+        self, ip_address: Optional[str] = None, record_type: str = "A", force: bool = False
     ) -> bool:
         """Manually update DNS record.
 
@@ -216,9 +216,9 @@ class DDNSManager:
 
         # Auto-detect IP if not provided
         if ip_address is None:
-            if record_type == 'A':
+            if record_type == "A":
                 ip_address = await self.detector.get_public_ipv4()
-            elif record_type == 'AAAA':
+            elif record_type == "AAAA":
                 ip_address = await self.detector.get_public_ipv6()
             else:
                 self.logger.error(f"Invalid record type: {record_type}")
@@ -230,10 +230,10 @@ class DDNSManager:
 
         # Check if update needed
         if not force:
-            if record_type == 'A' and ip_address == self.detector.current_ipv4:
+            if record_type == "A" and ip_address == self.detector.current_ipv4:
                 self.logger.info(f"IPv4 address unchanged: {ip_address}")
                 return True
-            elif record_type == 'AAAA' and ip_address == self.detector.current_ipv6:
+            elif record_type == "AAAA" and ip_address == self.detector.current_ipv6:
                 self.logger.info(f"IPv6 address unchanged: {ip_address}")
                 return True
 
@@ -243,21 +243,17 @@ class DDNSManager:
 
             if success:
                 # Update detector state
-                if record_type == 'A':
+                if record_type == "A":
                     self.detector.current_ipv4 = ip_address
                     self.last_ipv4_update = datetime.now()
                 else:
                     self.detector.current_ipv6 = ip_address
                     self.last_ipv6_update = datetime.now()
 
-                self.logger.info(
-                    f"Successfully updated {record_type} record to {ip_address}"
-                )
+                self.logger.info(f"Successfully updated {record_type} record to {ip_address}")
                 return True
             else:
-                self.logger.error(
-                    f"Failed to update {record_type} record to {ip_address}"
-                )
+                self.logger.error(f"Failed to update {record_type} record to {ip_address}")
                 return False
 
         except Exception as e:
@@ -314,18 +310,18 @@ class DDNSManager:
         detector_status = await self.detector.get_status()
 
         return {
-            'enabled': self.provider is not None,
-            'provider': self.provider.provider_name if self.provider else None,
-            'auto_update': self.auto_update,
-            'detector': detector_status,
-            'last_ipv4_update': (
+            "enabled": self.provider is not None,
+            "provider": self.provider.provider_name if self.provider else None,
+            "auto_update": self.auto_update,
+            "detector": detector_status,
+            "last_ipv4_update": (
                 self.last_ipv4_update.isoformat() if self.last_ipv4_update else None
             ),
-            'last_ipv6_update': (
+            "last_ipv6_update": (
                 self.last_ipv6_update.isoformat() if self.last_ipv6_update else None
             ),
-            'update_history_size': len(self.update_history),
-            'recent_updates': self.update_history[-5:] if self.update_history else [],
+            "update_history_size": len(self.update_history),
+            "recent_updates": self.update_history[-5:] if self.update_history else [],
         }
 
     def get_recent_updates(self, limit: int = 10) -> list[Dict[str, Any]]:
@@ -363,7 +359,7 @@ class DDNSManager:
 
         provider_class = cls.PROVIDERS[provider_name]
         return {
-            'name': provider_name,
-            'class': provider_class.__name__,
-            'description': provider_class.__doc__ or '',
+            "name": provider_name,
+            "class": provider_class.__name__,
+            "description": provider_class.__doc__ or "",
         }

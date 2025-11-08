@@ -108,6 +108,7 @@ class IPChangeDetector:
     def _is_valid_ipv4(self, ip: str) -> bool:
         """Validate IPv4 address format."""
         import ipaddress
+
         try:
             addr = ipaddress.IPv4Address(ip)
             # Exclude private/reserved addresses
@@ -118,6 +119,7 @@ class IPChangeDetector:
     def _is_valid_ipv6(self, ip: str) -> bool:
         """Validate IPv6 address format."""
         import ipaddress
+
         try:
             addr = ipaddress.IPv6Address(ip)
             # Exclude link-local, loopback, etc.
@@ -140,19 +142,19 @@ class IPChangeDetector:
             }
         """
         result = {
-            'ipv4_changed': False,
-            'ipv4_old': self.current_ipv4,
-            'ipv4_new': None,
-            'ipv6_changed': False,
-            'ipv6_old': self.current_ipv6,
-            'ipv6_new': None,
+            "ipv4_changed": False,
+            "ipv4_old": self.current_ipv4,
+            "ipv4_new": None,
+            "ipv6_changed": False,
+            "ipv6_old": self.current_ipv6,
+            "ipv6_new": None,
         }
 
         # Check IPv4
         new_ipv4 = await self.get_public_ipv4()
         if new_ipv4 and new_ipv4 != self.current_ipv4:
-            result['ipv4_changed'] = True
-            result['ipv4_new'] = new_ipv4
+            result["ipv4_changed"] = True
+            result["ipv4_new"] = new_ipv4
             self.logger.info(f"IPv4 change detected: {self.current_ipv4} -> {new_ipv4}")
 
             # Trigger callbacks
@@ -167,8 +169,8 @@ class IPChangeDetector:
         # Check IPv6
         new_ipv6 = await self.get_public_ipv6()
         if new_ipv6 and new_ipv6 != self.current_ipv6:
-            result['ipv6_changed'] = True
-            result['ipv6_new'] = new_ipv6
+            result["ipv6_changed"] = True
+            result["ipv6_new"] = new_ipv6
             self.logger.info(f"IPv6 change detected: {self.current_ipv6} -> {new_ipv6}")
 
             # Trigger callbacks
@@ -183,9 +185,7 @@ class IPChangeDetector:
         self.last_check = datetime.now()
         return result
 
-    def on_ipv4_change(
-        self, callback: Callable[[str, Optional[str]], Awaitable[None]]
-    ) -> None:
+    def on_ipv4_change(self, callback: Callable[[str, Optional[str]], Awaitable[None]]) -> None:
         """Register callback for IPv4 changes.
 
         Args:
@@ -193,9 +193,7 @@ class IPChangeDetector:
         """
         self.ipv4_change_callbacks.append(callback)
 
-    def on_ipv6_change(
-        self, callback: Callable[[str, Optional[str]], Awaitable[None]]
-    ) -> None:
+    def on_ipv6_change(self, callback: Callable[[str, Optional[str]], Awaitable[None]]) -> None:
         """Register callback for IPv6 changes.
 
         Args:
@@ -255,11 +253,11 @@ class IPChangeDetector:
             Dict with status information
         """
         return {
-            'running': self._running,
-            'current_ipv4': self.current_ipv4,
-            'current_ipv6': self.current_ipv6,
-            'last_check': self.last_check.isoformat() if self.last_check else None,
-            'check_interval': self.check_interval,
-            'ipv4_callbacks': len(self.ipv4_change_callbacks),
-            'ipv6_callbacks': len(self.ipv6_change_callbacks),
+            "running": self._running,
+            "current_ipv4": self.current_ipv4,
+            "current_ipv6": self.current_ipv6,
+            "last_check": self.last_check.isoformat() if self.last_check else None,
+            "check_interval": self.check_interval,
+            "ipv4_callbacks": len(self.ipv4_change_callbacks),
+            "ipv6_callbacks": len(self.ipv6_change_callbacks),
         }

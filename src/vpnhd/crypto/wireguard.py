@@ -22,11 +22,7 @@ def generate_keypair() -> Tuple[str, str]:
 
     try:
         # Generate private key
-        private_result = execute_command(
-            "wg genkey",
-            check=False,
-            capture_output=True
-        )
+        private_result = execute_command("wg genkey", check=False, capture_output=True)
 
         if not private_result.success:
             raise Exception("Failed to generate private key")
@@ -58,11 +54,7 @@ def generate_preshared_key() -> str:
     logger.info("Generating WireGuard preshared key")
 
     try:
-        result = execute_command(
-            "wg genpsk",
-            check=False,
-            capture_output=True
-        )
+        result = execute_command("wg genpsk", check=False, capture_output=True)
 
         if not result.success:
             raise Exception("Failed to generate preshared key")
@@ -100,7 +92,7 @@ def save_private_key(key: str, path: Path, mode: int = PERM_PRIVATE_KEY) -> bool
             logger.warning(f"Overwriting existing key file: {path}")
 
         # Write with secure permissions
-        path.write_text(key + '\n')
+        path.write_text(key + "\n")
         path.chmod(mode)
 
         logger.info(f"Private key saved with permissions {oct(mode)}")
@@ -155,10 +147,7 @@ def derive_public_key(private_key: str) -> Optional[str]:
     try:
         # Use wg pubkey command to derive public key via stdin (prevents key exposure in process list)
         result = run_command_with_input(
-            ["wg", "pubkey"],
-            input_data=private_key + "\n",
-            check=False,
-            capture_output=True
+            ["wg", "pubkey"], input_data=private_key + "\n", check=False, capture_output=True
         )
 
         if not result.success:
@@ -200,6 +189,7 @@ def validate_key(key: str, key_type: str = "private") -> bool:
 
     # Check if it's valid base64
     import base64
+
     try:
         decoded = base64.b64decode(key)
         if len(decoded) != 32:
@@ -232,10 +222,7 @@ def get_public_key_from_private_file(private_key_path: Path) -> Optional[str]:
 
 
 def save_keypair(
-    private_key: str,
-    public_key: str,
-    private_path: Path,
-    public_path: Optional[Path] = None
+    private_key: str, public_key: str, private_path: Path, public_path: Optional[Path] = None
 ) -> bool:
     """
     Save both private and public keys.
@@ -256,7 +243,7 @@ def save_keypair(
     # Save public key if path provided
     if public_path:
         try:
-            public_path.write_text(public_key + '\n')
+            public_path.write_text(public_key + "\n")
             public_path.chmod(0o644)
             logger.info(f"Public key saved to {public_path}")
         except Exception as e:
@@ -267,8 +254,7 @@ def save_keypair(
 
 
 def generate_and_save_keypair(
-    private_path: Path,
-    public_path: Optional[Path] = None
+    private_path: Path, public_path: Optional[Path] = None
 ) -> Optional[Tuple[str, str]]:
     """
     Generate and save a new keypair.

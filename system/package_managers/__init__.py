@@ -6,9 +6,9 @@ from .dnf import DNFPackageManager
 from .factory import PackageManagerFactory, get_package_manager
 
 __all__ = [
-    'PackageManager',
-    'APTPackageManager',
-    'DNFPackageManager',
-    'PackageManagerFactory',
-    'get_package_manager',
+    "PackageManager",
+    "APTPackageManager",
+    "DNFPackageManager",
+    "PackageManagerFactory",
+    "get_package_manager",
 ]

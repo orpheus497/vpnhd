@@ -32,7 +32,7 @@ class NoIPDDNS(DDNSProvider):
         if not all([self.username, self.password, self.hostname]):
             self.logger.warning("No-IP configuration incomplete")
 
-    async def update_record(self, ip_address: str, record_type: str = 'A') -> bool:
+    async def update_record(self, ip_address: str, record_type: str = "A") -> bool:
         """Update No-IP DNS record.
 
         No-IP uses HTTP Basic Authentication and a simple update URL.
@@ -49,7 +49,7 @@ class NoIPDDNS(DDNSProvider):
             return False
 
         # No-IP primarily supports IPv4; IPv6 support varies by plan
-        if record_type == 'AAAA':
+        if record_type == "AAAA":
             self.logger.warning("No-IP IPv6 support may be limited depending on your plan")
 
         try:
@@ -59,26 +59,19 @@ class NoIPDDNS(DDNSProvider):
 
             async with httpx.AsyncClient(timeout=30) as client:
                 headers = {
-                    'Authorization': f'Basic {auth_token}',
-                    'User-Agent': 'VPNHD/2.0.0 no-ip-client'
+                    "Authorization": f"Basic {auth_token}",
+                    "User-Agent": "VPNHD/2.0.0 no-ip-client",
                 }
 
-                params = {
-                    'hostname': self.hostname,
-                    'myip': ip_address
-                }
+                params = {"hostname": self.hostname, "myip": ip_address}
 
-                response = await client.get(
-                    self.API_BASE,
-                    headers=headers,
-                    params=params
-                )
+                response = await client.get(self.API_BASE, headers=headers, params=params)
 
                 # No-IP returns specific response codes
                 result = response.text.strip()
 
                 # Parse response
-                if result.startswith('good') or result.startswith('nochg'):
+                if result.startswith("good") or result.startswith("nochg"):
                     # good: Update successful
                     # nochg: IP address is current
                     self.logger.info(
@@ -86,22 +79,22 @@ class NoIPDDNS(DDNSProvider):
                         f"{self.hostname} -> {ip_address} ({result})"
                     )
                     return True
-                elif result == 'nohost':
+                elif result == "nohost":
                     self.logger.error(f"No-IP error: Hostname {self.hostname} does not exist")
                     return False
-                elif result == 'badauth':
+                elif result == "badauth":
                     self.logger.error("No-IP error: Invalid username or password")
                     return False
-                elif result == 'badagent':
+                elif result == "badagent":
                     self.logger.error("No-IP error: Bad user agent")
                     return False
-                elif result == '!donator':
+                elif result == "!donator":
                     self.logger.error("No-IP error: Feature requires paid account")
                     return False
-                elif result == 'abuse':
+                elif result == "abuse":
                     self.logger.error("No-IP error: Account blocked due to abuse")
                     return False
-                elif result.startswith('911'):
+                elif result.startswith("911"):
                     self.logger.error("No-IP error: System error, try again later")
                     return False
                 else:
@@ -124,7 +117,7 @@ class NoIPDDNS(DDNSProvider):
         try:
             import dns.resolver
 
-            record_type = 'AAAA' if ':' in expected_ip else 'A'
+            record_type = "AAAA" if ":" in expected_ip else "A"
             answers = dns.resolver.resolve(self.hostname, record_type)
 
             for rdata in answers:
@@ -158,7 +151,7 @@ class NoIPDDNS(DDNSProvider):
         try:
             import dns.resolver
 
-            answers = dns.resolver.resolve(self.hostname, 'A')
+            answers = dns.resolver.resolve(self.hostname, "A")
 
             for rdata in answers:
                 ip = str(rdata)

@@ -33,19 +33,14 @@ class PackageManagerFactory:
                     logger.info(f"Detected package manager: {manager.name}")
                     return manager
             except Exception as e:
-                logger.debug(
-                    f"Error checking {manager.name} availability: {e}"
-                )
+                logger.debug(f"Error checking {manager.name} availability: {e}")
                 continue
 
         logger.error("No supported package manager found")
         return None
 
     @classmethod
-    async def get_package_manager(
-        cls,
-        name: Optional[str] = None
-    ) -> Optional[PackageManager]:
+    async def get_package_manager(cls, name: Optional[str] = None) -> Optional[PackageManager]:
         """Get a specific package manager or auto-detect.
 
         Args:
@@ -80,9 +75,7 @@ class PackageManagerFactory:
         return [m().name for m in cls.MANAGERS]
 
 
-async def get_package_manager(
-    name: Optional[str] = None
-) -> Optional[PackageManager]:
+async def get_package_manager(name: Optional[str] = None) -> Optional[PackageManager]:
     """Convenience function to get package manager.
 
     Args:

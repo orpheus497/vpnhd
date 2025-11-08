@@ -169,9 +169,9 @@ PERM_CONFIG_FILE = 0o600
 PERM_DIRECTORY = 0o700
 
 # Validation Patterns
-HOSTNAME_PATTERN = r'^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$'
-IP_ADDRESS_PATTERN = r'^(\d{1,3}\.){3}\d{1,3}$'
-CIDR_PATTERN = r'^(\d{1,3}\.){3}\d{1,3}/\d{1,2}$'
+HOSTNAME_PATTERN = r"^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$"
+IP_ADDRESS_PATTERN = r"^(\d{1,3}\.){3}\d{1,3}$"
+CIDR_PATTERN = r"^(\d{1,3}\.){3}\d{1,3}/\d{1,2}$"
 
 # WireGuard Constants
 WG_KEY_LENGTH = 44  # Base64 encoded 32-byte key

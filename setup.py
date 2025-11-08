@@ -3,6 +3,7 @@
 
 from setuptools import setup, find_packages
 from pathlib import Path
+import re
 
 # Read the long description from README
 readme_file = Path(__file__).parent / "README.md"
@@ -10,15 +11,14 @@ long_description = readme_file.read_text(encoding="utf-8") if readme_file.exists
 
 # Read version from __version__.py
 version_file = Path(__file__).parent / "src" / "vpnhd" / "__version__.py"
-version = "1.0.0"  # Default version
+version = "2.0.0"  # Default version
 
 if version_file.exists():
-    # Parse version from __version__.py
+    # Parse version from __version__.py using regex for robustness
     version_content = version_file.read_text(encoding="utf-8")
-    for line in version_content.split("\n"):
-        if line.startswith('__version__'):
-            version = line.split('"')[1]
-            break
+    version_match = re.search(r'__version__\s*=\s*["\']([^"\']+)["\']', version_content)
+    if version_match:
+        version = version_match.group(1)
 
 # Read requirements
 requirements_file = Path(__file__).parent / "requirements.txt"

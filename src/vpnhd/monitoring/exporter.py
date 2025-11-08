@@ -19,26 +19,26 @@ class MetricsHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         """Handle GET requests."""
-        if self.path == '/metrics':
+        if self.path == "/metrics":
             # Generate Prometheus metrics
             try:
                 metrics_output = generate_latest(REGISTRY)
                 self.send_response(200)
-                self.send_header('Content-Type', 'text/plain; version=0.0.4; charset=utf-8')
+                self.send_header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
                 self.end_headers()
                 self.wfile.write(metrics_output)
             except Exception as e:
                 logger.error(f"Error generating metrics: {e}")
                 self.send_error(500, f"Error generating metrics: {e}")
 
-        elif self.path == '/health':
+        elif self.path == "/health":
             # Health check endpoint
             self.send_response(200)
-            self.send_header('Content-Type', 'text/plain')
+            self.send_header("Content-Type", "text/plain")
             self.end_headers()
-            self.wfile.write(b'OK')
+            self.wfile.write(b"OK")
 
-        elif self.path == '/':
+        elif self.path == "/":
             # Root path - provide basic info
             html = """
             <html>
@@ -54,12 +54,12 @@ class MetricsHandler(BaseHTTPRequestHandler):
             </html>
             """
             self.send_response(200)
-            self.send_header('Content-Type', 'text/html')
+            self.send_header("Content-Type", "text/html")
             self.end_headers()
             self.wfile.write(html.encode())
 
         else:
-            self.send_error(404, 'Not Found')
+            self.send_error(404, "Not Found")
 
     def log_message(self, format, *args):
         """Override to use custom logger."""
@@ -73,7 +73,7 @@ class MetricsExporter:
         self,
         config_manager: Optional[ConfigManager] = None,
         port: Optional[int] = None,
-        host: str = '0.0.0.0',
+        host: str = "0.0.0.0",
         collection_interval: int = 15,
     ):
         """Initialize metrics exporter.
@@ -88,7 +88,7 @@ class MetricsExporter:
         self.logger = logger
 
         # Server configuration
-        self.port = port or self.config.get('monitoring.prometheus_port', 9100)
+        self.port = port or self.config.get("monitoring.prometheus_port", 9100)
         self.host = host
         self.collection_interval = collection_interval
 
@@ -98,8 +98,7 @@ class MetricsExporter:
 
         # Metrics collector
         self.collector = MetricsCollector(
-            config_manager=self.config,
-            collection_interval=collection_interval
+            config_manager=self.config, collection_interval=collection_interval
         )
 
         # Running state
@@ -119,15 +118,10 @@ class MetricsExporter:
             self.logger.info(f"Starting metrics exporter on {self.host}:{self.port}")
 
             # Run server in separate thread
-            self.server_thread = threading.Thread(
-                target=self.server.serve_forever,
-                daemon=True
-            )
+            self.server_thread = threading.Thread(target=self.server.serve_forever, daemon=True)
             self.server_thread.start()
 
-            self.logger.info(
-                f"Metrics available at http://{self.host}:{self.port}/metrics"
-            )
+            self.logger.info(f"Metrics available at http://{self.host}:{self.port}/metrics")
 
         except Exception as e:
             self.logger.exception(f"Failed to start metrics exporter: {e}")
@@ -196,19 +190,18 @@ async def main_async() -> None:
     """Main entry point for async metrics exporter."""
     # Setup logging
     from ..utils.logging import setup_logging
-    setup_logging(log_level='INFO')
+
+    setup_logging(log_level="INFO")
 
     # Load configuration
     config = ConfigManager()
 
     # Create exporter
-    port = config.get('monitoring.prometheus_port', 9100)
-    collection_interval = config.get('monitoring.collection_interval', 15)
+    port = config.get("monitoring.prometheus_port", 9100)
+    collection_interval = config.get("monitoring.collection_interval", 15)
 
     exporter = MetricsExporter(
-        config_manager=config,
-        port=port,
-        collection_interval=collection_interval
+        config_manager=config, port=port, collection_interval=collection_interval
     )
 
     # Setup signal handlers
@@ -239,5 +232,5 @@ def main() -> None:
         raise
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

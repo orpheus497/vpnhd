@@ -10,7 +10,7 @@ from ..crypto.qrcode import (
     display_qr_terminal,
     create_qr_with_metadata,
     verify_qrcode_available,
-    install_qrencode
+    install_qrencode,
 )
 from ..utils.constants import TEMPLATE_DIR, QR_CODE_DIR
 from ..utils.logging import get_logger
@@ -63,7 +63,9 @@ to your VPN. Configuration is done via QR code for quick and easy setup.
             if not verify_qrcode_available():
                 self.display.warning("qrencode is not installed. Attempting to install...")
                 if not install_qrencode():
-                    self.display.error("Failed to install qrencode. QR code generation will be skipped.")
+                    self.display.error(
+                        "Failed to install qrencode. QR code generation will be skipped."
+                    )
                     if not self.prompts.confirm("Continue without QR code?", default=True):
                         return False
 
@@ -85,7 +87,7 @@ to your VPN. Configuration is done via QR code for quick and easy setup.
                 device_name=device_name,
                 vpn_ip=vpn_ip,
                 private_key=private_key,
-                public_key=public_key
+                public_key=public_key,
             )
 
             # Display configuration
@@ -145,8 +147,7 @@ to your VPN. Configuration is done via QR code for quick and easy setup.
         self.display.newline()
 
         choice = self.prompts.choice(
-            "Which mobile platform are you using?",
-            ["Android", "iOS (iPhone/iPad)"]
+            "Which mobile platform are you using?", ["Android", "iOS (iPhone/iPad)"]
         )
 
         return "android" if "Android" in choice else "ios"
@@ -157,15 +158,11 @@ to your VPN. Configuration is done via QR code for quick and easy setup.
         return self.prompts.text(
             "Enter a name for this mobile device",
             default=default_name,
-            help_text="This helps identify the device (e.g., android-phone, iphone, tablet)"
+            help_text="This helps identify the device (e.g., android-phone, iphone, tablet)",
         )
 
     def _create_mobile_config(
-        self,
-        device_name: str,
-        vpn_ip: str,
-        private_key: str,
-        public_key: str
+        self, device_name: str, vpn_ip: str, private_key: str, public_key: str
     ) -> str:
         """Create WireGuard mobile configuration from template.
 
@@ -197,7 +194,7 @@ to your VPN. Configuration is done via QR code for quick and easy setup.
             wireguard_port=self.config.get("network.wireguard_port", 51820),
             route_all_traffic=False,  # On-demand for mobile
             dns_servers=["1.1.1.1", "8.8.8.8"],
-            vpn_network=self.config.get("network.vpn.network", "10.66.66.0/24")
+            vpn_network=self.config.get("network.vpn.network", "10.66.66.0/24"),
         )
 
         return config
@@ -219,9 +216,7 @@ to your VPN. Configuration is done via QR code for quick and easy setup.
 
             # Generate QR code
             qr_path = create_qr_with_metadata(
-                config_text=config_text,
-                client_name=device_name,
-                output_dir=str(qr_dir)
+                config_text=config_text, client_name=device_name, output_dir=str(qr_dir)
             )
 
             return qr_path
@@ -234,9 +229,7 @@ to your VPN. Configuration is done via QR code for quick and easy setup.
         try:
             server_config_mgr = ServerConfigManager()
             return server_config_mgr.add_peer_to_server(
-                client_name=device_name,
-                public_key=public_key,
-                vpn_ip=vpn_ip
+                client_name=device_name, public_key=public_key, vpn_ip=vpn_ip
             )
         except Exception as e:
             logger.exception(f"Error adding peer to server: {e}")

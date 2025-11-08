@@ -25,7 +25,7 @@ class DDNSProvider(ABC):
         pass
 
     @abstractmethod
-    async def update_record(self, ip_address: str, record_type: str = 'A') -> bool:
+    async def update_record(self, ip_address: str, record_type: str = "A") -> bool:
         """Update DNS record with new IP address.
 
         Args:

@@ -52,7 +52,7 @@ class NotificationManager:
         event_type: str,
         message: str,
         details: Optional[Dict[str, Any]] = None,
-        severity: str = 'info'
+        severity: str = "info",
     ):
         """Send notification to all enabled channels.
 
@@ -71,16 +71,13 @@ class NotificationManager:
             message=message,
             details=details or {},
             severity=severity,
-            timestamp=datetime.now()
+            timestamp=datetime.now(),
         )
 
         logger.info(f"Sending notification: {event_type} - {message}")
 
         # Send to all channels concurrently
-        tasks = [
-            channel.send(event)
-            for channel in self.channels
-        ]
+        tasks = [channel.send(event) for channel in self.channels]
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -99,8 +96,8 @@ class NotificationManager:
         await self.send_notification(
             event_type=EventType.CLIENT_CONNECTED,
             message=f"Client '{client_name}' connected from {ip}",
-            details={'client': client_name, 'ip': ip},
-            severity='info'
+            details={"client": client_name, "ip": ip},
+            severity="info",
         )
 
     async def send_client_disconnected(self, client_name: str):
@@ -112,8 +109,8 @@ class NotificationManager:
         await self.send_notification(
             event_type=EventType.CLIENT_DISCONNECTED,
             message=f"Client '{client_name}' disconnected",
-            details={'client': client_name},
-            severity='info'
+            details={"client": client_name},
+            severity="info",
         )
 
     async def send_security_alert(self, alert_type: str, details: Dict[str, Any]):
@@ -127,7 +124,7 @@ class NotificationManager:
             event_type=EventType.SECURITY_ALERT,
             message=f"Security alert: {alert_type}",
             details=details,
-            severity='critical'
+            severity="critical",
         )
 
     async def send_backup_complete(self, backup_id: str, size_kb: float):
@@ -140,8 +137,8 @@ class NotificationManager:
         await self.send_notification(
             event_type=EventType.BACKUP_COMPLETE,
             message=f"Backup completed: {backup_id} ({size_kb:.2f} KB)",
-            details={'backup_id': backup_id, 'size_kb': size_kb},
-            severity='info'
+            details={"backup_id": backup_id, "size_kb": size_kb},
+            severity="info",
         )
 
     async def send_error(self, component: str, error_message: str):
@@ -154,11 +151,13 @@ class NotificationManager:
         await self.send_notification(
             event_type=EventType.ERROR,
             message=f"Error in {component}: {error_message}",
-            details={'component': component, 'error': error_message},
-            severity='error'
+            details={"component": component, "error": error_message},
+            severity="error",
         )
 
-    async def send_key_rotation(self, key_type: str, success: bool, details: Optional[Dict[str, Any]] = None):
+    async def send_key_rotation(
+        self, key_type: str, success: bool, details: Optional[Dict[str, Any]] = None
+    ):
         """Send key rotation notification.
 
         Args:
@@ -166,14 +165,14 @@ class NotificationManager:
             success: Whether rotation succeeded
             details: Additional details
         """
-        severity = 'info' if success else 'error'
-        status = 'succeeded' if success else 'failed'
+        severity = "info" if success else "error"
+        status = "succeeded" if success else "failed"
 
         await self.send_notification(
             event_type=EventType.KEY_ROTATION,
             message=f"{key_type.upper()} key rotation {status}",
             details=details or {},
-            severity=severity
+            severity=severity,
         )
 
     async def send_ddns_update(self, new_ip: str, new_ipv6: Optional[str] = None):
@@ -183,15 +182,15 @@ class NotificationManager:
             new_ip: New IPv4 address
             new_ipv6: New IPv6 address (optional)
         """
-        details = {'ipv4': new_ip}
+        details = {"ipv4": new_ip}
         if new_ipv6:
-            details['ipv6'] = new_ipv6
+            details["ipv6"] = new_ipv6
 
         await self.send_notification(
             event_type=EventType.DDNS_UPDATE,
             message=f"DNS updated - IP: {new_ip}" + (f", IPv6: {new_ipv6}" if new_ipv6 else ""),
             details=details,
-            severity='info'
+            severity="info",
         )
 
     async def send_phase_complete(self, phase_number: int, phase_name: str):
@@ -204,6 +203,6 @@ class NotificationManager:
         await self.send_notification(
             event_type=EventType.PHASE_COMPLETE,
             message=f"Phase {phase_number} ({phase_name}) completed successfully",
-            details={'phase': phase_number, 'name': phase_name},
-            severity='info'
+            details={"phase": phase_number, "name": phase_name},
+            severity="info",
         )

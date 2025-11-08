@@ -15,37 +15,21 @@ def get_default_config() -> Dict[str, Any]:
         "version": "1.0.0",
         "created_date": get_timestamp(),
         "last_modified": get_timestamp(),
-
         "network": {
-            "lan": {
-                "router_ip": "",
-                "subnet": "",
-                "server_ip": "",
-                "interface": ""
-            },
+            "lan": {"router_ip": "", "subnet": "", "server_ip": "", "interface": ""},
             "vpn": {
                 "network": "10.66.66.0/24",
                 "subnet_mask": "255.255.255.0",
                 "server_ip": "10.66.66.1",
                 "clients": {
-                    "linux_desktop_always_on": {
-                        "ip": "10.66.66.2",
-                        "name": "linux-desktop-1"
-                    },
-                    "linux_desktop_on_demand": {
-                        "ip": "10.66.66.3",
-                        "name": "linux-desktop-2"
-                    },
-                    "mobile": {
-                        "ip": "10.66.66.10",
-                        "name": "mobile-device"
-                    }
-                }
+                    "linux_desktop_always_on": {"ip": "10.66.66.2", "name": "linux-desktop-1"},
+                    "linux_desktop_on_demand": {"ip": "10.66.66.3", "name": "linux-desktop-2"},
+                    "mobile": {"ip": "10.66.66.10", "name": "mobile-device"},
+                },
             },
             "wireguard_port": 51820,
-            "ssh_port": 22
+            "ssh_port": 22,
         },
-
         "server": {
             "hostname": "",
             "username": "",
@@ -55,9 +39,8 @@ def get_default_config() -> Dict[str, Any]:
             "os": "debian",
             "os_version": "",
             "architecture": "amd64",
-            "public_ip": ""
+            "public_ip": "",
         },
-
         "clients": {
             "linux_desktop_always_on": {
                 "name": "linux-desktop-1",
@@ -66,7 +49,7 @@ def get_default_config() -> Dict[str, Any]:
                 "vpn_ip": "10.66.66.2",
                 "public_key": None,
                 "private_key_path": "",
-                "configured": False
+                "configured": False,
             },
             "linux_desktop_on_demand": {
                 "name": "linux-desktop-2",
@@ -76,7 +59,7 @@ def get_default_config() -> Dict[str, Any]:
                 "public_key": None,
                 "private_key_path": "",
                 "isolated": True,
-                "configured": False
+                "configured": False,
             },
             "mobile": {
                 "name": "mobile-device",
@@ -86,10 +69,9 @@ def get_default_config() -> Dict[str, Any]:
                 "public_key": None,
                 "private_key_path": "",
                 "qr_code_path": "",
-                "configured": False
-            }
+                "configured": False,
+            },
         },
-
         "security": {
             "ssh_key_auth_enabled": False,
             "ssh_password_auth_disabled": False,
@@ -97,15 +79,14 @@ def get_default_config() -> Dict[str, Any]:
             "fail2ban_enabled": False,
             "fail2ban_ssh_jail_configured": False,
             "fail2ban_wireguard_jail_configured": False,
-            "wireguard_running": False
+            "wireguard_running": False,
         },
-
         "phases": {
             "phase1_debian": {
                 "completed": False,
                 "date_completed": None,
                 "notes": "",
-                "rollback_data": {}
+                "rollback_data": {},
             },
             "phase2_wireguard_server": {
                 "completed": False,
@@ -113,28 +94,28 @@ def get_default_config() -> Dict[str, Any]:
                 "server_private_key_path": "/etc/wireguard/server_private.key",
                 "server_public_key": None,
                 "notes": "",
-                "rollback_data": {}
+                "rollback_data": {},
             },
             "phase3_router": {
                 "completed": False,
                 "date_completed": None,
                 "port_forwarding_verified": False,
                 "notes": "",
-                "rollback_data": {}
+                "rollback_data": {},
             },
             "phase4_linux_client": {
                 "completed": False,
                 "date_completed": None,
                 "distribution": "",
                 "notes": "",
-                "rollback_data": {}
+                "rollback_data": {},
             },
             "phase5_linux_client_ondemand": {
                 "completed": False,
                 "date_completed": None,
                 "distribution": "",
                 "notes": "",
-                "rollback_data": {}
+                "rollback_data": {},
             },
             "phase6_mobile": {
                 "completed": False,
@@ -142,7 +123,7 @@ def get_default_config() -> Dict[str, Any]:
                 "platform": "",  # android or ios
                 "qr_code_generated": False,
                 "notes": "",
-                "rollback_data": {}
+                "rollback_data": {},
             },
             "phase7_ssh_keys": {
                 "completed": False,
@@ -150,7 +131,7 @@ def get_default_config() -> Dict[str, Any]:
                 "ssh_key_path": "~/.ssh/id_ed25519",
                 "sshd_config_backup": "",
                 "notes": "",
-                "rollback_data": {}
+                "rollback_data": {},
             },
             "phase8_security": {
                 "completed": False,
@@ -160,18 +141,17 @@ def get_default_config() -> Dict[str, Any]:
                 "ssh_jail_configured": False,
                 "wireguard_jail_configured": False,
                 "notes": "",
-                "rollback_data": {}
-            }
+                "rollback_data": {},
+            },
         },
-
         "paths": {
             "wireguard_config_dir": "/etc/wireguard",
             "wireguard_server_config": "/etc/wireguard/wg0.conf",
             "ssh_config": "/etc/ssh/sshd_config",
             "backup_dir": "~/.config/vpnhd/backups",
             "qr_code_dir": "~/.config/vpnhd/qrcodes",
-            "fail2ban_jail_dir": "/etc/fail2ban/jail.d"
-        }
+            "fail2ban_jail_dir": "/etc/fail2ban/jail.d",
+        },
     }
 
 
@@ -191,8 +171,8 @@ CONFIG_SCHEMA = {
                         "router_ip": {"type": "string"},
                         "subnet": {"type": "string"},
                         "server_ip": {"type": "string"},
-                        "interface": {"type": "string"}
-                    }
+                        "interface": {"type": "string"},
+                    },
                 },
                 "vpn": {
                     "type": "object",
@@ -200,18 +180,18 @@ CONFIG_SCHEMA = {
                         "network": {"type": "string"},
                         "subnet_mask": {"type": "string"},
                         "server_ip": {"type": "string"},
-                        "clients": {"type": "object"}
-                    }
+                        "clients": {"type": "object"},
+                    },
                 },
                 "wireguard_port": {"type": "integer"},
-                "ssh_port": {"type": "integer"}
-            }
+                "ssh_port": {"type": "integer"},
+            },
         },
         "server": {"type": "object"},
         "clients": {"type": "object"},
         "security": {"type": "object"},
         "phases": {"type": "object"},
-        "paths": {"type": "object"}
+        "paths": {"type": "object"},
     },
-    "required": ["version", "network", "server", "clients", "security", "phases", "paths"]
+    "required": ["version", "network", "server", "clients", "security", "phases", "paths"],
 }

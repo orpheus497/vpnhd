@@ -21,11 +21,11 @@ class NetworkLANConfig(BaseModel):
     gateway: str = Field(..., description="Default gateway IP")
     server_ip: str = Field(..., description="Server IP address")
 
-    @field_validator('subnet', 'gateway', 'server_ip')
+    @field_validator("subnet", "gateway", "server_ip")
     @classmethod
     def validate_ip(cls, v: str, info) -> str:
         """Validate IP addresses and CIDR notation."""
-        if info.field_name == 'subnet':
+        if info.field_name == "subnet":
             try:
                 ipaddress.ip_network(v, strict=False)
             except ValueError as e:
@@ -48,7 +48,7 @@ class NetworkVPNConfig(BaseModel):
     ipv6_subnet: Optional[str] = Field(None, description="IPv6 subnet")
     ipv6_server_ip: Optional[str] = Field(None, description="IPv6 server IP")
 
-    @field_validator('subnet', 'ipv6_subnet')
+    @field_validator("subnet", "ipv6_subnet")
     @classmethod
     def validate_subnet(cls, v: Optional[str]) -> Optional[str]:
         """Validate subnet CIDR notation."""
@@ -60,7 +60,7 @@ class NetworkVPNConfig(BaseModel):
             raise ValueError(f"Invalid subnet: {e}")
         return v
 
-    @field_validator('server_ip', 'ipv6_server_ip')
+    @field_validator("server_ip", "ipv6_server_ip")
     @classmethod
     def validate_ip(cls, v: Optional[str]) -> Optional[str]:
         """Validate IP addresses."""
@@ -79,7 +79,7 @@ class ServerConfig(BaseModel):
     hostname: str = Field(..., min_length=1, max_length=253)
     public_ip: str = Field(..., description="Public IPv4 address")
     public_ipv6: Optional[str] = Field(None, description="Public IPv6 address")
-    mac_address: str = Field(..., pattern=r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$')
+    mac_address: str = Field(..., pattern=r"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$")
     os_version: str
     ddns_enabled: bool = Field(default=False)
     ddns_provider: Optional[str] = Field(None, description="DDNS provider name")
@@ -87,7 +87,7 @@ class ServerConfig(BaseModel):
     ddns_api_token: Optional[str] = Field(None, description="DDNS API token")
     ddns_zone_id: Optional[str] = Field(None, description="Cloudflare zone ID")
 
-    @field_validator('public_ip', 'public_ipv6')
+    @field_validator("public_ip", "public_ipv6")
     @classmethod
     def validate_public_ip(cls, v: Optional[str]) -> Optional[str]:
         """Validate public IP addresses."""
@@ -108,7 +108,7 @@ class PhaseConfig(BaseModel):
     notes: str = Field(default="")
     rollback_data: Dict[str, Any] = Field(default_factory=dict)
 
-    @field_validator('date_completed', mode='before')
+    @field_validator("date_completed", mode="before")
     @classmethod
     def parse_datetime(cls, v):
         """Parse datetime from string if needed."""
@@ -201,11 +201,11 @@ class VPNHDConfig(BaseModel):
     monitoring: MonitoringConfig = Field(default_factory=MonitoringConfig)
     notifications: NotificationConfig = Field(default_factory=NotificationConfig)
 
-    @field_validator('version')
+    @field_validator("version")
     @classmethod
     def validate_version(cls, v: str) -> str:
         """Validate version format."""
-        parts = v.split('.')
+        parts = v.split(".")
         if len(parts) != 3:
             raise ValueError("Version must be in format X.Y.Z")
         for part in parts:
@@ -213,7 +213,7 @@ class VPNHDConfig(BaseModel):
                 raise ValueError("Version parts must be numeric")
         return v
 
-    @field_validator('created_at', 'last_modified', mode='before')
+    @field_validator("created_at", "last_modified", mode="before")
     @classmethod
     def parse_datetime(cls, v):
         """Parse datetime from string if needed."""
@@ -227,10 +227,10 @@ class VPNHDConfig(BaseModel):
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
-        return self.model_dump(mode='json')
+        return self.model_dump(mode="json")
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'VPNHDConfig':
+    def from_dict(cls, data: Dict[str, Any]) -> "VPNHDConfig":
         """Create from dictionary."""
         return cls(**data)
 
@@ -241,7 +241,7 @@ class VPNHDSettings(BaseSettings):
     These can be overridden via environment variables with VPNHD_ prefix.
     """
 
-    model_config = ConfigDict(env_prefix='VPNHD_')
+    model_config = ConfigDict(env_prefix="VPNHD_")
 
     config_dir: Path = Field(default=Path.home() / ".config" / "vpnhd")
     config_file: str = Field(default="config.json")

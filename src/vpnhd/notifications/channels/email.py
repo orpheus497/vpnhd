@@ -44,17 +44,17 @@ class EmailChannel(NotificationChannel):
 
         try:
             # Create message
-            msg = MIMEMultipart('alternative')
-            msg['Subject'] = self._create_subject(event)
-            msg['From'] = email_from
-            msg['To'] = ', '.join(email_to)
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = self._create_subject(event)
+            msg["From"] = email_from
+            msg["To"] = ", ".join(email_to)
 
             # Create email body
             text_body = self._format_text_body(event)
             html_body = self._format_html_body(event)
 
-            msg.attach(MIMEText(text_body, 'plain'))
-            msg.attach(MIMEText(html_body, 'html'))
+            msg.attach(MIMEText(text_body, "plain"))
+            msg.attach(MIMEText(html_body, "html"))
 
             # Send email
             with smtplib.SMTP(smtp_host, smtp_port) as server:
@@ -80,13 +80,13 @@ class EmailChannel(NotificationChannel):
             str: Email subject
         """
         severity_prefix = {
-            'debug': '[DEBUG]',
-            'info': '[INFO]',
-            'warning': '[WARNING]',
-            'error': '[ERROR]',
-            'critical': '[CRITICAL]'
+            "debug": "[DEBUG]",
+            "info": "[INFO]",
+            "warning": "[WARNING]",
+            "error": "[ERROR]",
+            "critical": "[CRITICAL]",
         }
-        prefix = severity_prefix.get(event.severity, '[INFO]')
+        prefix = severity_prefix.get(event.severity, "[INFO]")
         return f"[VPNHD] {prefix} {event.event_type.replace('_', ' ').title()}"
 
     def _format_text_body(self, event: NotificationEvent) -> str:
@@ -132,13 +132,13 @@ To configure notifications, use: vpnhd config notifications
             str: HTML email body
         """
         severity_colors = {
-            'debug': '#9E9E9E',
-            'info': '#4CAF50',
-            'warning': '#FF9800',
-            'error': '#F44336',
-            'critical': '#9C27B0'
+            "debug": "#9E9E9E",
+            "info": "#4CAF50",
+            "warning": "#FF9800",
+            "error": "#F44336",
+            "critical": "#9C27B0",
         }
-        color = severity_colors.get(event.severity, '#2196F3')
+        color = severity_colors.get(event.severity, "#2196F3")
 
         html = f"""
 <html>

@@ -45,22 +45,16 @@ class WebhookChannel(NotificationChannel):
 
                     # Prepare headers
                     headers = {
-                        'Content-Type': 'application/json',
-                        'User-Agent': 'VPNHD/2.0.0',
-                        **custom_headers
+                        "Content-Type": "application/json",
+                        "User-Agent": "VPNHD/2.0.0",
+                        **custom_headers,
                     }
 
                     # Send POST request
-                    response = await client.post(
-                        url,
-                        json=payload,
-                        headers=headers
-                    )
+                    response = await client.post(url, json=payload, headers=headers)
 
                     if response.status_code < 200 or response.status_code >= 300:
-                        self.logger.error(
-                            f"Webhook failed: {url} returned {response.status_code}"
-                        )
+                        self.logger.error(f"Webhook failed: {url} returned {response.status_code}")
                         all_succeeded = False
                     else:
                         self.logger.info(f"Webhook notification sent to {url}")
@@ -81,11 +75,11 @@ class WebhookChannel(NotificationChannel):
             Dict containing payload data
         """
         return {
-            'event_type': event.event_type,
-            'severity': event.severity,
-            'message': event.message,
-            'details': event.details,
-            'timestamp': event.timestamp.isoformat(),
-            'source': 'VPNHD',
-            'version': '2.0.0'
+            "event_type": event.event_type,
+            "severity": event.severity,
+            "message": event.message,
+            "details": event.details,
+            "timestamp": event.timestamp.isoformat(),
+            "source": "VPNHD",
+            "version": "2.0.0",
         }

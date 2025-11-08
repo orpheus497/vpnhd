@@ -17,19 +17,14 @@ class TestPhase1Integration:
     def test_phase1_debian_detection(self, mocker):
         """Test that Phase 1 correctly detects Debian installation."""
         # Mock os-release file
-        mock_path = mocker.patch('pathlib.Path.exists')
+        mock_path = mocker.patch("pathlib.Path.exists")
         mock_path.return_value = True
 
-        mock_read = mocker.patch('pathlib.Path.read_text')
-        mock_read.return_value = "ID=debian\nVERSION_ID=\"13\""
+        mock_read = mocker.patch("pathlib.Path.read_text")
+        mock_read.return_value = 'ID=debian\nVERSION_ID="13"'
 
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
-        mock_cmd.return_value = mocker.Mock(
-            success=True,
-            exit_code=0,
-            stdout="13",
-            stderr=""
-        )
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
+        mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="13", stderr="")
 
         # Mock display and prompts
         mock_display = mocker.Mock()
@@ -45,13 +40,8 @@ class TestPhase1Integration:
 
     def test_phase1_version_detection(self, mocker):
         """Test that Phase 1 detects correct Debian version."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
-        mock_cmd.return_value = mocker.Mock(
-            success=True,
-            exit_code=0,
-            stdout="13\n",
-            stderr=""
-        )
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
+        mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="13\n", stderr="")
 
         mock_display = mocker.Mock()
         mock_prompts = mocker.Mock()
@@ -65,11 +55,11 @@ class TestPhase1Integration:
 
     def test_phase1_non_debian_detection(self, mocker):
         """Test that Phase 1 detects non-Debian systems."""
-        mock_path = mocker.patch('pathlib.Path.exists')
+        mock_path = mocker.patch("pathlib.Path.exists")
         mock_path.return_value = True
 
-        mock_read = mocker.patch('pathlib.Path.read_text')
-        mock_read.return_value = "ID=ubuntu\nVERSION_ID=\"22.04\""
+        mock_read = mocker.patch("pathlib.Path.read_text")
+        mock_read.return_value = 'ID=ubuntu\nVERSION_ID="22.04"'
 
         mock_display = mocker.Mock()
         mock_prompts = mocker.Mock()
@@ -92,7 +82,7 @@ class TestSecurityIntegration:
         from vpnhd.network.interfaces import NetworkInterface
 
         # Valid interface should work
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         ni = NetworkInterface("wg0")
@@ -106,9 +96,9 @@ class TestSecurityIntegration:
         """Test that package installation validates package names."""
         from vpnhd.system.packages import PackageManager
 
-        mock_open = mocker.patch('builtins.open', mocker.mock_open(read_data='ID=debian'))
-        mock_check = mocker.patch('vpnhd.system.packages.check_command_exists', return_value=True)
-        mock_cmd = mocker.patch('vpnhd.system.packages.execute_command')
+        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+        mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         pm = PackageManager()
@@ -126,9 +116,9 @@ class TestSecurityIntegration:
         from vpnhd.network.interfaces import NetworkInterface
         from vpnhd.system.packages import PackageManager
 
-        mock_open = mocker.patch('builtins.open', mocker.mock_open(read_data='ID=debian'))
-        mock_check = mocker.patch('vpnhd.system.packages.check_command_exists', return_value=True)
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         # Test various injection attempts across different modules
@@ -158,7 +148,7 @@ class TestCommandExecutionIntegration:
         """Test that network interface methods use safe command execution."""
         from vpnhd.network.interfaces import NetworkInterface
 
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         ni = NetworkInterface("eth0")
@@ -174,9 +164,9 @@ class TestCommandExecutionIntegration:
         """Test that package manager uses safe command execution."""
         from vpnhd.system.packages import PackageManager
 
-        mock_open = mocker.patch('builtins.open', mocker.mock_open(read_data='ID=debian'))
-        mock_check = mocker.patch('vpnhd.system.packages.check_command_exists', return_value=True)
-        mock_cmd = mocker.patch('vpnhd.system.packages.execute_command')
+        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+        mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         pm = PackageManager()
@@ -196,7 +186,7 @@ class TestValidationIntegration:
         """Test IP validation in network configuration."""
         from vpnhd.network.interfaces import NetworkInterface
 
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         ni = NetworkInterface("eth0")
@@ -216,7 +206,7 @@ class TestValidationIntegration:
         """Test route validation in network configuration."""
         from vpnhd.network.interfaces import NetworkInterface
 
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         ni = NetworkInterface("eth0")
@@ -254,13 +244,8 @@ class TestErrorHandlingIntegration:
         """Test handling of command failures."""
         from vpnhd.network.interfaces import NetworkInterface
 
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
-        mock_cmd.return_value = mocker.Mock(
-            success=False,
-            exit_code=1,
-            stdout="",
-            stderr="error"
-        )
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
+        mock_cmd.return_value = mocker.Mock(success=False, exit_code=1, stdout="", stderr="error")
 
         ni = NetworkInterface("eth0")
         result = ni.bring_interface_up()
@@ -272,15 +257,12 @@ class TestErrorHandlingIntegration:
         """Test handling of package installation failures."""
         from vpnhd.system.packages import PackageManager
 
-        mock_open = mocker.patch('builtins.open', mocker.mock_open(read_data='ID=debian'))
-        mock_check = mocker.patch('vpnhd.system.packages.check_command_exists', return_value=True)
-        mock_cmd = mocker.patch('vpnhd.system.packages.execute_command')
+        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+        mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
         # Installation fails
         mock_cmd.return_value = mocker.Mock(
-            success=False,
-            exit_code=1,
-            stdout="",
-            stderr="Package not found"
+            success=False, exit_code=1, stdout="", stderr="Package not found"
         )
 
         pm = PackageManager()
@@ -326,8 +308,8 @@ class TestMultiDistroSupport:
         """Test Debian package manager detection."""
         from vpnhd.system.packages import PackageManager
 
-        mock_open = mocker.patch('builtins.open', mocker.mock_open(read_data='ID=debian'))
-        mock_check = mocker.patch('vpnhd.system.packages.check_command_exists')
+        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists")
 
         def check_side_effect(cmd):
             return cmd == "apt"
@@ -343,8 +325,8 @@ class TestMultiDistroSupport:
         """Test Fedora package manager detection."""
         from vpnhd.system.packages import PackageManager
 
-        mock_open = mocker.patch('builtins.open', mocker.mock_open(read_data='ID=fedora'))
-        mock_check = mocker.patch('vpnhd.system.packages.check_command_exists')
+        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=fedora"))
+        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists")
 
         def check_side_effect(cmd):
             return cmd == "dnf"
@@ -361,9 +343,9 @@ class TestMultiDistroSupport:
         from vpnhd.system.packages import PackageManager
 
         # Test Debian
-        mock_open = mocker.patch('builtins.open', mocker.mock_open(read_data='ID=debian'))
-        mock_check = mocker.patch('vpnhd.system.packages.check_command_exists', return_value=True)
-        mock_cmd = mocker.patch('vpnhd.system.packages.execute_command')
+        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+        mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         pm_debian = PackageManager()
@@ -375,7 +357,7 @@ class TestMultiDistroSupport:
         assert "apt" in call_args[0][0]
 
         # Test Fedora
-        mock_open = mocker.patch('builtins.open', mocker.mock_open(read_data='ID=fedora'))
+        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=fedora"))
         mock_cmd.reset_mock()
 
         pm_fedora = PackageManager()
@@ -394,7 +376,7 @@ class TestEndToEndWorkflow:
         """Test complete network configuration workflow."""
         from vpnhd.network.interfaces import NetworkInterface
 
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         # Simulate network configuration workflow
@@ -419,16 +401,16 @@ class TestEndToEndWorkflow:
         """Test complete package installation workflow."""
         from vpnhd.system.packages import PackageManager
 
-        mock_open = mocker.patch('builtins.open', mocker.mock_open(read_data='ID=debian'))
-        mock_check = mocker.patch('vpnhd.system.packages.check_command_exists', return_value=True)
-        mock_cmd = mocker.patch('vpnhd.system.packages.execute_command')
+        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+        mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
 
         # Simulate package installation workflow
         # First check returns not installed, install succeeds, second check returns installed
         mock_cmd.side_effect = [
-            mocker.Mock(success=True, exit_code=0, stdout="", stderr=""),   # update cache
+            mocker.Mock(success=True, exit_code=0, stdout="", stderr=""),  # update cache
             mocker.Mock(success=False, exit_code=1, stdout="", stderr=""),  # check: not installed
-            mocker.Mock(success=True, exit_code=0, stdout="", stderr=""),   # install: success
+            mocker.Mock(success=True, exit_code=0, stdout="", stderr=""),  # install: success
         ]
 
         pm = PackageManager()
@@ -444,9 +426,9 @@ class TestEndToEndWorkflow:
         from vpnhd.network.interfaces import NetworkInterface
         from vpnhd.system.packages import PackageManager
 
-        mock_open = mocker.patch('builtins.open', mocker.mock_open(read_data='ID=debian'))
-        mock_check = mocker.patch('vpnhd.system.packages.check_command_exists', return_value=True)
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         # Attempt workflow with injection attempts - all should be blocked
@@ -477,7 +459,7 @@ class TestConcurrentOperations:
         """Test multiple interface operations."""
         from vpnhd.network.interfaces import NetworkInterface
 
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         # Create multiple interfaces
@@ -497,9 +479,9 @@ class TestConcurrentOperations:
         """Test batch package installation."""
         from vpnhd.system.packages import PackageManager
 
-        mock_open = mocker.patch('builtins.open', mocker.mock_open(read_data='ID=debian'))
-        mock_check = mocker.patch('vpnhd.system.packages.check_command_exists', return_value=True)
-        mock_cmd = mocker.patch('vpnhd.system.packages.execute_command')
+        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+        mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         pm = PackageManager()
@@ -518,18 +500,18 @@ class TestRobustnessAndRecovery:
         """Test recovery from partial failures."""
         from vpnhd.system.packages import PackageManager
 
-        mock_open = mocker.patch('builtins.open', mocker.mock_open(read_data='ID=debian'))
-        mock_check = mocker.patch('vpnhd.system.packages.check_command_exists', return_value=True)
-        mock_cmd = mocker.patch('vpnhd.system.packages.execute_command')
+        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+        mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
 
         # Simulate: first package succeeds, second fails, third succeeds
         responses = [
             mocker.Mock(success=False, exit_code=1, stdout="", stderr=""),  # pkg1 check
-            mocker.Mock(success=True, exit_code=0, stdout="", stderr=""),   # pkg1 install
+            mocker.Mock(success=True, exit_code=0, stdout="", stderr=""),  # pkg1 install
             mocker.Mock(success=False, exit_code=1, stdout="", stderr=""),  # pkg2 check
             mocker.Mock(success=False, exit_code=1, stdout="", stderr=""),  # pkg2 install FAILS
             mocker.Mock(success=False, exit_code=1, stdout="", stderr=""),  # pkg3 check
-            mocker.Mock(success=True, exit_code=0, stdout="", stderr=""),   # pkg3 install
+            mocker.Mock(success=True, exit_code=0, stdout="", stderr=""),  # pkg3 install
         ]
         mock_cmd.side_effect = responses
 
@@ -548,11 +530,8 @@ class TestRobustnessAndRecovery:
         from vpnhd.system.commands import execute_command
         import subprocess
 
-        mock_run = mocker.patch('subprocess.run')
-        mock_run.side_effect = subprocess.TimeoutExpired(
-            cmd="long-running-command",
-            timeout=1
-        )
+        mock_run = mocker.patch("subprocess.run")
+        mock_run.side_effect = subprocess.TimeoutExpired(cmd="long-running-command", timeout=1)
 
         result = execute_command(["long-running-command"], timeout=1)
 

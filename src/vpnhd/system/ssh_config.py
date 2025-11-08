@@ -227,9 +227,7 @@ class SSHConfigManager:
             for service_name in service_names:
                 # Check if service exists using systemctl status
                 result = execute_command(
-                    ["systemctl", "status", service_name],
-                    check=False,
-                    capture_output=True
+                    ["systemctl", "status", service_name], check=False, capture_output=True
                 )
                 # systemctl status returns 0-4 for loaded services, >4 for not found
                 if result.exit_code <= 4:

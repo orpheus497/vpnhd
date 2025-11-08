@@ -44,7 +44,7 @@ class ServerManager:
     def _load_servers(self) -> None:
         """Load server profiles from configuration."""
         try:
-            servers_data = self.config.get('servers', {})
+            servers_data = self.config.get("servers", {})
 
             for server_name, server_data in servers_data.items():
                 try:
@@ -62,12 +62,9 @@ class ServerManager:
     def _save_servers(self) -> None:
         """Save server profiles to configuration."""
         try:
-            servers_data = {
-                name: profile.to_dict()
-                for name, profile in self.servers.items()
-            }
+            servers_data = {name: profile.to_dict() for name, profile in self.servers.items()}
 
-            self.config.set('servers', servers_data)
+            self.config.set("servers", servers_data)
             self.config.save()
             self.logger.debug("Saved server profiles to configuration")
 
@@ -135,9 +132,7 @@ class ServerManager:
         return self.servers.get(server_name)
 
     def list_servers(
-        self,
-        enabled_only: bool = False,
-        tags: Optional[List[str]] = None
+        self, enabled_only: bool = False, tags: Optional[List[str]] = None
     ) -> List[ServerProfile]:
         """List server profiles with optional filtering.
 
@@ -158,9 +153,7 @@ class ServerManager:
 
         return servers
 
-    async def _get_ssh_connection(
-        self, server_name: str
-    ) -> Optional[asyncssh.SSHClientConnection]:
+    async def _get_ssh_connection(self, server_name: str) -> Optional[asyncssh.SSHClientConnection]:
         """Get or create SSH connection to server.
 
         Args:
@@ -187,27 +180,22 @@ class ServerManager:
             conn_info = profile.connection
 
             connect_params: Dict[str, Any] = {
-                'host': conn_info.host,
-                'port': conn_info.port,
-                'username': conn_info.username,
-                'known_hosts': None,  # Disable host key checking for simplicity
+                "host": conn_info.host,
+                "port": conn_info.port,
+                "username": conn_info.username,
+                "known_hosts": None,  # Disable host key checking for simplicity
             }
 
             if conn_info.key_path:
-                connect_params['client_keys'] = [conn_info.key_path]
+                connect_params["client_keys"] = [conn_info.key_path]
             elif conn_info.password:
-                connect_params['password'] = conn_info.password
+                connect_params["password"] = conn_info.password
             else:
-                self.logger.error(
-                    f"No authentication method for {server_name}"
-                )
+                self.logger.error(f"No authentication method for {server_name}")
                 return None
 
             self.logger.debug(f"Connecting to {server_name} via SSH...")
-            conn = await asyncio.wait_for(
-                asyncssh.connect(**connect_params),
-                timeout=30
-            )
+            conn = await asyncio.wait_for(asyncssh.connect(**connect_params), timeout=30)
 
             self._ssh_connections[server_name] = conn
             self.logger.info(f"SSH connection established to {server_name}")
@@ -234,9 +222,7 @@ class ServerManager:
                 del self._ssh_connections[server_name]
                 self.logger.debug(f"Closed SSH connection to {server_name}")
             except Exception as e:
-                self.logger.error(
-                    f"Error closing SSH connection to {server_name}: {e}"
-                )
+                self.logger.error(f"Error closing SSH connection to {server_name}: {e}")
 
     async def execute_command(
         self, server_name: str, command: str, timeout: int = 30
@@ -256,21 +242,14 @@ class ServerManager:
             return None
 
         try:
-            result = await asyncio.wait_for(
-                conn.run(command, check=True),
-                timeout=timeout
-            )
+            result = await asyncio.wait_for(conn.run(command, check=True), timeout=timeout)
             return result.stdout
 
         except asyncio.TimeoutError:
-            self.logger.error(
-                f"Command timeout on {server_name}: {command}"
-            )
+            self.logger.error(f"Command timeout on {server_name}: {command}")
             return None
         except Exception as e:
-            self.logger.error(
-                f"Command failed on {server_name}: {command} - {e}"
-            )
+            self.logger.error(f"Command failed on {server_name}: {command} - {e}")
             return None
 
     async def check_server_status(self, server_name: str) -> bool:
@@ -292,9 +271,7 @@ class ServerManager:
 
             if not conn:
                 profile.update_status(
-                    online=False,
-                    vpn_running=False,
-                    error_message="SSH connection failed"
+                    online=False, vpn_running=False, error_message="SSH connection failed"
                 )
                 return False
 
@@ -303,16 +280,12 @@ class ServerManager:
 
             # Check if VPN is running
             output = await self.execute_command(
-                server_name,
-                f"ip link show {profile.vpn_interface}"
+                server_name, f"ip link show {profile.vpn_interface}"
             )
-            vpn_running = output is not None and 'UP' in output
+            vpn_running = output is not None and "UP" in output
 
             # Get system uptime
-            uptime_output = await self.execute_command(
-                server_name,
-                "cat /proc/uptime"
-            )
+            uptime_output = await self.execute_command(server_name, "cat /proc/uptime")
             uptime = None
             if uptime_output:
                 try:
@@ -327,18 +300,12 @@ class ServerManager:
                 uptime=uptime,
             )
 
-            self.logger.info(
-                f"Server {server_name} status: online={True}, vpn={vpn_running}"
-            )
+            self.logger.info(f"Server {server_name} status: online={True}, vpn={vpn_running}")
             return True
 
         except Exception as e:
             self.logger.exception(f"Error checking status for {server_name}: {e}")
-            profile.update_status(
-                online=False,
-                vpn_running=False,
-                error_message=str(e)
-            )
+            profile.update_status(online=False, vpn_running=False, error_message=str(e))
             return False
 
     async def collect_server_metrics(self, server_name: str) -> bool:
@@ -357,8 +324,7 @@ class ServerManager:
         try:
             # Get WireGuard peer count
             output = await self.execute_command(
-                server_name,
-                f"wg show {profile.vpn_interface} peers | wc -l"
+                server_name, f"wg show {profile.vpn_interface} peers | wc -l"
             )
             active_clients = 0
             if output:
@@ -391,8 +357,7 @@ class ServerManager:
         servers = self.list_servers(enabled_only=True)
 
         results = await asyncio.gather(
-            *[self.check_server_status(s.name) for s in servers],
-            return_exceptions=True
+            *[self.check_server_status(s.name) for s in servers], return_exceptions=True
         )
 
         return {
@@ -406,14 +371,10 @@ class ServerManager:
         Returns:
             Dict mapping server names to collection success
         """
-        servers = [
-            s for s in self.list_servers(enabled_only=True)
-            if s.status.online
-        ]
+        servers = [s for s in self.list_servers(enabled_only=True) if s.status.online]
 
         results = await asyncio.gather(
-            *[self.collect_server_metrics(s.name) for s in servers],
-            return_exceptions=True
+            *[self.collect_server_metrics(s.name) for s in servers], return_exceptions=True
         )
 
         return {
@@ -479,10 +440,10 @@ class ServerManager:
         enabled_count = sum(1 for s in servers if s.enabled)
 
         return {
-            'total_servers': len(servers),
-            'enabled_servers': enabled_count,
-            'online_servers': online_count,
-            'vpn_running': vpn_running_count,
-            'total_groups': len(self.groups),
-            'ssh_connections': len(self._ssh_connections),
+            "total_servers": len(servers),
+            "enabled_servers": enabled_count,
+            "online_servers": online_count,
+            "vpn_running": vpn_running_count,
+            "total_groups": len(self.groups),
+            "ssh_connections": len(self._ssh_connections),
         }

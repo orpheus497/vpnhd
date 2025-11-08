@@ -16,9 +16,7 @@ class ConfigSync:
     """Synchronize configurations across multiple VPN servers."""
 
     def __init__(
-        self,
-        server_manager: ServerManager,
-        sync_config: Optional[SyncConfiguration] = None
+        self, server_manager: ServerManager, sync_config: Optional[SyncConfiguration] = None
     ):
         """Initialize configuration sync.
 
@@ -47,8 +45,7 @@ class ConfigSync:
         try:
             # Get configuration file from server
             config_content = await self.server_manager.execute_command(
-                server_name,
-                "cat ~/.config/vpnhd/config.yaml 2>/dev/null || echo '{}'"
+                server_name, "cat ~/.config/vpnhd/config.yaml 2>/dev/null || echo '{}'"
             )
 
             if not config_content:
@@ -74,8 +71,7 @@ class ConfigSync:
         try:
             # Execute command to read config
             config_content = await self.server_manager.execute_command(
-                server_name,
-                "cat ~/.config/vpnhd/config.yaml"
+                server_name, "cat ~/.config/vpnhd/config.yaml"
             )
 
             if not config_content:
@@ -84,6 +80,7 @@ class ConfigSync:
             # Parse YAML (simplified - would need actual YAML parser)
             # For now, assume JSON format or convert
             import yaml
+
             config_data = yaml.safe_load(config_content)
             return config_data
 
@@ -91,11 +88,7 @@ class ConfigSync:
             self.logger.error(f"Failed to get config from {server_name}: {e}")
             return None
 
-    async def push_config_to_server(
-        self,
-        server_name: str,
-        config_data: Dict[str, Any]
-    ) -> bool:
+    async def push_config_to_server(self, server_name: str, config_data: Dict[str, Any]) -> bool:
         """Push configuration to server.
 
         Args:
@@ -108,6 +101,7 @@ class ConfigSync:
         try:
             # Convert config to YAML
             import yaml
+
             config_yaml = yaml.safe_dump(config_data, default_flow_style=False)
 
             # Create temp file and upload
@@ -134,9 +128,7 @@ class ConfigSync:
             return False
 
     async def sync_client_configs(
-        self,
-        source_server: str,
-        target_servers: List[str]
+        self, source_server: str, target_servers: List[str]
     ) -> Dict[str, bool]:
         """Synchronize client configurations from source to targets.
 
@@ -159,7 +151,7 @@ class ConfigSync:
                 return {server: False for server in target_servers}
 
             # Extract client configurations
-            clients = source_config.get('clients', {})
+            clients = source_config.get("clients", {})
             if not clients:
                 self.logger.warning(f"No clients found in {source_server}")
                 return {server: False for server in target_servers}
@@ -179,7 +171,7 @@ class ConfigSync:
                     continue
 
                 # Merge client configs
-                target_config['clients'] = clients
+                target_config["clients"] = clients
 
                 # Push updated config
                 success = await self.push_config_to_server(target, target_config)
@@ -195,7 +187,7 @@ class ConfigSync:
         self,
         source_server: str,
         target_servers: List[str],
-        settings_keys: Optional[List[str]] = None
+        settings_keys: Optional[List[str]] = None,
     ) -> Dict[str, bool]:
         """Synchronize specific server settings.
 
@@ -220,15 +212,14 @@ class ConfigSync:
             # Extract settings
             if settings_keys:
                 settings = {
-                    key: source_config.get(key)
-                    for key in settings_keys
-                    if key in source_config
+                    key: source_config.get(key) for key in settings_keys if key in source_config
                 }
             else:
                 # Sync all non-client settings
                 settings = {
-                    k: v for k, v in source_config.items()
-                    if k not in ['clients', 'servers']  # Exclude client/server lists
+                    k: v
+                    for k, v in source_config.items()
+                    if k not in ["clients", "servers"]  # Exclude client/server lists
                 }
 
             # Sync to each target
@@ -257,10 +248,7 @@ class ConfigSync:
             self.logger.exception(f"Error syncing server settings: {e}")
             return {server: False for server in target_servers}
 
-    async def detect_config_conflicts(
-        self,
-        server_names: List[str]
-    ) -> Dict[str, Any]:
+    async def detect_config_conflicts(self, server_names: List[str]) -> Dict[str, Any]:
         """Detect configuration conflicts between servers.
 
         Args:
@@ -294,32 +282,28 @@ class ConfigSync:
                         continue
 
                     # Compare configs
-                    diffs = self._find_config_differences(
-                        ref_config,
-                        configs[server]
-                    )
+                    diffs = self._find_config_differences(ref_config, configs[server])
 
                     if diffs:
-                        conflicts.append({
-                            'servers': [reference_server, server],
-                            'differences': diffs,
-                        })
+                        conflicts.append(
+                            {
+                                "servers": [reference_server, server],
+                                "differences": diffs,
+                            }
+                        )
 
             return {
-                'has_conflicts': len(conflicts) > 0,
-                'conflicts': conflicts,
-                'config_hashes': hashes,
+                "has_conflicts": len(conflicts) > 0,
+                "conflicts": conflicts,
+                "config_hashes": hashes,
             }
 
         except Exception as e:
             self.logger.exception(f"Error detecting conflicts: {e}")
-            return {'has_conflicts': False, 'conflicts': [], 'config_hashes': {}}
+            return {"has_conflicts": False, "conflicts": [], "config_hashes": {}}
 
     def _find_config_differences(
-        self,
-        config1: Dict[str, Any],
-        config2: Dict[str, Any],
-        path: str = ""
+        self, config1: Dict[str, Any], config2: Dict[str, Any], path: str = ""
     ) -> List[Dict[str, Any]]:
         """Find differences between two configurations.
 
@@ -338,36 +322,40 @@ class ConfigSync:
             current_path = f"{path}.{key}" if path else key
 
             if key not in config2:
-                diffs.append({
-                    'path': current_path,
-                    'type': 'missing_in_second',
-                    'value1': config1[key],
-                })
+                diffs.append(
+                    {
+                        "path": current_path,
+                        "type": "missing_in_second",
+                        "value1": config1[key],
+                    }
+                )
             elif isinstance(config1[key], dict) and isinstance(config2[key], dict):
                 # Recursive comparison
                 nested_diffs = self._find_config_differences(
-                    config1[key],
-                    config2[key],
-                    current_path
+                    config1[key], config2[key], current_path
                 )
                 diffs.extend(nested_diffs)
             elif config1[key] != config2[key]:
-                diffs.append({
-                    'path': current_path,
-                    'type': 'value_mismatch',
-                    'value1': config1[key],
-                    'value2': config2[key],
-                })
+                diffs.append(
+                    {
+                        "path": current_path,
+                        "type": "value_mismatch",
+                        "value1": config1[key],
+                        "value2": config2[key],
+                    }
+                )
 
         # Check for keys only in config2
         for key in config2:
             if key not in config1:
                 current_path = f"{path}.{key}" if path else key
-                diffs.append({
-                    'path': current_path,
-                    'type': 'missing_in_first',
-                    'value2': config2[key],
-                })
+                diffs.append(
+                    {
+                        "path": current_path,
+                        "type": "missing_in_first",
+                        "value2": config2[key],
+                    }
+                )
 
         return diffs
 
@@ -384,45 +372,40 @@ class ConfigSync:
             # Get all enabled servers except primary
             all_servers = self.server_manager.list_servers(enabled_only=True)
             target_servers = [
-                s.name for s in all_servers
+                s.name
+                for s in all_servers
                 if s.name != primary_server and s.name not in self.sync_config.excluded_servers
             ]
 
             if not target_servers:
                 self.logger.info("No target servers for sync")
-                return {'success': True, 'synced_servers': []}
+                return {"success": True, "synced_servers": []}
 
             # Sync clients if enabled
             client_results = {}
             if self.sync_config.sync_clients:
-                client_results = await self.sync_client_configs(
-                    primary_server,
-                    target_servers
-                )
+                client_results = await self.sync_client_configs(primary_server, target_servers)
 
             # Sync settings if enabled
             settings_results = {}
             if self.sync_config.sync_settings:
-                settings_results = await self.sync_server_settings(
-                    primary_server,
-                    target_servers
-                )
+                settings_results = await self.sync_server_settings(primary_server, target_servers)
 
             # Update last sync time
             self._last_sync = datetime.now()
 
             return {
-                'success': True,
-                'primary_server': primary_server,
-                'target_servers': target_servers,
-                'client_sync': client_results,
-                'settings_sync': settings_results,
-                'timestamp': self._last_sync.isoformat(),
+                "success": True,
+                "primary_server": primary_server,
+                "target_servers": target_servers,
+                "client_sync": client_results,
+                "settings_sync": settings_results,
+                "timestamp": self._last_sync.isoformat(),
             }
 
         except Exception as e:
             self.logger.exception(f"Auto-sync failed: {e}")
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     async def start_auto_sync(self, primary_server: str) -> None:
         """Start automatic synchronization loop.
@@ -472,7 +455,7 @@ class ConfigSync:
                 # Perform sync
                 result = await self.auto_sync(primary_server)
 
-                if result['success']:
+                if result["success"]:
                     self.logger.info("Auto-sync completed successfully")
                 else:
                     self.logger.error(f"Auto-sync failed: {result.get('error')}")
@@ -490,11 +473,11 @@ class ConfigSync:
             Dict with status information
         """
         return {
-            'enabled': self.sync_config.enabled,
-            'auto_sync_running': self._running,
-            'sync_interval': self.sync_config.sync_interval,
-            'last_sync': self._last_sync.isoformat() if self._last_sync else None,
-            'sync_clients': self.sync_config.sync_clients,
-            'sync_settings': self.sync_config.sync_settings,
-            'excluded_servers': self.sync_config.excluded_servers,
+            "enabled": self.sync_config.enabled,
+            "auto_sync_running": self._running,
+            "sync_interval": self.sync_config.sync_interval,
+            "last_sync": self._last_sync.isoformat() if self._last_sync else None,
+            "sync_clients": self.sync_config.sync_clients,
+            "sync_settings": self.sync_config.sync_settings,
+            "excluded_servers": self.sync_config.excluded_servers,
         }

@@ -14,21 +14,14 @@ class DNFPackageManager(PackageManager):
 
     async def is_available(self) -> bool:
         """Check if DNF is available."""
-        result = await execute_command_async(
-            ['which', 'dnf'],
-            check=False
-        )
+        result = await execute_command_async(["which", "dnf"], check=False)
         return result.success
 
     async def update_cache(self) -> bool:
         """Update DNF package cache."""
         self.logger.info("Updating DNF package cache...")
 
-        result = await execute_command_async(
-            ['dnf', 'check-update'],
-            sudo=True,
-            check=False
-        )
+        result = await execute_command_async(["dnf", "check-update"], sudo=True, check=False)
 
         # check-update returns 100 if updates are available, 0 if none
         if result.returncode in [0, 100]:
@@ -38,20 +31,14 @@ class DNFPackageManager(PackageManager):
             self.logger.error(f"Failed to update DNF cache: {result.stderr}")
             return False
 
-    async def install_package(
-        self,
-        package: str,
-        version: Optional[str] = None
-    ) -> bool:
+    async def install_package(self, package: str, version: Optional[str] = None) -> bool:
         """Install a package using DNF."""
         package_spec = f"{package}-{version}" if version else package
 
         self.logger.info(f"Installing package: {package_spec}")
 
         result = await execute_command_async(
-            ['dnf', 'install', '-y', package_spec],
-            sudo=True,
-            check=False
+            ["dnf", "install", "-y", package_spec], sudo=True, check=False
         )
 
         if result.success:
@@ -69,9 +56,7 @@ class DNFPackageManager(PackageManager):
         self.logger.info(f"Installing packages: {', '.join(packages)}")
 
         result = await execute_command_async(
-            ['dnf', 'install', '-y'] + packages,
-            sudo=True,
-            check=False
+            ["dnf", "install", "-y"] + packages, sudo=True, check=False
         )
 
         if result.success:
@@ -86,9 +71,7 @@ class DNFPackageManager(PackageManager):
         self.logger.info(f"Removing package: {package}")
 
         result = await execute_command_async(
-            ['dnf', 'remove', '-y', package],
-            sudo=True,
-            check=False
+            ["dnf", "remove", "-y", package], sudo=True, check=False
         )
 
         if result.success:
@@ -100,18 +83,14 @@ class DNFPackageManager(PackageManager):
 
     async def is_package_installed(self, package: str) -> bool:
         """Check if a package is installed."""
-        result = await execute_command_async(
-            ['rpm', '-q', package],
-            check=False
-        )
+        result = await execute_command_async(["rpm", "-q", package], check=False)
 
         return result.success
 
     async def get_package_version(self, package: str) -> Optional[str]:
         """Get installed package version."""
         result = await execute_command_async(
-            ['rpm', '-q', '--queryformat', '%{VERSION}-%{RELEASE}', package],
-            check=False
+            ["rpm", "-q", "--queryformat", "%{VERSION}-%{RELEASE}", package], check=False
         )
 
         if result.success:
@@ -124,9 +103,7 @@ class DNFPackageManager(PackageManager):
         self.logger.info(f"Upgrading package: {package}")
 
         result = await execute_command_async(
-            ['dnf', 'upgrade', '-y', package],
-            sudo=True,
-            check=False
+            ["dnf", "upgrade", "-y", package], sudo=True, check=False
         )
 
         if result.success:
@@ -140,11 +117,7 @@ class DNFPackageManager(PackageManager):
         """Upgrade all installed packages."""
         self.logger.info("Upgrading all packages...")
 
-        result = await execute_command_async(
-            ['dnf', 'upgrade', '-y'],
-            sudo=True,
-            check=False
-        )
+        result = await execute_command_async(["dnf", "upgrade", "-y"], sudo=True, check=False)
 
         if result.success:
             self.logger.info("All packages upgraded successfully")
@@ -157,11 +130,7 @@ class DNFPackageManager(PackageManager):
         """Remove unused packages."""
         self.logger.info("Removing unused packages...")
 
-        result = await execute_command_async(
-            ['dnf', 'autoremove', '-y'],
-            sudo=True,
-            check=False
-        )
+        result = await execute_command_async(["dnf", "autoremove", "-y"], sudo=True, check=False)
 
         if result.success:
             self.logger.info("Unused packages removed successfully")
@@ -174,11 +143,7 @@ class DNFPackageManager(PackageManager):
         """Clean DNF cache."""
         self.logger.info("Cleaning DNF cache...")
 
-        result = await execute_command_async(
-            ['dnf', 'clean', 'all'],
-            sudo=True,
-            check=False
-        )
+        result = await execute_command_async(["dnf", "clean", "all"], sudo=True, check=False)
 
         if result.success:
             self.logger.info("DNF cache cleaned successfully")

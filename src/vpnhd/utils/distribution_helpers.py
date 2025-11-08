@@ -24,10 +24,7 @@ def prompt_for_distribution(display, prompts) -> str:
 
     choices.append("Other (generic Linux)")
 
-    choice = prompts.choice(
-        "Which Linux distribution are you using?",
-        choices
-    )
+    choice = prompts.choice("Which Linux distribution are you using?", choices)
 
     # Extract distribution key from choice
     if choice == "Other (generic Linux)":
@@ -66,10 +63,7 @@ def get_package_install_command(pkg_manager: str, packages: list) -> str:
         return f"# Install WireGuard packages: {pkg_list}"
 
 
-def generate_wireguard_install_instructions(
-    distro: str,
-    always_on: bool = True
-) -> str:
+def generate_wireguard_install_instructions(distro: str, always_on: bool = True) -> str:
     """Generate WireGuard installation instructions for a distribution.
 
     Args:

@@ -163,9 +163,7 @@ class ServerConfigManager:
         try:
             # First, get the stripped configuration
             strip_result = execute_command(
-                ["wg-quick", "strip", "wg0"],
-                sudo=True,
-                capture_output=True
+                ["wg-quick", "strip", "wg0"], sudo=True, capture_output=True
             )
 
             if strip_result.success:
@@ -173,7 +171,7 @@ class ServerConfigManager:
                 sync_result = run_command_with_input(
                     ["wg", "syncconf", "wg0", "/dev/stdin"],
                     input_data=strip_result.stdout,
-                    sudo=True
+                    sudo=True,
                 )
 
                 if sync_result.success:

@@ -18,8 +18,8 @@ from .__version__ import __version__
 
 
 @click.group(invoke_without_command=True)
-@click.option('--verbose', '-v', is_flag=True, help='Enable verbose logging')
-@click.option('--config', '-c', type=click.Path(), help='Path to config file')
+@click.option("--verbose", "-v", is_flag=True, help="Enable verbose logging")
+@click.option("--config", "-c", type=click.Path(), help="Path to config file")
 @click.pass_context
 def main(ctx, verbose, config):
     """VPNHD - VPN Helper Daemon
@@ -38,10 +38,10 @@ def main(ctx, verbose, config):
 
     # Store in context for subcommands
     ctx.ensure_object(dict)
-    ctx.obj['config'] = config_manager
-    ctx.obj['display'] = display
-    ctx.obj['prompts'] = prompts
-    ctx.obj['logger'] = logger
+    ctx.obj["config"] = config_manager
+    ctx.obj["display"] = display
+    ctx.obj["prompts"] = prompts
+    ctx.obj["logger"] = logger
 
     # Load configuration
     if not config_manager.load():
@@ -62,11 +62,11 @@ def run_interactive(config_manager: ConfigManager, display: Display, prompts: Pr
             menu = MainMenu(config_manager)
             choice = menu.show()
 
-            if choice == '0':  # Exit
+            if choice == "0":  # Exit
                 display.info("Goodbye!")
                 sys.exit(0)
 
-            elif choice == '1':  # Continue to next phase
+            elif choice == "1":  # Continue to next phase
                 next_phase = config_manager.get_next_phase()
                 if next_phase == 0:
                     display.success("All phases complete! Your VPN is ready.")
@@ -74,23 +74,23 @@ def run_interactive(config_manager: ConfigManager, display: Display, prompts: Pr
                 else:
                     execute_phase(next_phase, config_manager, display, prompts)
 
-            elif choice == '2':  # Jump to specific phase
+            elif choice == "2":  # Jump to specific phase
                 phase_num = menu.show_phase_selection()
                 if phase_num:
                     execute_phase(phase_num, config_manager, display, prompts)
 
-            elif choice == '3':  # Review configuration
+            elif choice == "3":  # Review configuration
                 menu.show_configuration_review()
 
-            elif choice == '4':  # Show phase details
+            elif choice == "4":  # Show phase details
                 phase_num = menu.show_phase_selection()
                 if phase_num:
                     menu.show_phase_details(phase_num)
 
-            elif choice == '5':  # Troubleshooting
+            elif choice == "5":  # Troubleshooting
                 menu.show_troubleshooting()
 
-            elif choice == '6':  # View guide documentation
+            elif choice == "6":  # View guide documentation
                 display.info("Guide documentation is located in .devdocs/")
                 prompts.pause()
 
@@ -104,7 +104,9 @@ def run_interactive(config_manager: ConfigManager, display: Display, prompts: Pr
         sys.exit(1)
 
 
-def execute_phase(phase_number: int, config_manager: ConfigManager, display: Display, prompts: Prompts):
+def execute_phase(
+    phase_number: int, config_manager: ConfigManager, display: Display, prompts: Prompts
+):
     """Execute a specific phase."""
     logger = get_logger(f"Phase{phase_number}")
 
@@ -120,7 +122,9 @@ def execute_phase(phase_number: int, config_manager: ConfigManager, display: Dis
 
         # Check if already complete
         if phase.is_complete():
-            if not prompts.confirm(f"Phase {phase_number} is already complete. Run again?", default=False):
+            if not prompts.confirm(
+                f"Phase {phase_number} is already complete. Run again?", default=False
+            ):
                 return
 
         # Check prerequisites
@@ -130,7 +134,9 @@ def execute_phase(phase_number: int, config_manager: ConfigManager, display: Dis
             return
 
         # Confirm execution
-        if not prompts.confirm(f"Ready to execute Phase {phase_number}: {phase.name}?", default=True):
+        if not prompts.confirm(
+            f"Ready to execute Phase {phase_number}: {phase.name}?", default=True
+        ):
             return
 
         # Execute phase
@@ -163,18 +169,18 @@ def execute_phase(phase_number: int, config_manager: ConfigManager, display: Dis
 @click.pass_context
 def version(ctx):
     """Show version information."""
-    display = ctx.obj['display']
+    display = ctx.obj["display"]
     display.print(f"{APP_NAME} version {__version__}", style="cyan bold")
 
 
 @main.command()
-@click.argument('phase_number', type=int)
+@click.argument("phase_number", type=int)
 @click.pass_context
 def run_phase(ctx, phase_number):
     """Run a specific phase."""
-    config_manager = ctx.obj['config']
-    display = ctx.obj['display']
-    prompts = ctx.obj['prompts']
+    config_manager = ctx.obj["config"]
+    display = ctx.obj["display"]
+    prompts = ctx.obj["prompts"]
 
     execute_phase(phase_number, config_manager, display, prompts)
 
@@ -183,8 +189,8 @@ def run_phase(ctx, phase_number):
 @click.pass_context
 def status(ctx):
     """Show current status."""
-    config_manager = ctx.obj['config']
-    display = ctx.obj['display']
+    config_manager = ctx.obj["config"]
+    display = ctx.obj["display"]
 
     display.heading("VPNHD Status", style="cyan bold")
     display.newline()
@@ -192,11 +198,7 @@ def status(ctx):
     for phase_num in range(1, 9):
         phase_info = config_manager.get_phase_info(phase_num)
         if phase_info:
-            display.phase_status(
-                phase_num,
-                phase_info['name'],
-                phase_info['completed']
-            )
+            display.phase_status(phase_num, phase_info["name"], phase_info["completed"])
 
     completion = config_manager.get_completion_percentage()
     display.newline()
@@ -207,9 +209,9 @@ def status(ctx):
 @click.pass_context
 def reset(ctx):
     """Reset configuration to defaults."""
-    config_manager = ctx.obj['config']
-    display = ctx.obj['display']
-    prompts = ctx.obj['prompts']
+    config_manager = ctx.obj["config"]
+    display = ctx.obj["display"]
+    prompts = ctx.obj["prompts"]
 
     if prompts.confirm("Are you sure you want to reset all configuration?", default=False):
         if config_manager.reset():
@@ -219,12 +221,12 @@ def reset(ctx):
 
 
 @main.command()
-@click.argument('output_path', type=click.Path())
+@click.argument("output_path", type=click.Path())
 @click.pass_context
 def export_config(ctx, output_path):
     """Export configuration to file."""
-    config_manager = ctx.obj['config']
-    display = ctx.obj['display']
+    config_manager = ctx.obj["config"]
+    display = ctx.obj["display"]
 
     if config_manager.export_config(Path(output_path)):
         display.success(f"Configuration exported to {output_path}")
@@ -236,32 +238,40 @@ def export_config(ctx, output_path):
 # Client Management Commands
 # ==============================================================================
 
+
 @main.group()
 @click.pass_context
 def client(ctx):
     """Manage VPN clients."""
     # Initialize client manager if not already in context
-    if 'client_manager' not in ctx.obj:
-        ctx.obj['client_manager'] = ClientManager(ctx.obj['config'])
+    if "client_manager" not in ctx.obj:
+        ctx.obj["client_manager"] = ClientManager(ctx.obj["config"])
 
 
-@client.command('list')
-@click.option('--enabled', is_flag=True, help='Show only enabled clients')
-@click.option('--device-type', type=click.Choice(['desktop', 'mobile', 'server']), help='Filter by device type')
-@click.option('--os', help='Filter by operating system')
-@click.option('--connected', is_flag=True, help='Show only connected clients')
-@click.option('--format', type=click.Choice(['table', 'json', 'simple']), default='table', help='Output format')
+@client.command("list")
+@click.option("--enabled", is_flag=True, help="Show only enabled clients")
+@click.option(
+    "--device-type",
+    type=click.Choice(["desktop", "mobile", "server"]),
+    help="Filter by device type",
+)
+@click.option("--os", help="Filter by operating system")
+@click.option("--connected", is_flag=True, help="Show only connected clients")
+@click.option(
+    "--format",
+    type=click.Choice(["table", "json", "simple"]),
+    default="table",
+    help="Output format",
+)
 @click.pass_context
 def list_clients(ctx, enabled, device_type, os, connected, format):
     """List all VPN clients."""
-    client_manager = ctx.obj['client_manager']
-    display = ctx.obj['display']
+    client_manager = ctx.obj["client_manager"]
+    display = ctx.obj["display"]
 
     # Get clients with filters
     clients = client_manager.list_clients(
-        enabled_only=enabled,
-        device_type=device_type,
-        os_filter=os
+        enabled_only=enabled, device_type=device_type, os_filter=os
     )
 
     # Filter by connection status if requested
@@ -273,11 +283,12 @@ def list_clients(ctx, enabled, device_type, os, connected, format):
         display.info("No clients found")
         return
 
-    if format == 'json':
+    if format == "json":
         import json
+
         output = [c.to_dict() for c in clients]
         click.echo(json.dumps(output, indent=2))
-    elif format == 'simple':
+    elif format == "simple":
         for client in clients:
             status = "✓" if client.enabled else "✗"
             click.echo(f"{status} {client.name} ({client.vpn_ip}) - {client.device_type}")
@@ -302,24 +313,29 @@ def list_clients(ctx, enabled, device_type, os, connected, format):
                 client.device_type or "Unknown",
                 client.os or "Unknown",
                 status,
-                created
+                created,
             )
 
         Console().print(table)
 
 
-@client.command('add')
-@click.argument('name')
-@click.option('--description', default='', help='Client description')
-@click.option('--device-type', type=click.Choice(['desktop', 'mobile', 'server']), default='desktop', help='Device type')
-@click.option('--os', default='linux', help='Operating system')
-@click.option('--ip', help='Specific VPN IP address')
-@click.option('--qr', is_flag=True, help='Generate QR code (for mobile clients)')
+@client.command("add")
+@click.argument("name")
+@click.option("--description", default="", help="Client description")
+@click.option(
+    "--device-type",
+    type=click.Choice(["desktop", "mobile", "server"]),
+    default="desktop",
+    help="Device type",
+)
+@click.option("--os", default="linux", help="Operating system")
+@click.option("--ip", help="Specific VPN IP address")
+@click.option("--qr", is_flag=True, help="Generate QR code (for mobile clients)")
 @click.pass_context
 def add_client(ctx, name, description, device_type, os, ip, qr):
     """Add a new VPN client."""
-    client_manager = ctx.obj['client_manager']
-    display = ctx.obj['display']
+    client_manager = ctx.obj["client_manager"]
+    display = ctx.obj["display"]
 
     display.info(f"Adding client '{name}'...")
 
@@ -329,7 +345,7 @@ def add_client(ctx, name, description, device_type, os, ip, qr):
         device_type=device_type,
         os=os,
         vpn_ip=ip,
-        generate_qr=qr
+        generate_qr=qr,
     )
 
     if client_info:
@@ -350,15 +366,15 @@ def add_client(ctx, name, description, device_type, os, ip, qr):
         sys.exit(1)
 
 
-@client.command('remove')
-@click.argument('name')
-@click.option('--yes', '-y', is_flag=True, help='Skip confirmation')
+@client.command("remove")
+@click.argument("name")
+@click.option("--yes", "-y", is_flag=True, help="Skip confirmation")
 @click.pass_context
 def remove_client(ctx, name, yes):
     """Remove a VPN client."""
-    client_manager = ctx.obj['client_manager']
-    display = ctx.obj['display']
-    prompts = ctx.obj['prompts']
+    client_manager = ctx.obj["client_manager"]
+    display = ctx.obj["display"]
+    prompts = ctx.obj["prompts"]
 
     # Check if client exists
     client = client_manager.get_client(name)
@@ -380,15 +396,15 @@ def remove_client(ctx, name, yes):
         sys.exit(1)
 
 
-@client.command('show')
-@click.argument('name')
-@click.option('--show-keys', is_flag=True, help='Display full keys')
+@client.command("show")
+@click.argument("name")
+@click.option("--show-keys", is_flag=True, help="Display full keys")
 @click.pass_context
 def show_client(ctx, name, show_keys):
     """Show detailed information about a client."""
-    client_manager = ctx.obj['client_manager']
-    display = ctx.obj['display']
-    config_manager = ctx.obj['config']
+    client_manager = ctx.obj["client_manager"]
+    display = ctx.obj["display"]
+    config_manager = ctx.obj["config"]
 
     client = client_manager.get_client(name)
     if not client:
@@ -422,7 +438,9 @@ def show_client(ctx, name, show_keys):
         if private_key:
             info_lines.append(f"[cyan]Private Key:[/cyan] {private_key}")
     else:
-        info_lines.append(f"[cyan]Public Key:[/cyan] {client.public_key[:32]}... (use --show-keys for full)")
+        info_lines.append(
+            f"[cyan]Public Key:[/cyan] {client.public_key[:32]}... (use --show-keys for full)"
+        )
 
     # Show connection details if connected
     if connected and status:
@@ -437,21 +455,17 @@ def show_client(ctx, name, show_keys):
         if status.get("transfer_tx"):
             info_lines.append(f"  [cyan]Data Sent:[/cyan] {status['transfer_tx']} bytes")
 
-    panel = Panel(
-        "\n".join(info_lines),
-        title=f"Client: {name}",
-        border_style="cyan"
-    )
+    panel = Panel("\n".join(info_lines), title=f"Client: {name}", border_style="cyan")
     Console().print(panel)
 
 
-@client.command('status')
-@click.option('--all', is_flag=True, help='Show all clients (not just connected)')
+@client.command("status")
+@click.option("--all", is_flag=True, help="Show all clients (not just connected)")
 @click.pass_context
 def client_status(ctx, all):
     """Show connection status of clients."""
-    client_manager = ctx.obj['client_manager']
-    display = ctx.obj['display']
+    client_manager = ctx.obj["client_manager"]
+    display = ctx.obj["display"]
 
     from rich.table import Table
     from rich.console import Console
@@ -485,27 +499,20 @@ def client_status(ctx, all):
         else:
             transfer = "-"
 
-        table.add_row(
-            client.name,
-            client.vpn_ip,
-            conn_status,
-            endpoint,
-            handshake,
-            transfer
-        )
+        table.add_row(client.name, client.vpn_ip, conn_status, endpoint, handshake, transfer)
 
     Console().print(table)
 
 
-@client.command('export')
-@click.argument('name')
-@click.option('--output', '-o', help='Output file path')
-@click.option('--qr', is_flag=True, help='Also generate QR code')
+@client.command("export")
+@click.argument("name")
+@click.option("--output", "-o", help="Output file path")
+@click.option("--qr", is_flag=True, help="Also generate QR code")
 @click.pass_context
 def export_client_config(ctx, name, output, qr):
     """Export client configuration file."""
-    client_manager = ctx.obj['client_manager']
-    display = ctx.obj['display']
+    client_manager = ctx.obj["client_manager"]
+    display = ctx.obj["display"]
 
     client = client_manager.get_client(name)
     if not client:
@@ -527,9 +534,7 @@ def export_client_config(ctx, name, output, qr):
 
         config_text = Path(config_path).read_text()
         qr_path = create_qr_with_metadata(
-            config_text=config_text,
-            client_name=name,
-            output_dir=QR_CODE_DIR
+            config_text=config_text, client_name=name, output_dir=QR_CODE_DIR
         )
         if qr_path:
             display.success(f"✓ QR code generated: {qr_path}")
@@ -537,13 +542,13 @@ def export_client_config(ctx, name, output, qr):
             display.warning("Failed to generate QR code")
 
 
-@client.command('enable')
-@click.argument('name')
+@client.command("enable")
+@click.argument("name")
 @click.pass_context
 def enable_client(ctx, name):
     """Enable a client."""
-    client_manager = ctx.obj['client_manager']
-    display = ctx.obj['display']
+    client_manager = ctx.obj["client_manager"]
+    display = ctx.obj["display"]
 
     if client_manager.enable_client(name):
         display.success(f"✓ Client '{name}' enabled")
@@ -552,13 +557,13 @@ def enable_client(ctx, name):
         sys.exit(1)
 
 
-@client.command('disable')
-@click.argument('name')
+@client.command("disable")
+@click.argument("name")
 @click.pass_context
 def disable_client(ctx, name):
     """Disable a client."""
-    client_manager = ctx.obj['client_manager']
-    display = ctx.obj['display']
+    client_manager = ctx.obj["client_manager"]
+    display = ctx.obj["display"]
 
     if client_manager.disable_client(name):
         display.success(f"✓ Client '{name}' disabled")
@@ -567,11 +572,11 @@ def disable_client(ctx, name):
         sys.exit(1)
 
 
-@client.command('stats')
+@client.command("stats")
 @click.pass_context
 def client_stats(ctx):
     """Show client statistics."""
-    client_manager = ctx.obj['client_manager']
+    client_manager = ctx.obj["client_manager"]
 
     from rich.panel import Panel
     from rich.console import Console
@@ -585,23 +590,19 @@ def client_stats(ctx):
         f"[cyan]Connected:[/cyan] [yellow]{stats['connected']}[/yellow]",
     ]
 
-    if stats['by_device_type']:
+    if stats["by_device_type"]:
         lines.append("")
         lines.append("[yellow]By Device Type:[/yellow]")
-        for dtype, count in stats['by_device_type'].items():
+        for dtype, count in stats["by_device_type"].items():
             lines.append(f"  {dtype}: {count}")
 
-    if stats['by_os']:
+    if stats["by_os"]:
         lines.append("")
         lines.append("[yellow]By Operating System:[/yellow]")
-        for os_name, count in stats['by_os'].items():
+        for os_name, count in stats["by_os"].items():
             lines.append(f"  {os_name}: {count}")
 
-    panel = Panel(
-        "\n".join(lines),
-        title="Client Statistics",
-        border_style="cyan"
-    )
+    panel = Panel("\n".join(lines), title="Client Statistics", border_style="cyan")
     Console().print(panel)
 
 
@@ -609,23 +610,24 @@ def client_stats(ctx):
 # Performance Testing Commands
 # ==============================================================================
 
+
 @main.group()
 @click.pass_context
 def performance(ctx):
     """Performance testing for VPN connections."""
-    if 'perf_tester' not in ctx.obj:
-        ctx.obj['perf_tester'] = PerformanceTester()
+    if "perf_tester" not in ctx.obj:
+        ctx.obj["perf_tester"] = PerformanceTester()
 
 
-@performance.command('latency')
-@click.option('--count', default=20, help='Number of ping packets')
-@click.option('--server', default='8.8.8.8', help='Test server')
+@performance.command("latency")
+@click.option("--count", default=20, help="Number of ping packets")
+@click.option("--server", default="8.8.8.8", help="Test server")
 @click.pass_context
 def test_latency(ctx, count, server):
     """Test VPN latency."""
-    perf_tester = ctx.obj['perf_tester']
+    perf_tester = ctx.obj["perf_tester"]
     perf_tester.test_server = server
-    display = ctx.obj['display']
+    display = ctx.obj["display"]
 
     display.info(f"Testing latency to {server} with {count} packets...")
 
@@ -641,13 +643,13 @@ def test_latency(ctx, count, server):
             f"[cyan]Max:[/cyan] {result.max_ms:.2f} ms",
             f"[cyan]Std Dev:[/cyan] {result.stddev_ms:.2f} ms",
             f"[cyan]Packet Loss:[/cyan] {result.packet_loss_percent:.1f}%",
-            f"[cyan]Packets:[/cyan] {result.packets_received}/{result.packets_sent}"
+            f"[cyan]Packets:[/cyan] {result.packets_received}/{result.packets_sent}",
         ]
 
         panel = Panel(
             "\n".join(lines),
             title="Latency Test Results",
-            border_style="green" if result.packet_loss_percent < 1 else "yellow"
+            border_style="green" if result.packet_loss_percent < 1 else "yellow",
         )
         Console().print(panel)
     else:
@@ -655,22 +657,21 @@ def test_latency(ctx, count, server):
         sys.exit(1)
 
 
-@performance.command('stability')
-@click.option('--duration', default=60, help='Test duration in seconds')
-@click.option('--interval', default=1, help='Ping interval in seconds')
-@click.option('--server', default='8.8.8.8', help='Test server')
+@performance.command("stability")
+@click.option("--duration", default=60, help="Test duration in seconds")
+@click.option("--interval", default=1, help="Ping interval in seconds")
+@click.option("--server", default="8.8.8.8", help="Test server")
 @click.pass_context
 def test_stability(ctx, duration, interval, server):
     """Test VPN connection stability."""
-    perf_tester = ctx.obj['perf_tester']
+    perf_tester = ctx.obj["perf_tester"]
     perf_tester.test_server = server
-    display = ctx.obj['display']
+    display = ctx.obj["display"]
 
     display.info(f"Testing connection stability for {duration} seconds...")
 
     result = perf_tester.test_connection_stability(
-        duration_seconds=duration,
-        interval_seconds=interval
+        duration_seconds=duration, interval_seconds=interval
     )
 
     if result:
@@ -684,13 +685,13 @@ def test_stability(ctx, duration, interval, server):
             f"[cyan]Failed:[/cyan] [red]{result.failed_pings}[/red]",
             f"[cyan]Uptime:[/cyan] {result.uptime_percent:.1f}%",
             f"[cyan]Disconnections:[/cyan] {result.disconnections}",
-            f"[cyan]Avg Latency:[/cyan] {result.avg_latency_ms:.2f} ms"
+            f"[cyan]Avg Latency:[/cyan] {result.avg_latency_ms:.2f} ms",
         ]
 
         panel = Panel(
             "\n".join(lines),
             title="Connection Stability Results",
-            border_style="green" if result.uptime_percent > 99 else "yellow"
+            border_style="green" if result.uptime_percent > 99 else "yellow",
         )
         Console().print(panel)
     else:
@@ -698,17 +699,17 @@ def test_stability(ctx, duration, interval, server):
         sys.exit(1)
 
 
-@performance.command('full')
-@click.option('--iperf-server', help='iperf3 server for bandwidth test')
-@click.option('--latency-count', default=20, help='Ping count for latency')
-@click.option('--stability-duration', default=60, help='Stability test duration')
-@click.option('--server', default='8.8.8.8', help='Test server for ping tests')
+@performance.command("full")
+@click.option("--iperf-server", help="iperf3 server for bandwidth test")
+@click.option("--latency-count", default=20, help="Ping count for latency")
+@click.option("--stability-duration", default=60, help="Stability test duration")
+@click.option("--server", default="8.8.8.8", help="Test server for ping tests")
 @click.pass_context
 def full_test(ctx, iperf_server, latency_count, stability_duration, server):
     """Run complete performance test suite."""
-    perf_tester = ctx.obj['perf_tester']
+    perf_tester = ctx.obj["perf_tester"]
     perf_tester.test_server = server
-    display = ctx.obj['display']
+    display = ctx.obj["display"]
 
     display.heading("Running Full Performance Test Suite", style="cyan bold")
     display.newline()
@@ -717,7 +718,7 @@ def full_test(ctx, iperf_server, latency_count, stability_duration, server):
         include_bandwidth=bool(iperf_server),
         iperf_server=iperf_server,
         latency_count=latency_count,
-        stability_duration=stability_duration
+        stability_duration=stability_duration,
     )
 
     from rich.table import Table
@@ -728,50 +729,32 @@ def full_test(ctx, iperf_server, latency_count, stability_duration, server):
     table.add_column("Result", style="yellow")
 
     if report.latency:
-        table.add_row(
-            "Latency (avg)",
-            f"{report.latency.avg_ms:.2f} ms"
-        )
-        table.add_row(
-            "Packet Loss",
-            f"{report.latency.packet_loss_percent:.1f}%"
-        )
+        table.add_row("Latency (avg)", f"{report.latency.avg_ms:.2f} ms")
+        table.add_row("Packet Loss", f"{report.latency.packet_loss_percent:.1f}%")
 
     if report.stability:
-        table.add_row(
-            "Uptime",
-            f"{report.stability.uptime_percent:.1f}%"
-        )
-        table.add_row(
-            "Disconnections",
-            str(report.stability.disconnections)
-        )
+        table.add_row("Uptime", f"{report.stability.uptime_percent:.1f}%")
+        table.add_row("Disconnections", str(report.stability.disconnections))
 
     if report.bandwidth:
-        table.add_row(
-            "Download",
-            f"{report.bandwidth.download_mbps:.2f} Mbps"
-        )
-        table.add_row(
-            "Upload",
-            f"{report.bandwidth.upload_mbps:.2f} Mbps"
-        )
+        table.add_row("Download", f"{report.bandwidth.download_mbps:.2f} Mbps")
+        table.add_row("Upload", f"{report.bandwidth.upload_mbps:.2f} Mbps")
 
     Console().print(table)
     display.newline()
     display.success(f"Report saved to performance results directory")
 
 
-@performance.command('list')
+@performance.command("list")
 @click.pass_context
 def list_reports(ctx):
     """List all performance reports."""
-    perf_tester = ctx.obj['perf_tester']
+    perf_tester = ctx.obj["perf_tester"]
 
     reports = perf_tester.list_reports()
 
     if not reports:
-        ctx.obj['display'].info("No performance reports found")
+        ctx.obj["display"].info("No performance reports found")
         return
 
     from rich.table import Table
@@ -786,11 +769,7 @@ def list_reports(ctx):
         date_str = report_path.stem.replace("performance_report_", "")
         size_kb = report_path.stat().st_size / 1024
 
-        table.add_row(
-            report_path.name,
-            date_str,
-            f"{size_kb:.2f} KB"
-        )
+        table.add_row(report_path.name, date_str, f"{size_kb:.2f} KB")
 
     Console().print(table)
 
@@ -799,25 +778,26 @@ def list_reports(ctx):
 # Backup & Restore Commands
 # ==============================================================================
 
+
 @main.group()
 @click.pass_context
 def backup(ctx):
     """Backup and restore VPN configuration."""
-    if 'backup_manager' not in ctx.obj:
-        ctx.obj['backup_manager'] = BackupManager()
+    if "backup_manager" not in ctx.obj:
+        ctx.obj["backup_manager"] = BackupManager()
 
 
-@backup.command('create')
-@click.option('--description', default='', help='Backup description')
-@click.option('--no-wireguard', is_flag=True, help='Exclude WireGuard config')
-@click.option('--no-ssh', is_flag=True, help='Exclude SSH keys')
-@click.option('--no-config', is_flag=True, help='Exclude VPNHD config')
-@click.option('--no-clients', is_flag=True, help='Exclude client database')
+@backup.command("create")
+@click.option("--description", default="", help="Backup description")
+@click.option("--no-wireguard", is_flag=True, help="Exclude WireGuard config")
+@click.option("--no-ssh", is_flag=True, help="Exclude SSH keys")
+@click.option("--no-config", is_flag=True, help="Exclude VPNHD config")
+@click.option("--no-clients", is_flag=True, help="Exclude client database")
 @click.pass_context
 def create_backup(ctx, description, no_wireguard, no_ssh, no_config, no_clients):
     """Create a new backup."""
-    backup_manager = ctx.obj['backup_manager']
-    display = ctx.obj['display']
+    backup_manager = ctx.obj["backup_manager"]
+    display = ctx.obj["display"]
 
     display.info("Creating backup...")
 
@@ -826,7 +806,7 @@ def create_backup(ctx, description, no_wireguard, no_ssh, no_config, no_clients)
         include_wireguard=not no_wireguard,
         include_ssh=not no_ssh,
         include_config=not no_config,
-        include_clients=not no_clients
+        include_clients=not no_clients,
     )
 
     if backup_id:
@@ -835,22 +815,24 @@ def create_backup(ctx, description, no_wireguard, no_ssh, no_config, no_clients)
 
         display.success(f"✓ Backup created: {backup_id}")
         display.print(f"  Size: {size_kb:.2f} KB", style="yellow")
-        display.print(f"  Includes: {', '.join(metadata.includes) if metadata else 'N/A'}", style="cyan")
+        display.print(
+            f"  Includes: {', '.join(metadata.includes) if metadata else 'N/A'}", style="cyan"
+        )
     else:
         display.error("Failed to create backup")
         sys.exit(1)
 
 
-@backup.command('list')
+@backup.command("list")
 @click.pass_context
 def list_backups(ctx):
     """List all backups."""
-    backup_manager = ctx.obj['backup_manager']
+    backup_manager = ctx.obj["backup_manager"]
 
     backups = backup_manager.list_backups()
 
     if not backups:
-        ctx.obj['display'].info("No backups found")
+        ctx.obj["display"].info("No backups found")
         return
 
     from rich.table import Table
@@ -870,31 +852,27 @@ def list_backups(ctx):
         if len(bkp.includes) > 2:
             includes += f" (+{len(bkp.includes) - 2})"
 
-        table.add_row(
-            bkp.backup_id,
-            created,
-            f"{size_kb:.2f} KB",
-            bkp.description or "-",
-            includes
-        )
+        table.add_row(bkp.backup_id, created, f"{size_kb:.2f} KB", bkp.description or "-", includes)
 
     Console().print(table)
 
 
-@backup.command('restore')
-@click.argument('backup_id')
-@click.option('--no-wireguard', is_flag=True, help='Do not restore WireGuard config')
-@click.option('--no-ssh', is_flag=True, help='Do not restore SSH keys')
-@click.option('--no-config', is_flag=True, help='Do not restore VPNHD config')
-@click.option('--no-clients', is_flag=True, help='Do not restore client database')
-@click.option('--skip-verification', is_flag=True, help='Skip checksum verification')
-@click.option('--yes', '-y', is_flag=True, help='Skip confirmation')
+@backup.command("restore")
+@click.argument("backup_id")
+@click.option("--no-wireguard", is_flag=True, help="Do not restore WireGuard config")
+@click.option("--no-ssh", is_flag=True, help="Do not restore SSH keys")
+@click.option("--no-config", is_flag=True, help="Do not restore VPNHD config")
+@click.option("--no-clients", is_flag=True, help="Do not restore client database")
+@click.option("--skip-verification", is_flag=True, help="Skip checksum verification")
+@click.option("--yes", "-y", is_flag=True, help="Skip confirmation")
 @click.pass_context
-def restore_backup(ctx, backup_id, no_wireguard, no_ssh, no_config, no_clients, skip_verification, yes):
+def restore_backup(
+    ctx, backup_id, no_wireguard, no_ssh, no_config, no_clients, skip_verification, yes
+):
     """Restore from a backup."""
-    backup_manager = ctx.obj['backup_manager']
-    display = ctx.obj['display']
-    prompts = ctx.obj['prompts']
+    backup_manager = ctx.obj["backup_manager"]
+    display = ctx.obj["display"]
+    prompts = ctx.obj["prompts"]
 
     # Confirm restore
     if not yes:
@@ -912,7 +890,7 @@ def restore_backup(ctx, backup_id, no_wireguard, no_ssh, no_config, no_clients, 
         restore_ssh=not no_ssh,
         restore_config=not no_config,
         restore_clients=not no_clients,
-        verify_checksum=not skip_verification
+        verify_checksum=not skip_verification,
     )
 
     if success:
@@ -922,13 +900,13 @@ def restore_backup(ctx, backup_id, no_wireguard, no_ssh, no_config, no_clients, 
         sys.exit(1)
 
 
-@backup.command('verify')
-@click.argument('backup_id')
+@backup.command("verify")
+@click.argument("backup_id")
 @click.pass_context
 def verify_backup(ctx, backup_id):
     """Verify backup integrity."""
-    backup_manager = ctx.obj['backup_manager']
-    display = ctx.obj['display']
+    backup_manager = ctx.obj["backup_manager"]
+    display = ctx.obj["display"]
 
     display.info(f"Verifying backup: {backup_id}...")
 
@@ -939,15 +917,15 @@ def verify_backup(ctx, backup_id):
         sys.exit(1)
 
 
-@backup.command('delete')
-@click.argument('backup_id')
-@click.option('--yes', '-y', is_flag=True, help='Skip confirmation')
+@backup.command("delete")
+@click.argument("backup_id")
+@click.option("--yes", "-y", is_flag=True, help="Skip confirmation")
 @click.pass_context
 def delete_backup(ctx, backup_id, yes):
     """Delete a backup."""
-    backup_manager = ctx.obj['backup_manager']
-    display = ctx.obj['display']
-    prompts = ctx.obj['prompts']
+    backup_manager = ctx.obj["backup_manager"]
+    display = ctx.obj["display"]
+    prompts = ctx.obj["prompts"]
 
     if not yes:
         display.warning(f"This will permanently delete backup: {backup_id}")
@@ -962,14 +940,14 @@ def delete_backup(ctx, backup_id, yes):
         sys.exit(1)
 
 
-@backup.command('export')
-@click.argument('backup_id')
-@click.argument('destination')
+@backup.command("export")
+@click.argument("backup_id")
+@click.argument("destination")
 @click.pass_context
 def export_backup(ctx, backup_id, destination):
     """Export backup to external location."""
-    backup_manager = ctx.obj['backup_manager']
-    display = ctx.obj['display']
+    backup_manager = ctx.obj["backup_manager"]
+    display = ctx.obj["display"]
 
     if backup_manager.export_backup(backup_id, destination):
         display.success(f"✓ Backup exported to: {destination}")
@@ -978,13 +956,13 @@ def export_backup(ctx, backup_id, destination):
         sys.exit(1)
 
 
-@backup.command('import')
-@click.argument('source_path')
+@backup.command("import")
+@click.argument("source_path")
 @click.pass_context
 def import_backup(ctx, source_path):
     """Import backup from external location."""
-    backup_manager = ctx.obj['backup_manager']
-    display = ctx.obj['display']
+    backup_manager = ctx.obj["backup_manager"]
+    display = ctx.obj["display"]
 
     backup_id = backup_manager.import_backup(source_path)
 
@@ -995,15 +973,15 @@ def import_backup(ctx, source_path):
         sys.exit(1)
 
 
-@backup.command('cleanup')
-@click.option('--keep', default=10, help='Number of recent backups to keep')
-@click.option('--yes', '-y', is_flag=True, help='Skip confirmation')
+@backup.command("cleanup")
+@click.option("--keep", default=10, help="Number of recent backups to keep")
+@click.option("--yes", "-y", is_flag=True, help="Skip confirmation")
 @click.pass_context
 def cleanup_backups(ctx, keep, yes):
     """Delete old backups, keeping only recent ones."""
-    backup_manager = ctx.obj['backup_manager']
-    display = ctx.obj['display']
-    prompts = ctx.obj['prompts']
+    backup_manager = ctx.obj["backup_manager"]
+    display = ctx.obj["display"]
+    prompts = ctx.obj["prompts"]
 
     backups = backup_manager.list_backups()
     to_delete = len(backups) - keep
@@ -1022,5 +1000,5 @@ def cleanup_backups(ctx, keep, yes):
     display.success(f"✓ Deleted {deleted} old backups")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

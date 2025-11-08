@@ -49,17 +49,18 @@ class NotificationEvent:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
-            'event_type': self.event_type,
-            'message': self.message,
-            'details': self.details,
-            'severity': self.severity,
-            'timestamp': self.timestamp.isoformat(),
-            'source': self.source
+            "event_type": self.event_type,
+            "message": self.message,
+            "details": self.details,
+            "severity": self.severity,
+            "timestamp": self.timestamp.isoformat(),
+            "source": self.source,
         }
 
     def to_json(self) -> str:
         """Convert to JSON string."""
         import json
+
         return json.dumps(self.to_dict(), default=str)
 
     @property

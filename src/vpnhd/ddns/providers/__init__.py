@@ -5,4 +5,4 @@ from .cloudflare import CloudflareDDNS
 from .duckdns import DuckDNS
 from .noip import NoIPDDNS
 
-__all__ = ['DDNSProvider', 'CloudflareDDNS', 'DuckDNS', 'NoIPDDNS']
+__all__ = ["DDNSProvider", "CloudflareDDNS", "DuckDNS", "NoIPDDNS"]

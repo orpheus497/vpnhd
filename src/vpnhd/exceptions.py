@@ -7,16 +7,19 @@ error handling and debugging throughout the application.
 
 class VPNHDError(Exception):
     """Base exception for all VPNHD errors."""
+
     pass
 
 
 class ConfigurationError(VPNHDError):
     """Raised when configuration is invalid or cannot be loaded."""
+
     pass
 
 
 class PhaseError(VPNHDError):
     """Base exception for phase-related errors."""
+
     pass
 
 
@@ -27,8 +30,7 @@ class PrerequisiteError(PhaseError):
         self.phase_number = phase_number
         self.missing_items = missing_items
         message = (
-            f"Phase {phase_number} prerequisites not met. "
-            f"Missing: {', '.join(missing_items)}"
+            f"Phase {phase_number} prerequisites not met. " f"Missing: {', '.join(missing_items)}"
         )
         super().__init__(message)
 
@@ -56,6 +58,7 @@ class ValidationError(VPNHDError):
 
 class NetworkError(VPNHDError):
     """Raised when network operations fail."""
+
     pass
 
 
@@ -67,14 +70,14 @@ class SystemCommandError(VPNHDError):
         self.exit_code = exit_code
         self.stderr = stderr
         message = (
-            f"Command failed with exit code {exit_code}: {command}\n"
-            f"Error output: {stderr}"
+            f"Command failed with exit code {exit_code}: {command}\n" f"Error output: {stderr}"
         )
         super().__init__(message)
 
 
 class SecurityError(VPNHDError):
     """Raised when security checks fail."""
+
     pass
 
 

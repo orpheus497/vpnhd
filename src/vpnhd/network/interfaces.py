@@ -9,7 +9,7 @@ from ..security.validators import (
     is_valid_interface_name,
     is_valid_ip,
     is_valid_cidr,
-    is_valid_netmask
+    is_valid_netmask,
 )
 from ..exceptions import ValidationError
 from .discovery import get_interface_by_name
@@ -44,11 +44,7 @@ class InterfaceManager:
 
         self.logger.info(f"Bringing interface {interface} up")
 
-        result = execute_command(
-            ["ip", "link", "set", interface, "up"],
-            sudo=True,
-            check=False
-        )
+        result = execute_command(["ip", "link", "set", interface, "up"], sudo=True, check=False)
 
         return result.success
 
@@ -71,11 +67,7 @@ class InterfaceManager:
 
         self.logger.info(f"Bringing interface {interface} down")
 
-        result = execute_command(
-            ["ip", "link", "set", interface, "down"],
-            sudo=True,
-            check=False
-        )
+        result = execute_command(["ip", "link", "set", interface, "down"], sudo=True, check=False)
 
         return result.success
 
@@ -107,9 +99,7 @@ class InterfaceManager:
         self.logger.info(f"Setting IP {ip}/{netmask} on {interface}")
 
         result = execute_command(
-            ["ip", "addr", "add", f"{ip}/{netmask}", "dev", interface],
-            sudo=True,
-            check=False
+            ["ip", "addr", "add", f"{ip}/{netmask}", "dev", interface], sudo=True, check=False
         )
 
         return result.success
@@ -124,11 +114,7 @@ class InterfaceManager:
         self.logger.info("Enabling IP forwarding")
 
         # Enable temporarily
-        result1 = execute_command(
-            ["sysctl", "-w", "net.ipv4.ip_forward=1"],
-            sudo=True,
-            check=False
-        )
+        result1 = execute_command(["sysctl", "-w", "net.ipv4.ip_forward=1"], sudo=True, check=False)
 
         # Make permanent using Python file I/O instead of shell pipes
         sysctl_conf = Path("/etc/sysctl.conf")
@@ -142,10 +128,14 @@ class InterfaceManager:
                 if "net.ipv4.ip_forward=1" not in content:
                     # Add to sysctl.conf using file manager
                     from ..system.files import FileManager
+
                     fm = FileManager()
 
                     # Append to existing content
-                    new_content = content.rstrip() + "\n# Enable IP forwarding for VPN\nnet.ipv4.ip_forward=1\n"
+                    new_content = (
+                        content.rstrip()
+                        + "\n# Enable IP forwarding for VPN\nnet.ipv4.ip_forward=1\n"
+                    )
                     fm.safe_write_file(sysctl_conf, new_content, sudo=True)
 
                     self.logger.info("Added IP forwarding to sysctl.conf")
@@ -164,11 +154,7 @@ class InterfaceManager:
         """
         self.logger.info("Disabling IP forwarding")
 
-        result = execute_command(
-            ["sysctl", "-w", "net.ipv4.ip_forward=0"],
-            sudo=True,
-            check=False
-        )
+        result = execute_command(["sysctl", "-w", "net.ipv4.ip_forward=0"], sudo=True, check=False)
 
         return result.success
 
@@ -180,9 +166,7 @@ class InterfaceManager:
             bool: True if enabled
         """
         result = execute_command(
-            ["sysctl", "net.ipv4.ip_forward"],
-            check=False,
-            capture_output=True
+            ["sysctl", "net.ipv4.ip_forward"], check=False, capture_output=True
         )
 
         if result.success and "= 1" in result.stdout:
@@ -220,8 +204,9 @@ class InterfaceManager:
         if interface:
             cmd.extend(["dev", interface])
 
-        self.logger.info(f"Adding route: {network} via {gateway}" +
-                        (f" dev {interface}" if interface else ""))
+        self.logger.info(
+            f"Adding route: {network} via {gateway}" + (f" dev {interface}" if interface else "")
+        )
 
         result = execute_command(cmd, sudo=True, check=False)
         return result.success
@@ -245,11 +230,7 @@ class InterfaceManager:
 
         self.logger.info(f"Deleting route to {network}")
 
-        result = execute_command(
-            ["ip", "route", "del", network],
-            sudo=True,
-            check=False
-        )
+        result = execute_command(["ip", "route", "del", network], sudo=True, check=False)
 
         return result.success
 
@@ -272,11 +253,7 @@ class InterfaceManager:
 
         self.logger.info(f"Flushing interface {interface}")
 
-        result = execute_command(
-            ["ip", "addr", "flush", "dev", interface],
-            sudo=True,
-            check=False
-        )
+        result = execute_command(["ip", "addr", "flush", "dev", interface], sudo=True, check=False)
 
         return result.success
 
@@ -298,9 +275,7 @@ class InterfaceManager:
             raise ValidationError("interface", interface, "Invalid interface name format")
 
         result = execute_command(
-            ["ip", "-s", "link", "show", interface],
-            check=False,
-            capture_output=True
+            ["ip", "-s", "link", "show", interface], check=False, capture_output=True
         )
 
         if result.success:

@@ -27,15 +27,15 @@ class DuckDNS(DDNSProvider):
         self.domain = self.config.get("server.ddns_domain")
 
         # Duck DNS uses subdomains (e.g., "myhost" for "myhost.duckdns.org")
-        if self.domain and self.domain.endswith('.duckdns.org'):
-            self.subdomain = self.domain.replace('.duckdns.org', '')
+        if self.domain and self.domain.endswith(".duckdns.org"):
+            self.subdomain = self.domain.replace(".duckdns.org", "")
         else:
             self.subdomain = self.domain
 
         if not all([self.api_token, self.subdomain]):
             self.logger.warning("Duck DNS configuration incomplete")
 
-    async def update_record(self, ip_address: str, record_type: str = 'A') -> bool:
+    async def update_record(self, ip_address: str, record_type: str = "A") -> bool:
         """Update Duck DNS record.
 
         Duck DNS automatically detects IPv4/IPv6 based on the request source,
@@ -54,17 +54,13 @@ class DuckDNS(DDNSProvider):
 
         try:
             async with httpx.AsyncClient(timeout=30) as client:
-                params = {
-                    'domains': self.subdomain,
-                    'token': self.api_token,
-                    'verbose': 'true'
-                }
+                params = {"domains": self.subdomain, "token": self.api_token, "verbose": "true"}
 
                 # Add IP parameter based on record type
-                if record_type == 'AAAA':
-                    params['ipv6'] = ip_address
+                if record_type == "AAAA":
+                    params["ipv6"] = ip_address
                 else:
-                    params['ip'] = ip_address
+                    params["ip"] = ip_address
 
                 response = await client.get(self.API_BASE, params=params)
                 response.raise_for_status()
@@ -72,7 +68,7 @@ class DuckDNS(DDNSProvider):
                 # Duck DNS returns "OK" or "KO" followed by details
                 result = response.text.strip()
 
-                if result.startswith('OK'):
+                if result.startswith("OK"):
                     self.logger.info(
                         f"Duck DNS {record_type} record updated: "
                         f"{self.subdomain}.duckdns.org -> {ip_address}"
@@ -99,7 +95,7 @@ class DuckDNS(DDNSProvider):
             import dns.resolver
 
             domain = f"{self.subdomain}.duckdns.org"
-            record_type = 'AAAA' if ':' in expected_ip else 'A'
+            record_type = "AAAA" if ":" in expected_ip else "A"
 
             answers = dns.resolver.resolve(domain, record_type)
 
@@ -122,7 +118,7 @@ class DuckDNS(DDNSProvider):
         """
         return True
 
-    async def clear_ip(self, record_type: str = 'A') -> bool:
+    async def clear_ip(self, record_type: str = "A") -> bool:
         """Clear Duck DNS IP address (set to empty).
 
         Args:
@@ -138,10 +134,10 @@ class DuckDNS(DDNSProvider):
         try:
             async with httpx.AsyncClient(timeout=30) as client:
                 params = {
-                    'domains': self.subdomain,
-                    'token': self.api_token,
-                    'clear': 'true',
-                    'verbose': 'true'
+                    "domains": self.subdomain,
+                    "token": self.api_token,
+                    "clear": "true",
+                    "verbose": "true",
                 }
 
                 response = await client.get(self.API_BASE, params=params)
@@ -149,7 +145,7 @@ class DuckDNS(DDNSProvider):
 
                 result = response.text.strip()
 
-                if result.startswith('OK'):
+                if result.startswith("OK"):
                     self.logger.info(f"Duck DNS {record_type} record cleared")
                     return True
                 else:

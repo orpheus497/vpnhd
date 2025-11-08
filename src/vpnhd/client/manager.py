@@ -43,7 +43,7 @@ class ClientInfo:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'ClientInfo':
+    def from_dict(cls, data: Dict[str, Any]) -> "ClientInfo":
         """Create from dictionary."""
         return cls(**data)
 
@@ -67,12 +67,9 @@ class ClientManager:
         """Load clients database from disk."""
         try:
             if self.clients_db_path.exists():
-                with open(self.clients_db_path, 'r') as f:
+                with open(self.clients_db_path, "r") as f:
                     data = json.load(f)
-                    self.clients = {
-                        name: ClientInfo.from_dict(info)
-                        for name, info in data.items()
-                    }
+                    self.clients = {name: ClientInfo.from_dict(info) for name, info in data.items()}
             else:
                 self.clients = {}
                 self._save_clients_db()
@@ -84,7 +81,7 @@ class ClientManager:
         """Save clients database to disk."""
         try:
             data = {name: client.to_dict() for name, client in self.clients.items()}
-            with open(self.clients_db_path, 'w') as f:
+            with open(self.clients_db_path, "w") as f:
                 json.dump(data, f, indent=2)
         except Exception as e:
             logger.exception(f"Error saving clients database: {e}")
@@ -93,7 +90,7 @@ class ClientManager:
         self,
         enabled_only: bool = False,
         device_type: Optional[str] = None,
-        os_filter: Optional[str] = None
+        os_filter: Optional[str] = None,
     ) -> List[ClientInfo]:
         """List all clients with optional filtering.
 
@@ -154,7 +151,7 @@ class ClientManager:
         os: str = "linux",
         vpn_ip: Optional[str] = None,
         generate_qr: bool = False,
-        qr_output_dir: Optional[str] = None
+        qr_output_dir: Optional[str] = None,
     ) -> Optional[ClientInfo]:
         """Add a new VPN client.
 
@@ -197,14 +194,12 @@ class ClientManager:
                 allowed_ips=allowed_ips,
                 description=description,
                 device_type=device_type,
-                os=os
+                os=os,
             )
 
             # Add to server configuration
             if not self.server_config.add_peer_to_server(
-                client_name=name,
-                public_key=public_key,
-                vpn_ip=vpn_ip
+                client_name=name, public_key=public_key, vpn_ip=vpn_ip
             ):
                 logger.error(f"Failed to add client '{name}' to server")
                 return None
@@ -220,9 +215,7 @@ class ClientManager:
                 config_text = self._generate_client_config(name, private_key, vpn_ip)
                 qr_dir = qr_output_dir or QR_CODE_DIR
                 qr_path = create_qr_with_metadata(
-                    config_text=config_text,
-                    client_name=name,
-                    output_dir=qr_dir
+                    config_text=config_text, client_name=name, output_dir=qr_dir
                 )
                 if qr_path:
                     logger.info(f"QR code generated: {qr_path}")
@@ -316,7 +309,7 @@ class ClientManager:
         name: str,
         description: Optional[str] = None,
         device_type: Optional[str] = None,
-        os: Optional[str] = None
+        os: Optional[str] = None,
     ) -> bool:
         """Update client metadata.
 
@@ -361,24 +354,18 @@ class ClientManager:
         try:
             # Use wg show to get peer status
             result = subprocess.run(
-                ["wg", "show", "wg0", "dump"],
-                capture_output=True,
-                text=True,
-                timeout=5
+                ["wg", "show", "wg0", "dump"], capture_output=True, text=True, timeout=5
             )
 
             if result.returncode != 0:
-                return {
-                    "connected": False,
-                    "error": "Failed to query WireGuard status"
-                }
+                return {"connected": False, "error": "Failed to query WireGuard status"}
 
             # Parse output
-            for line in result.stdout.strip().split('\n'):
-                if not line or line.startswith('wg0'):
+            for line in result.stdout.strip().split("\n"):
+                if not line or line.startswith("wg0"):
                     continue
 
-                parts = line.split('\t')
+                parts = line.split("\t")
                 if len(parts) >= 5 and parts[0] == client.public_key:
                     return {
                         "connected": True,
@@ -389,7 +376,7 @@ class ClientManager:
                         "latest_handshake": parts[4],
                         "transfer_rx": parts[5] if len(parts) > 5 else "0",
                         "transfer_tx": parts[6] if len(parts) > 6 else "0",
-                        "persistent_keepalive": parts[7] if len(parts) > 7 else "off"
+                        "persistent_keepalive": parts[7] if len(parts) > 7 else "off",
                     }
 
             return {"connected": False}
@@ -411,12 +398,7 @@ class ClientManager:
                 connected.append(name)
         return connected
 
-    def _generate_client_config(
-        self,
-        client_name: str,
-        private_key: str,
-        vpn_ip: str
-    ) -> str:
+    def _generate_client_config(self, client_name: str, private_key: str, vpn_ip: str) -> str:
         """Generate WireGuard configuration for client.
 
         Args:
@@ -440,21 +422,19 @@ class ClientManager:
             client_vpn_ip=vpn_ip,
             vpn_subnet_mask="24",
             client_private_key=private_key,
-            server_public_key=self.config_manager.get("phases.phase2_wireguard_server.server_public_key"),
+            server_public_key=self.config_manager.get(
+                "phases.phase2_wireguard_server.server_public_key"
+            ),
             server_public_ip=self.config_manager.get("server.public_ip"),
             wireguard_port=self.config_manager.get("network.wireguard_port", 51820),
             route_all_traffic=True,
             dns_servers=["1.1.1.1", "8.8.8.8"],
-            vpn_network=self.config_manager.get("network.vpn.network", "10.66.66.0/24")
+            vpn_network=self.config_manager.get("network.vpn.network", "10.66.66.0/24"),
         )
 
         return config
 
-    def export_client_config(
-        self,
-        name: str,
-        output_path: Optional[str] = None
-    ) -> Optional[str]:
+    def export_client_config(self, name: str, output_path: Optional[str] = None) -> Optional[str]:
         """Export client configuration to file.
 
         Args:
@@ -534,5 +514,5 @@ class ClientManager:
             "disabled": disabled,
             "connected": connected,
             "by_device_type": by_device,
-            "by_os": by_os
+            "by_os": by_os,
         }

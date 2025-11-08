@@ -74,7 +74,7 @@ class FileManager:
         content: str,
         mode: int = PERM_CONFIG_FILE,
         backup: bool = True,
-        sudo: bool = False
+        sudo: bool = False,
     ) -> bool:
         """
         Safely write content to a file with backup.
@@ -100,27 +100,20 @@ class FileManager:
             if sudo:
                 # Write to temp file first, then move with sudo
                 import tempfile
-                with tempfile.NamedTemporaryFile(mode='w', delete=False) as tmp:
+
+                with tempfile.NamedTemporaryFile(mode="w", delete=False) as tmp:
                     tmp.write(content)
                     tmp_path = tmp.name
 
                 # Move to final location with sudo
-                result = execute_command(
-                    ["mv", tmp_path, str(file_path)],
-                    sudo=True,
-                    check=False
-                )
+                result = execute_command(["mv", tmp_path, str(file_path)], sudo=True, check=False)
 
                 if not result.success:
                     Path(tmp_path).unlink(missing_ok=True)
                     return False
 
                 # Set permissions
-                execute_command(
-                    ["chmod", oct(mode)[2:], str(file_path)],
-                    sudo=True,
-                    check=False
-                )
+                execute_command(["chmod", oct(mode)[2:], str(file_path)], sudo=True, check=False)
 
             else:
                 # Write directly
@@ -152,10 +145,7 @@ class FileManager:
 
             if sudo:
                 result = execute_command(
-                    ["cat", str(file_path)],
-                    sudo=True,
-                    check=False,
-                    capture_output=True
+                    ["cat", str(file_path)], sudo=True, check=False, capture_output=True
                 )
 
                 if result.success:
@@ -170,12 +160,7 @@ class FileManager:
             self.logger.error(f"Failed to read file: {e}")
             return None
 
-    def append_to_file(
-        self,
-        file_path: Path,
-        content: str,
-        sudo: bool = False
-    ) -> bool:
+    def append_to_file(self, file_path: Path, content: str, sudo: bool = False) -> bool:
         """
         Append content to a file.
 
@@ -194,12 +179,12 @@ class FileManager:
                     ["tee", "-a", str(file_path)],
                     input_data=content,
                     sudo=True,
-                    capture_output=True
+                    capture_output=True,
                 )
                 return result.success
 
             else:
-                with open(file_path, 'a') as f:
+                with open(file_path, "a") as f:
                     f.write(content)
                 return True
 
@@ -224,11 +209,7 @@ class FileManager:
                 return True
 
             if sudo:
-                result = execute_command(
-                    ["rm", "-f", str(file_path)],
-                    sudo=True,
-                    check=False
-                )
+                result = execute_command(["rm", "-f", str(file_path)], sudo=True, check=False)
                 return result.success
 
             else:
@@ -241,11 +222,7 @@ class FileManager:
             return False
 
     def copy_file(
-        self,
-        source: Path,
-        destination: Path,
-        sudo: bool = False,
-        preserve_permissions: bool = True
+        self, source: Path, destination: Path, sudo: bool = False, preserve_permissions: bool = True
     ) -> bool:
         """
         Copy a file.
@@ -309,9 +286,7 @@ class FileManager:
 
             if sudo:
                 result = execute_command(
-                    ["mv", str(source), str(destination)],
-                    sudo=True,
-                    check=False
+                    ["mv", str(source), str(destination)], sudo=True, check=False
                 )
                 return result.success
 
@@ -343,9 +318,7 @@ class FileManager:
 
             if sudo:
                 result = execute_command(
-                    ["chmod", oct(mode)[2:], str(file_path)],
-                    sudo=True,
-                    check=False
+                    ["chmod", oct(mode)[2:], str(file_path)], sudo=True, check=False
                 )
                 return result.success
 
@@ -358,7 +331,9 @@ class FileManager:
             self.logger.error(f"Failed to set permissions: {e}")
             return False
 
-    def set_owner(self, file_path: Path, owner: str, group: Optional[str] = None, sudo: bool = True) -> bool:
+    def set_owner(
+        self, file_path: Path, owner: str, group: Optional[str] = None, sudo: bool = True
+    ) -> bool:
         """
         Set file owner and group.
 
@@ -380,11 +355,7 @@ class FileManager:
             if group:
                 owner_spec = f"{owner}:{group}"
 
-            result = execute_command(
-                ["chown", owner_spec, str(file_path)],
-                sudo=sudo,
-                check=False
-            )
+            result = execute_command(["chown", owner_spec, str(file_path)], sudo=sudo, check=False)
 
             if result.success:
                 self.logger.info(f"Set owner {owner_spec} on {file_path}")
@@ -433,10 +404,7 @@ class FileManager:
         return None
 
     def verify_file_hash(
-        self,
-        file_path: Path,
-        expected_hash: str,
-        algorithm: str = 'sha256'
+        self, file_path: Path, expected_hash: str, algorithm: str = "sha256"
     ) -> bool:
         """
         Verify file hash matches expected value.

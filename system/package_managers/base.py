@@ -39,11 +39,7 @@ class PackageManager(ABC):
         pass
 
     @abstractmethod
-    async def install_package(
-        self,
-        package: str,
-        version: Optional[str] = None
-    ) -> bool:
+    async def install_package(self, package: str, version: Optional[str] = None) -> bool:
         """Install a package.
 
         Args:
@@ -125,9 +121,7 @@ class PackageManager(ABC):
         pass
 
     async def ensure_packages_installed(
-        self,
-        packages: List[str],
-        update_cache: bool = True
+        self, packages: List[str], update_cache: bool = True
     ) -> Dict[str, bool]:
         """Ensure packages are installed, installing if necessary.
 
@@ -172,6 +166,6 @@ class PackageManager(ABC):
         available = await self.is_available()
 
         return {
-            'name': self.name,
-            'available': available,
+            "name": self.name,
+            "available": available,
         }

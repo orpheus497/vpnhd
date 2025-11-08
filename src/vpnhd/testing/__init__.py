@@ -5,13 +5,13 @@ from .performance import (
     BandwidthResult,
     LatencyResult,
     ConnectionStabilityResult,
-    PerformanceReport
+    PerformanceReport,
 )
 
 __all__ = [
-    'PerformanceTester',
-    'BandwidthResult',
-    'LatencyResult',
-    'ConnectionStabilityResult',
-    'PerformanceReport'
+    "PerformanceTester",
+    "BandwidthResult",
+    "LatencyResult",
+    "ConnectionStabilityResult",
+    "PerformanceReport",
 ]

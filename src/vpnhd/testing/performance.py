@@ -22,6 +22,7 @@ logger = get_logger(__name__)
 @dataclass
 class BandwidthResult:
     """Bandwidth test result."""
+
     download_mbps: float
     upload_mbps: float
     test_duration: float
@@ -35,6 +36,7 @@ class BandwidthResult:
 @dataclass
 class LatencyResult:
     """Latency test result."""
+
     min_ms: float
     max_ms: float
     avg_ms: float
@@ -52,6 +54,7 @@ class LatencyResult:
 @dataclass
 class ConnectionStabilityResult:
     """Connection stability test result."""
+
     test_duration_seconds: int
     successful_pings: int
     failed_pings: int
@@ -69,6 +72,7 @@ class ConnectionStabilityResult:
 @dataclass
 class PerformanceReport:
     """Complete performance test report."""
+
     bandwidth: Optional[BandwidthResult]
     latency: Optional[LatencyResult]
     stability: Optional[ConnectionStabilityResult]
@@ -84,7 +88,7 @@ class PerformanceReport:
             "stability": asdict(self.stability) if self.stability else None,
             "test_date": self.test_date,
             "vpn_interface": self.vpn_interface,
-            "test_server": self.test_server
+            "test_server": self.test_server,
         }
 
 
@@ -103,11 +107,7 @@ class PerformanceTester:
         self.results_dir = Path.home() / ".config" / "vpnhd" / "performance"
         self.results_dir.mkdir(parents=True, exist_ok=True)
 
-    def test_latency(
-        self,
-        count: int = 10,
-        timeout: int = 5
-    ) -> Optional[LatencyResult]:
+    def test_latency(self, count: int = 10, timeout: int = 5) -> Optional[LatencyResult]:
         """Test latency using ping.
 
         Args:
@@ -124,7 +124,7 @@ class PerformanceTester:
             result = execute_command(
                 ["ping", "-c", str(count), "-W", str(timeout), self.test_server],
                 capture_output=True,
-                timeout=count * timeout + 10
+                timeout=count * timeout + 10,
             )
 
             if not result.success:
@@ -136,8 +136,8 @@ class PerformanceTester:
 
             # Extract statistics
             stats_line = None
-            for line in output.split('\n'):
-                if 'min/avg/max' in line.lower() or 'rtt' in line.lower():
+            for line in output.split("\n"):
+                if "min/avg/max" in line.lower() or "rtt" in line.lower():
                     stats_line = line
                     break
 
@@ -147,8 +147,8 @@ class PerformanceTester:
 
             # Parse timing: min/avg/max/stddev
             # Example: "rtt min/avg/max/mdev = 10.123/15.456/20.789/2.345 ms"
-            times_part = stats_line.split('=')[1].strip() if '=' in stats_line else stats_line
-            times = times_part.split()[0].split('/')
+            times_part = stats_line.split("=")[1].strip() if "=" in stats_line else stats_line
+            times = times_part.split()[0].split("/")
 
             if len(times) < 4:
                 logger.error(f"Invalid ping statistics format: {stats_line}")
@@ -164,17 +164,17 @@ class PerformanceTester:
             packets_sent = count
             packets_received = count
 
-            for line in output.split('\n'):
-                if 'packet loss' in line.lower():
+            for line in output.split("\n"):
+                if "packet loss" in line.lower():
                     # Example: "10 packets transmitted, 9 received, 10% packet loss"
-                    parts = line.split(',')
+                    parts = line.split(",")
                     for part in parts:
-                        if 'transmitted' in part:
+                        if "transmitted" in part:
                             packets_sent = int(part.split()[0])
-                        elif 'received' in part:
+                        elif "received" in part:
                             packets_received = int(part.split()[0])
-                        elif 'packet loss' in part or 'loss' in part:
-                            loss_str = part.split('%')[0].strip().split()[-1]
+                        elif "packet loss" in part or "loss" in part:
+                            loss_str = part.split("%")[0].strip().split()[-1]
                             packet_loss = float(loss_str)
                     break
 
@@ -185,7 +185,7 @@ class PerformanceTester:
                 stddev_ms=stddev_ms,
                 packet_loss_percent=packet_loss,
                 packets_sent=packets_sent,
-                packets_received=packets_received
+                packets_received=packets_received,
             )
 
             logger.info(f"Latency test complete: avg={avg_ms:.2f}ms, loss={packet_loss:.1f}%")
@@ -196,10 +196,7 @@ class PerformanceTester:
             return None
 
     def test_bandwidth_iperf(
-        self,
-        server: str,
-        duration: int = 10,
-        reverse: bool = False
+        self, server: str, duration: int = 10, reverse: bool = False
     ) -> Optional[BandwidthResult]:
         """Test bandwidth using iperf3.
 
@@ -235,9 +232,9 @@ class PerformanceTester:
             data = json.loads(result.stdout)
 
             # Extract bandwidth
-            if 'end' in data and 'sum_received' in data['end']:
-                download_bps = data['end']['sum_received']['bits_per_second']
-                upload_bps = data['end']['sum_sent']['bits_per_second']
+            if "end" in data and "sum_received" in data["end"]:
+                download_bps = data["end"]["sum_received"]["bits_per_second"]
+                upload_bps = data["end"]["sum_sent"]["bits_per_second"]
                 download_mbps = download_bps / 1_000_000
                 upload_mbps = upload_bps / 1_000_000
             else:
@@ -245,9 +242,7 @@ class PerformanceTester:
                 return None
 
             return BandwidthResult(
-                download_mbps=download_mbps,
-                upload_mbps=upload_mbps,
-                test_duration=duration
+                download_mbps=download_mbps, upload_mbps=upload_mbps, test_duration=duration
             )
 
         except Exception as e:
@@ -255,9 +250,7 @@ class PerformanceTester:
             return None
 
     def test_connection_stability(
-        self,
-        duration_seconds: int = 300,
-        interval_seconds: int = 1
+        self, duration_seconds: int = 300, interval_seconds: int = 1
     ) -> Optional[ConnectionStabilityResult]:
         """Test connection stability over time.
 
@@ -283,18 +276,16 @@ class PerformanceTester:
             for i in range(total_pings):
                 # Single ping
                 result = execute_command(
-                    ["ping", "-c", "1", "-W", "2", self.test_server],
-                    capture_output=True,
-                    timeout=5
+                    ["ping", "-c", "1", "-W", "2", self.test_server], capture_output=True, timeout=5
                 )
 
                 if result.success:
                     successful_pings += 1
 
                     # Extract latency
-                    for line in result.stdout.split('\n'):
-                        if 'time=' in line:
-                            time_part = line.split('time=')[1].split()[0]
+                    for line in result.stdout.split("\n"):
+                        if "time=" in line:
+                            time_part = line.split("time=")[1].split()[0]
                             latency = float(time_part)
                             latencies.append(latency)
                             break
@@ -324,10 +315,12 @@ class PerformanceTester:
                 total_pings=total,
                 uptime_percent=uptime_percent,
                 disconnections=disconnections,
-                avg_latency_ms=avg_latency
+                avg_latency_ms=avg_latency,
             )
 
-            logger.info(f"Stability test complete: uptime={uptime_percent:.1f}%, disconnections={disconnections}")
+            logger.info(
+                f"Stability test complete: uptime={uptime_percent:.1f}%, disconnections={disconnections}"
+            )
             return result
 
         except Exception as e:
@@ -339,7 +332,7 @@ class PerformanceTester:
         include_bandwidth: bool = False,
         iperf_server: Optional[str] = None,
         latency_count: int = 20,
-        stability_duration: int = 60
+        stability_duration: int = 60,
     ) -> PerformanceReport:
         """Run complete performance test suite.
 
@@ -371,7 +364,7 @@ class PerformanceTester:
             stability=stability_result,
             test_date=datetime.now().isoformat(),
             vpn_interface=self.vpn_interface,
-            test_server=self.test_server
+            test_server=self.test_server,
         )
 
         # Save report
@@ -393,7 +386,7 @@ class PerformanceTester:
         filename = f"performance_report_{timestamp}.json"
         filepath = self.results_dir / filename
 
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(report.to_dict(), f, indent=2)
 
         logger.info(f"Performance report saved to {filepath}")
@@ -409,20 +402,22 @@ class PerformanceTester:
             PerformanceReport or None if loading fails
         """
         try:
-            with open(filepath, 'r') as f:
+            with open(filepath, "r") as f:
                 data = json.load(f)
 
-            bandwidth = BandwidthResult(**data['bandwidth']) if data['bandwidth'] else None
-            latency = LatencyResult(**data['latency']) if data['latency'] else None
-            stability = ConnectionStabilityResult(**data['stability']) if data['stability'] else None
+            bandwidth = BandwidthResult(**data["bandwidth"]) if data["bandwidth"] else None
+            latency = LatencyResult(**data["latency"]) if data["latency"] else None
+            stability = (
+                ConnectionStabilityResult(**data["stability"]) if data["stability"] else None
+            )
 
             return PerformanceReport(
                 bandwidth=bandwidth,
                 latency=latency,
                 stability=stability,
-                test_date=data['test_date'],
-                vpn_interface=data['vpn_interface'],
-                test_server=data['test_server']
+                test_date=data["test_date"],
+                vpn_interface=data["vpn_interface"],
+                test_server=data["test_server"],
             )
         except Exception as e:
             logger.exception(f"Error loading report: {e}")
@@ -471,7 +466,7 @@ class PerformanceTester:
             "min_latency_ms": min(latencies) if latencies else 0,
             "max_latency_ms": max(latencies) if latencies else 0,
             "avg_packet_loss": statistics.mean(packet_losses) if packet_losses else 0,
-            "avg_uptime_percent": statistics.mean(uptimes) if uptimes else 0
+            "avg_uptime_percent": statistics.mean(uptimes) if uptimes else 0,
         }
 
         return stats

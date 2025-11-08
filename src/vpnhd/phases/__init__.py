@@ -11,16 +11,16 @@ from .phase7_ssh_keys import Phase7SSHKeys
 from .phase8_security import Phase8Security
 
 __all__ = [
-    'Phase',
-    'PhaseStatus',
-    'Phase1Debian',
-    'Phase2WireGuardServer',
-    'Phase3Router',
-    'Phase4LinuxClient',
-    'Phase5LinuxClientOnDemand',
-    'Phase6Mobile',
-    'Phase7SSHKeys',
-    'Phase8Security'
+    "Phase",
+    "PhaseStatus",
+    "Phase1Debian",
+    "Phase2WireGuardServer",
+    "Phase3Router",
+    "Phase4LinuxClient",
+    "Phase5LinuxClientOnDemand",
+    "Phase6Mobile",
+    "Phase7SSHKeys",
+    "Phase8Security",
 ]
 
 
@@ -42,7 +42,7 @@ def get_phase_class(phase_number: int):
         5: Phase5LinuxClientOnDemand,
         6: Phase6Mobile,
         7: Phase7SSHKeys,
-        8: Phase8Security
+        8: Phase8Security,
     }
 
     return phases.get(phase_number)

@@ -14,7 +14,7 @@ from ..utils.constants import (
     FAIL2BAN_WIREGUARD_BAN_TIME,
     FAIL2BAN_WIREGUARD_MAX_RETRY,
     DEFAULT_WIREGUARD_PORT,
-    DEFAULT_SSH_PORT
+    DEFAULT_SSH_PORT,
 )
 from ..security.validators import is_valid_port
 
@@ -104,15 +104,28 @@ class Phase8Security(Phase):
         execute_command(
             ["ufw", "allow", f"{int(wg_port)}/udp", "comment", "WireGuard VPN"],
             sudo=True,
-            check=False
+            check=False,
         )
 
         # Allow SSH from VPN
         vpn_network = self.config.get("network.vpn.network", "10.66.66.0/24")
         execute_command(
-            ["ufw", "allow", "from", vpn_network, "to", "any", "port", str(ssh_port), "proto", "tcp", "comment", "SSH from VPN"],
+            [
+                "ufw",
+                "allow",
+                "from",
+                vpn_network,
+                "to",
+                "any",
+                "port",
+                str(ssh_port),
+                "proto",
+                "tcp",
+                "comment",
+                "SSH from VPN",
+            ],
             sudo=True,
-            check=False
+            check=False,
         )
 
         # Enable UFW
@@ -143,7 +156,7 @@ class Phase8Security(Phase):
             ban_time=FAIL2BAN_SSH_BAN_TIME,
             find_time=600,
             max_retry=FAIL2BAN_SSH_MAX_RETRY,
-            port=ssh_port
+            port=ssh_port,
         ):
             self.display.success("✓ SSH jail configured")
             self.config.set("security.fail2ban_ssh_jail_configured", True)
@@ -157,7 +170,7 @@ class Phase8Security(Phase):
             ban_time=FAIL2BAN_WIREGUARD_BAN_TIME,
             find_time=600,
             max_retry=FAIL2BAN_WIREGUARD_MAX_RETRY,
-            port=wg_port
+            port=wg_port,
         ):
             self.display.success("✓ WireGuard jail configured")
             self.config.set("security.fail2ban_wireguard_jail_configured", True)
@@ -171,18 +184,17 @@ class Phase8Security(Phase):
             self.config.set("phases.phase8_security.fail2ban_configured", True)
             self.display.success("fail2ban is running with custom jails")
             self.display.newline()
-            self.display.info(f"SSH protection: Ban after {FAIL2BAN_SSH_MAX_RETRY} failures for {FAIL2BAN_SSH_BAN_TIME}s")
-            self.display.info(f"WireGuard protection: Ban after {FAIL2BAN_WIREGUARD_MAX_RETRY} failures for {FAIL2BAN_WIREGUARD_BAN_TIME}s")
+            self.display.info(
+                f"SSH protection: Ban after {FAIL2BAN_SSH_MAX_RETRY} failures for {FAIL2BAN_SSH_BAN_TIME}s"
+            )
+            self.display.info(
+                f"WireGuard protection: Ban after {FAIL2BAN_WIREGUARD_MAX_RETRY} failures for {FAIL2BAN_WIREGUARD_BAN_TIME}s"
+            )
 
     def verify(self) -> bool:
         """Verify that security hardening was successful."""
         # Check UFW is enabled
-        result = execute_command(
-            ["ufw", "status"],
-            sudo=True,
-            check=False,
-            capture_output=True
-        )
+        result = execute_command(["ufw", "status"], sudo=True, check=False, capture_output=True)
         if not result.success or "Status: active" not in result.stdout:
             return False
 

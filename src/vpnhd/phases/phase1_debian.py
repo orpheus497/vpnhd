@@ -77,7 +77,7 @@ class Phase1Debian(Phase):
                 return False
 
             content = os_release_path.read_text().lower()
-            return 'debian' in content
+            return "debian" in content
 
         except Exception as e:
             logger.error(f"Error checking Debian installation: {e}")
@@ -117,12 +117,14 @@ class Phase1Debian(Phase):
 
         # Username
         import os
-        username = os.environ.get('USER', 'admin')
+
+        username = os.environ.get("USER", "admin")
         username = self.prompts.text("Enter admin username", default=username)
         self.config.set("server.username", username)
 
         # Network interface
         from ..network.discovery import get_primary_interface
+
         primary_iface = get_primary_interface()
 
         if primary_iface:
@@ -136,6 +138,7 @@ class Phase1Debian(Phase):
 
         # Detect subnet
         from ..network.discovery import detect_lan_subnet, get_default_gateway
+
         lan_subnet = detect_lan_subnet()
         if lan_subnet:
             self.config.set("network.lan.subnet", lan_subnet)

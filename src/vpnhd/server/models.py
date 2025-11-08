@@ -15,7 +15,7 @@ class ServerConnection(BaseModel):
     key_path: Optional[str] = Field(None, description="Path to SSH private key")
     password: Optional[str] = Field(None, description="SSH password (not recommended)")
 
-    @field_validator('host')
+    @field_validator("host")
     @classmethod
     def validate_host(cls, v: str) -> str:
         """Validate hostname or IP address."""
@@ -30,7 +30,7 @@ class ServerConnection(BaseModel):
             pass
 
         # Validate as hostname (basic check)
-        if not all(c.isalnum() or c in '.-' for c in v):
+        if not all(c.isalnum() or c in ".-" for c in v):
             raise ValueError(f"Invalid hostname: {v}")
 
         return v
@@ -86,28 +86,18 @@ class ServerProfile(BaseModel):
     ddns_domain: Optional[str] = Field(None, description="DDNS domain name")
 
     # Status and Metrics
-    status: ServerStatus = Field(
-        default_factory=ServerStatus,
-        description="Current server status"
-    )
-    metrics: ServerMetrics = Field(
-        default_factory=ServerMetrics,
-        description="Server metrics"
-    )
+    status: ServerStatus = Field(default_factory=ServerStatus, description="Current server status")
+    metrics: ServerMetrics = Field(default_factory=ServerMetrics, description="Server metrics")
 
     # Metadata
-    created_at: datetime = Field(
-        default_factory=datetime.now,
-        description="Profile creation time"
-    )
+    created_at: datetime = Field(default_factory=datetime.now, description="Profile creation time")
     updated_at: datetime = Field(
-        default_factory=datetime.now,
-        description="Profile last update time"
+        default_factory=datetime.now, description="Profile last update time"
     )
     enabled: bool = Field(default=True, description="Server enabled for management")
     is_primary: bool = Field(default=False, description="Primary server flag")
 
-    @field_validator('vpn_subnet', 'vpn_ipv6_subnet')
+    @field_validator("vpn_subnet", "vpn_ipv6_subnet")
     @classmethod
     def validate_subnet(cls, v: Optional[str]) -> Optional[str]:
         """Validate VPN subnet."""
@@ -121,7 +111,7 @@ class ServerProfile(BaseModel):
 
         return v
 
-    @field_validator('name')
+    @field_validator("name")
     @classmethod
     def validate_name(cls, v: str) -> str:
         """Validate server name."""
@@ -129,7 +119,7 @@ class ServerProfile(BaseModel):
             raise ValueError("Server name cannot be empty")
 
         # Only allow alphanumeric, hyphens, underscores
-        if not all(c.isalnum() or c in '-_' for c in v):
+        if not all(c.isalnum() or c in "-_" for c in v):
             raise ValueError(
                 "Server name can only contain letters, numbers, hyphens, and underscores"
             )
@@ -171,7 +161,7 @@ class ServerProfile(BaseModel):
         return self.model_dump()
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'ServerProfile':
+    def from_dict(cls, data: Dict[str, Any]) -> "ServerProfile":
         """Create from dictionary.
 
         Args:
@@ -189,26 +179,21 @@ class ServerGroup(BaseModel):
     name: str = Field(..., description="Group name")
     description: Optional[str] = Field(None, description="Group description")
     server_names: List[str] = Field(
-        default_factory=list,
-        description="List of server names in this group"
+        default_factory=list, description="List of server names in this group"
     )
     tags: List[str] = Field(default_factory=list, description="Group tags")
-    created_at: datetime = Field(
-        default_factory=datetime.now,
-        description="Group creation time"
-    )
+    created_at: datetime = Field(default_factory=datetime.now, description="Group creation time")
 
-    @field_validator('name')
+    @field_validator("name")
     @classmethod
     def validate_name(cls, v: str) -> str:
         """Validate group name."""
         if not v:
             raise ValueError("Group name cannot be empty")
 
-        if not all(c.isalnum() or c in '-_ ' for c in v):
+        if not all(c.isalnum() or c in "-_ " for c in v):
             raise ValueError(
-                "Group name can only contain letters, numbers, hyphens, "
-                "underscores, and spaces"
+                "Group name can only contain letters, numbers, hyphens, " "underscores, and spaces"
             )
 
         return v
@@ -222,13 +207,9 @@ class ServerOperation(BaseModel):
     status: str = Field(..., description="Operation status (success, failure, pending)")
     message: Optional[str] = Field(None, description="Operation message")
     details: Dict[str, Any] = Field(
-        default_factory=dict,
-        description="Additional operation details"
+        default_factory=dict, description="Additional operation details"
     )
-    started_at: datetime = Field(
-        default_factory=datetime.now,
-        description="Operation start time"
-    )
+    started_at: datetime = Field(default_factory=datetime.now, description="Operation start time")
     completed_at: Optional[datetime] = Field(None, description="Operation completion time")
     duration: Optional[float] = Field(None, description="Operation duration in seconds")
 
@@ -256,26 +237,22 @@ class SyncConfiguration(BaseModel):
     sync_settings: bool = Field(default=True, description="Sync server settings")
     sync_keys: bool = Field(default=False, description="Sync WireGuard keys")
     sync_interval: int = Field(
-        default=300,
-        description="Automatic sync interval in seconds (0 = manual only)"
+        default=300, description="Automatic sync interval in seconds (0 = manual only)"
     )
     conflict_resolution: str = Field(
-        default="newest",
-        description="Conflict resolution strategy (newest, oldest, manual)"
+        default="newest", description="Conflict resolution strategy (newest, oldest, manual)"
     )
     excluded_servers: List[str] = Field(
-        default_factory=list,
-        description="Servers excluded from sync"
+        default_factory=list, description="Servers excluded from sync"
     )
 
-    @field_validator('conflict_resolution')
+    @field_validator("conflict_resolution")
     @classmethod
     def validate_conflict_resolution(cls, v: str) -> str:
         """Validate conflict resolution strategy."""
-        valid_strategies = {'newest', 'oldest', 'manual'}
+        valid_strategies = {"newest", "oldest", "manual"}
         if v not in valid_strategies:
             raise ValueError(
-                f"Invalid conflict resolution strategy: {v}. "
-                f"Must be one of {valid_strategies}"
+                f"Invalid conflict resolution strategy: {v}. " f"Must be one of {valid_strategies}"
             )
         return v

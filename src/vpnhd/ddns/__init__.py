@@ -3,4 +3,4 @@
 from .manager import DDNSManager
 from .detector import IPChangeDetector
 
-__all__ = ['DDNSManager', 'IPChangeDetector']
+__all__ = ["DDNSManager", "IPChangeDetector"]

@@ -43,8 +43,7 @@ class IPv6Manager:
         """
         try:
             result = await execute_command_async(
-                ["sysctl", "-n", "net.ipv6.conf.all.disable_ipv6"],
-                check=False
+                ["sysctl", "-n", "net.ipv6.conf.all.disable_ipv6"], check=False
             )
             if result.success:
                 # 0 = enabled, 1 = disabled
@@ -62,9 +61,7 @@ class IPv6Manager:
         """
         try:
             result = await execute_command_async(
-                ["sysctl", "-w", "net.ipv6.conf.all.disable_ipv6=0"],
-                sudo=True,
-                check=False
+                ["sysctl", "-w", "net.ipv6.conf.all.disable_ipv6=0"], sudo=True, check=False
             )
 
             if result.success:
@@ -89,18 +86,18 @@ class IPv6Manager:
             Optional[str]: IPv6 address or None if not found
         """
         try:
-            result = await execute_command_async([
-                "ip", "-6", "addr", "show", "dev", interface, "scope", scope
-            ], check=False)
+            result = await execute_command_async(
+                ["ip", "-6", "addr", "show", "dev", interface, "scope", scope], check=False
+            )
 
             if result.success:
                 # Parse output to extract IPv6 address
-                for line in result.stdout.split('\n'):
-                    if 'inet6' in line and f'scope {scope}' in line:
+                for line in result.stdout.split("\n"):
+                    if "inet6" in line and f"scope {scope}" in line:
                         parts = line.strip().split()
                         if len(parts) >= 2:
                             # Remove prefix length
-                            return parts[1].split('/')[0]
+                            return parts[1].split("/")[0]
             return None
         except Exception as e:
             self.logger.error(f"Failed to get IPv6 address: {e}")
@@ -138,9 +135,7 @@ class IPv6Manager:
         try:
             # Set for all interfaces
             result = await execute_command_async(
-                ["sysctl", "-w", f"net.ipv6.conf.all.forwarding={value}"],
-                sudo=True,
-                check=False
+                ["sysctl", "-w", f"net.ipv6.conf.all.forwarding={value}"], sudo=True, check=False
             )
 
             if not result.success:
@@ -150,7 +145,7 @@ class IPv6Manager:
             await execute_command_async(
                 ["sysctl", "-w", f"net.ipv6.conf.default.forwarding={value}"],
                 sudo=True,
-                check=False
+                check=False,
             )
 
             # Make persistent
@@ -222,12 +217,7 @@ class IPv6Manager:
         except ValueError:
             return False
 
-    async def add_ipv6_address(
-        self,
-        interface: str,
-        address: str,
-        prefix_len: int = 64
-    ) -> bool:
+    async def add_ipv6_address(self, interface: str, address: str, prefix_len: int = 64) -> bool:
         """Add IPv6 address to interface.
 
         Args:
@@ -243,11 +233,11 @@ class IPv6Manager:
             return False
 
         try:
-            result = await execute_command_async([
-                "ip", "-6", "addr", "add",
-                f"{address}/{prefix_len}",
-                "dev", interface
-            ], sudo=True, check=False)
+            result = await execute_command_async(
+                ["ip", "-6", "addr", "add", f"{address}/{prefix_len}", "dev", interface],
+                sudo=True,
+                check=False,
+            )
 
             if result.success:
                 self.logger.info(f"Added IPv6 address {address}/{prefix_len} to {interface}")
@@ -258,12 +248,7 @@ class IPv6Manager:
             self.logger.error(f"Failed to add IPv6 address: {e}")
             return False
 
-    async def remove_ipv6_address(
-        self,
-        interface: str,
-        address: str,
-        prefix_len: int = 64
-    ) -> bool:
+    async def remove_ipv6_address(self, interface: str, address: str, prefix_len: int = 64) -> bool:
         """Remove IPv6 address from interface.
 
         Args:
@@ -275,11 +260,11 @@ class IPv6Manager:
             bool: True if successfully removed
         """
         try:
-            result = await execute_command_async([
-                "ip", "-6", "addr", "del",
-                f"{address}/{prefix_len}",
-                "dev", interface
-            ], sudo=True, check=False)
+            result = await execute_command_async(
+                ["ip", "-6", "addr", "del", f"{address}/{prefix_len}", "dev", interface],
+                sudo=True,
+                check=False,
+            )
 
             if result.success:
                 self.logger.info(f"Removed IPv6 address {address}/{prefix_len} from {interface}")
@@ -295,7 +280,7 @@ class IPv6Manager:
         destination: str,
         gateway: Optional[str] = None,
         interface: Optional[str] = None,
-        metric: Optional[int] = None
+        metric: Optional[int] = None,
     ) -> bool:
         """Add IPv6 route.
 
@@ -339,10 +324,7 @@ class IPv6Manager:
             return False
 
     async def delete_ipv6_route(
-        self,
-        destination: str,
-        gateway: Optional[str] = None,
-        interface: Optional[str] = None
+        self, destination: str, gateway: Optional[str] = None, interface: Optional[str] = None
     ) -> bool:
         """Delete IPv6 route.
 
@@ -383,13 +365,10 @@ class IPv6Manager:
         routes = []
 
         try:
-            result = await execute_command_async(
-                ["ip", "-6", "route", "show"],
-                check=False
-            )
+            result = await execute_command_async(["ip", "-6", "route", "show"], check=False)
 
             if result.success:
-                for line in result.stdout.strip().split('\n'):
+                for line in result.stdout.strip().split("\n"):
                     if line:
                         routes.append(self._parse_route_line(line))
 
@@ -408,25 +387,21 @@ class IPv6Manager:
             dict: Parsed route information
         """
         parts = line.split()
-        route = {'destination': parts[0] if parts else 'unknown'}
+        route = {"destination": parts[0] if parts else "unknown"}
 
         for i, part in enumerate(parts):
-            if part == 'via' and i + 1 < len(parts):
-                route['gateway'] = parts[i + 1]
-            elif part == 'dev' and i + 1 < len(parts):
-                route['interface'] = parts[i + 1]
-            elif part == 'metric' and i + 1 < len(parts):
-                route['metric'] = parts[i + 1]
-            elif part == 'proto' and i + 1 < len(parts):
-                route['proto'] = parts[i + 1]
+            if part == "via" and i + 1 < len(parts):
+                route["gateway"] = parts[i + 1]
+            elif part == "dev" and i + 1 < len(parts):
+                route["interface"] = parts[i + 1]
+            elif part == "metric" and i + 1 < len(parts):
+                route["metric"] = parts[i + 1]
+            elif part == "proto" and i + 1 < len(parts):
+                route["proto"] = parts[i + 1]
 
         return route
 
-    async def configure_ipv6_privacy_extensions(
-        self,
-        interface: str,
-        enable: bool = True
-    ) -> bool:
+    async def configure_ipv6_privacy_extensions(self, interface: str, enable: bool = True) -> bool:
         """Configure IPv6 privacy extensions (RFC 4941).
 
         Privacy extensions generate temporary IPv6 addresses to enhance privacy.
@@ -441,17 +416,15 @@ class IPv6Manager:
         value = "2" if enable else "0"  # 2 = prefer temporary addresses
 
         try:
-            result = await execute_command_async([
-                "sysctl", "-w",
-                f"net.ipv6.conf.{interface}.use_tempaddr={value}"
-            ], sudo=True, check=False)
+            result = await execute_command_async(
+                ["sysctl", "-w", f"net.ipv6.conf.{interface}.use_tempaddr={value}"],
+                sudo=True,
+                check=False,
+            )
 
             if result.success:
                 # Make persistent
-                await self._persist_sysctl(
-                    f"net.ipv6.conf.{interface}.use_tempaddr",
-                    value
-                )
+                await self._persist_sysctl(f"net.ipv6.conf.{interface}.use_tempaddr", value)
 
                 action = "enabled" if enable else "disabled"
                 self.logger.info(f"IPv6 privacy extensions {action} for {interface}")
@@ -479,9 +452,9 @@ class IPv6Manager:
             existing_config = {}
             if sysctl_conf.exists():
                 content = sysctl_conf.read_text()
-                for line in content.split('\n'):
-                    if '=' in line and not line.strip().startswith('#'):
-                        k, v = line.split('=', 1)
+                for line in content.split("\n"):
+                    if "=" in line and not line.strip().startswith("#"):
+                        k, v = line.split("=", 1)
                         existing_config[k.strip()] = v.strip()
 
             # Update config
@@ -489,17 +462,18 @@ class IPv6Manager:
 
             # Write back
             lines = [f"{k} = {v}" for k, v in existing_config.items()]
-            new_content = '\n'.join(lines) + '\n'
+            new_content = "\n".join(lines) + "\n"
 
             # Write with sudo
             import tempfile
-            with tempfile.NamedTemporaryFile(mode='w', delete=False) as tmp:
+
+            with tempfile.NamedTemporaryFile(mode="w", delete=False) as tmp:
                 tmp.write(new_content)
                 tmp_path = tmp.name
 
-            result = await execute_command_async([
-                "cp", tmp_path, str(sysctl_conf)
-            ], sudo=True, check=False)
+            result = await execute_command_async(
+                ["cp", tmp_path, str(sysctl_conf)], sudo=True, check=False
+            )
 
             Path(tmp_path).unlink()  # Clean up temp file
 
@@ -518,9 +492,9 @@ class IPv6Manager:
             bool: True if connectivity is working
         """
         try:
-            result = await execute_command_async([
-                "ping6", "-c", "3", "-W", "5", target
-            ], check=False, timeout=10)
+            result = await execute_command_async(
+                ["ping6", "-c", "3", "-W", "5", target], check=False, timeout=10
+            )
 
             if result.success and "0% packet loss" in result.stdout:
                 self.logger.info(f"IPv6 connectivity test to {target}: SUCCESS")

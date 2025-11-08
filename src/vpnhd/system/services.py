@@ -9,6 +9,7 @@ from .commands import execute_command, check_command_exists
 
 class ServiceStatus(Enum):
     """Service status enumeration."""
+
     ACTIVE = "active"
     INACTIVE = "inactive"
     FAILED = "failed"
@@ -225,9 +226,7 @@ class ServiceManager:
         """
         if self.init_system == "systemd":
             result = execute_command(
-                f"systemctl is-active {service_name}",
-                check=False,
-                capture_output=True
+                f"systemctl is-active {service_name}", check=False, capture_output=True
             )
 
             if result.success:
@@ -241,9 +240,7 @@ class ServiceManager:
 
         elif self.init_system == "sysvinit":
             result = execute_command(
-                f"service {service_name} status",
-                check=False,
-                capture_output=True
+                f"service {service_name} status", check=False, capture_output=True
             )
 
             if result.success:
@@ -279,9 +276,7 @@ class ServiceManager:
         """
         if self.init_system == "systemd":
             result = execute_command(
-                f"systemctl is-enabled {service_name}",
-                check=False,
-                capture_output=True
+                f"systemctl is-enabled {service_name}", check=False, capture_output=True
             )
             return result.success
 
@@ -320,12 +315,12 @@ class ServiceManager:
 
             if result.success:
                 services = []
-                for line in result.stdout.split('\n'):
-                    if line.strip() and not line.startswith('UNIT'):
+                for line in result.stdout.split("\n"):
+                    if line.strip() and not line.startswith("UNIT"):
                         parts = line.split()
                         if parts:
                             service_name = parts[0]
-                            if service_name.endswith('.service'):
+                            if service_name.endswith(".service"):
                                 services.append(service_name)
                 return services
 
@@ -347,7 +342,7 @@ class ServiceManager:
                 f"journalctl -u {service_name} -n {lines} --no-pager",
                 sudo=True,
                 check=False,
-                capture_output=True
+                capture_output=True,
             )
 
             if result.success:

@@ -24,13 +24,7 @@ def mock_config(temp_dir):
     config = ConfigManager(config_path=config_file)
 
     # Initialize with minimal config
-    config.data = {
-        "version": "1.0.0",
-        "phases": {},
-        "server": {},
-        "network": {},
-        "clients": {}
-    }
+    config.data = {"version": "1.0.0", "phases": {}, "server": {}, "network": {}, "clients": {}}
     config.save()
 
     return config
@@ -40,6 +34,7 @@ def mock_config(temp_dir):
 def mock_display():
     """Provide a mocked Display instance."""
     from vpnhd.ui.display import Display
+
     display = MagicMock(spec=Display)
     return display
 
@@ -48,6 +43,7 @@ def mock_display():
 def mock_prompts():
     """Provide a mocked Prompts instance."""
     from vpnhd.ui.prompts import Prompts
+
     prompts = MagicMock(spec=Prompts)
     prompts.confirm.return_value = True  # Default to yes
     return prompts
@@ -58,13 +54,9 @@ def mock_execute_command(mocker):
     """Mock execute_command to prevent actual system calls."""
     from vpnhd.system.commands import CommandResult
 
-    mock = mocker.patch('vpnhd.system.commands.execute_command')
+    mock = mocker.patch("vpnhd.system.commands.execute_command")
     mock.return_value = CommandResult(
-        exit_code=0,
-        stdout="Mock output",
-        stderr="",
-        success=True,
-        command="mock command"
+        exit_code=0, stdout="Mock output", stderr="", success=True, command="mock command"
     )
 
     return mock
@@ -83,31 +75,21 @@ def sample_config_data():
         "version": "1.0.0",
         "phases": {
             "phase1_debian": {"completed": True},
-            "phase2_wireguard_server": {"completed": False}
+            "phase2_wireguard_server": {"completed": False},
         },
-        "server": {
-            "hostname": "vpn-server",
-            "lan_ip": "192.168.1.100",
-            "interface": "eth0"
-        },
+        "server": {"hostname": "vpn-server", "lan_ip": "192.168.1.100", "interface": "eth0"},
         "network": {
-            "lan": {
-                "subnet": "192.168.1.0/24",
-                "router_ip": "192.168.1.1"
-            },
-            "vpn": {
-                "subnet": "10.66.66.0/24",
-                "server_ip": "10.66.66.1"
-            }
+            "lan": {"subnet": "192.168.1.0/24", "router_ip": "192.168.1.1"},
+            "vpn": {"subnet": "10.66.66.0/24", "server_ip": "10.66.66.1"},
         },
-        "clients": {}
+        "clients": {},
     }
 
 
 @pytest.fixture
 def mock_subprocess_run(mocker):
     """Mock subprocess.run to prevent actual system calls."""
-    mock = mocker.patch('subprocess.run')
+    mock = mocker.patch("subprocess.run")
 
     # Create a mock result
     result = Mock()
@@ -122,24 +104,14 @@ def mock_subprocess_run(mocker):
 @pytest.fixture
 def mock_logger(mocker):
     """Mock logger to capture log messages."""
-    return mocker.patch('vpnhd.utils.logging.get_logger')
+    return mocker.patch("vpnhd.utils.logging.get_logger")
 
 
 # Fixtures for network testing
 @pytest.fixture
 def valid_interface_names():
     """Provide valid interface names for testing."""
-    return [
-        "eth0",
-        "wg0",
-        "enp0s3",
-        "wlan0",
-        "br0",
-        "tun0",
-        "tap0",
-        "veth0",
-        "docker0"
-    ]
+    return ["eth0", "wg0", "enp0s3", "wlan0", "br0", "tun0", "tap0", "veth0", "docker0"]
 
 
 @pytest.fixture

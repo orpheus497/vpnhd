@@ -14,21 +14,14 @@ class APTPackageManager(PackageManager):
 
     async def is_available(self) -> bool:
         """Check if APT is available."""
-        result = await execute_command_async(
-            ['which', 'apt-get'],
-            check=False
-        )
+        result = await execute_command_async(["which", "apt-get"], check=False)
         return result.success
 
     async def update_cache(self) -> bool:
         """Update APT package cache."""
         self.logger.info("Updating APT package cache...")
 
-        result = await execute_command_async(
-            ['apt-get', 'update'],
-            sudo=True,
-            check=False
-        )
+        result = await execute_command_async(["apt-get", "update"], sudo=True, check=False)
 
         if result.success:
             self.logger.info("APT cache updated successfully")
@@ -37,25 +30,17 @@ class APTPackageManager(PackageManager):
             self.logger.error(f"Failed to update APT cache: {result.stderr}")
             return False
 
-    async def install_package(
-        self,
-        package: str,
-        version: Optional[str] = None
-    ) -> bool:
+    async def install_package(self, package: str, version: Optional[str] = None) -> bool:
         """Install a package using APT."""
         package_spec = f"{package}={version}" if version else package
 
         self.logger.info(f"Installing package: {package_spec}")
 
         result = await execute_command_async(
-            [
-                'apt-get', 'install', '-y',
-                '--no-install-recommends',
-                package_spec
-            ],
+            ["apt-get", "install", "-y", "--no-install-recommends", package_spec],
             sudo=True,
             check=False,
-            env={'DEBIAN_FRONTEND': 'noninteractive'}
+            env={"DEBIAN_FRONTEND": "noninteractive"},
         )
 
         if result.success:
@@ -73,13 +58,10 @@ class APTPackageManager(PackageManager):
         self.logger.info(f"Installing packages: {', '.join(packages)}")
 
         result = await execute_command_async(
-            [
-                'apt-get', 'install', '-y',
-                '--no-install-recommends'
-            ] + packages,
+            ["apt-get", "install", "-y", "--no-install-recommends"] + packages,
             sudo=True,
             check=False,
-            env={'DEBIAN_FRONTEND': 'noninteractive'}
+            env={"DEBIAN_FRONTEND": "noninteractive"},
         )
 
         if result.success:
@@ -94,10 +76,10 @@ class APTPackageManager(PackageManager):
         self.logger.info(f"Removing package: {package}")
 
         result = await execute_command_async(
-            ['apt-get', 'remove', '-y', package],
+            ["apt-get", "remove", "-y", package],
             sudo=True,
             check=False,
-            env={'DEBIAN_FRONTEND': 'noninteractive'}
+            env={"DEBIAN_FRONTEND": "noninteractive"},
         )
 
         if result.success:
@@ -109,13 +91,10 @@ class APTPackageManager(PackageManager):
 
     async def is_package_installed(self, package: str) -> bool:
         """Check if a package is installed."""
-        result = await execute_command_async(
-            ['dpkg', '-s', package],
-            check=False
-        )
+        result = await execute_command_async(["dpkg", "-s", package], check=False)
 
         # Check for "Status: install ok installed" in output
-        if result.success and 'Status: install ok installed' in result.stdout:
+        if result.success and "Status: install ok installed" in result.stdout:
             return True
 
         return False
@@ -123,8 +102,7 @@ class APTPackageManager(PackageManager):
     async def get_package_version(self, package: str) -> Optional[str]:
         """Get installed package version."""
         result = await execute_command_async(
-            ['dpkg-query', '-W', '-f=${Version}', package],
-            check=False
+            ["dpkg-query", "-W", "-f=${Version}", package], check=False
         )
 
         if result.success:
@@ -137,10 +115,10 @@ class APTPackageManager(PackageManager):
         self.logger.info(f"Upgrading package: {package}")
 
         result = await execute_command_async(
-            ['apt-get', 'install', '--only-upgrade', '-y', package],
+            ["apt-get", "install", "--only-upgrade", "-y", package],
             sudo=True,
             check=False,
-            env={'DEBIAN_FRONTEND': 'noninteractive'}
+            env={"DEBIAN_FRONTEND": "noninteractive"},
         )
 
         if result.success:
@@ -159,10 +137,10 @@ class APTPackageManager(PackageManager):
 
         # Upgrade packages
         result = await execute_command_async(
-            ['apt-get', 'upgrade', '-y'],
+            ["apt-get", "upgrade", "-y"],
             sudo=True,
             check=False,
-            env={'DEBIAN_FRONTEND': 'noninteractive'}
+            env={"DEBIAN_FRONTEND": "noninteractive"},
         )
 
         if result.success:
@@ -177,10 +155,10 @@ class APTPackageManager(PackageManager):
         self.logger.info("Removing unused packages...")
 
         result = await execute_command_async(
-            ['apt-get', 'autoremove', '-y'],
+            ["apt-get", "autoremove", "-y"],
             sudo=True,
             check=False,
-            env={'DEBIAN_FRONTEND': 'noninteractive'}
+            env={"DEBIAN_FRONTEND": "noninteractive"},
         )
 
         if result.success:
@@ -194,11 +172,7 @@ class APTPackageManager(PackageManager):
         """Clean APT cache."""
         self.logger.info("Cleaning APT cache...")
 
-        result = await execute_command_async(
-            ['apt-get', 'clean'],
-            sudo=True,
-            check=False
-        )
+        result = await execute_command_async(["apt-get", "clean"], sudo=True, check=False)
 
         if result.success:
             self.logger.info("APT cache cleaned successfully")

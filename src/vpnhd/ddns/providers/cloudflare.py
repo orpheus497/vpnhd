@@ -31,7 +31,7 @@ class CloudflareDDNS(DDNSProvider):
         if not all([self.api_token, self.zone_id, self.record_name]):
             self.logger.warning("Cloudflare configuration incomplete")
 
-    async def update_record(self, ip_address: str, record_type: str = 'A') -> bool:
+    async def update_record(self, ip_address: str, record_type: str = "A") -> bool:
         """Update Cloudflare DNS record.
 
         Args:
@@ -48,42 +48,42 @@ class CloudflareDDNS(DDNSProvider):
         try:
             async with httpx.AsyncClient(timeout=30) as client:
                 headers = {
-                    'Authorization': f'Bearer {self.api_token}',
-                    'Content-Type': 'application/json'
+                    "Authorization": f"Bearer {self.api_token}",
+                    "Content-Type": "application/json",
                 }
 
                 # Get existing record
                 list_url = f"{self.API_BASE}/zones/{self.zone_id}/dns_records"
-                params = {'type': record_type, 'name': self.record_name}
+                params = {"type": record_type, "name": self.record_name}
 
                 response = await client.get(list_url, headers=headers, params=params)
                 response.raise_for_status()
 
                 result = response.json()
-                if not result.get('success'):
+                if not result.get("success"):
                     self.logger.error(f"Cloudflare API error: {result.get('errors')}")
                     return False
 
-                records = result.get('result', [])
+                records = result.get("result", [])
 
                 data = {
-                    'type': record_type,
-                    'name': self.record_name,
-                    'content': ip_address,
-                    'ttl': 120,  # 2 minutes
-                    'proxied': False  # Direct DNS, no Cloudflare proxy
+                    "type": record_type,
+                    "name": self.record_name,
+                    "content": ip_address,
+                    "ttl": 120,  # 2 minutes
+                    "proxied": False,  # Direct DNS, no Cloudflare proxy
                 }
 
                 if records:
                     # Update existing record
-                    record_id = records[0]['id']
+                    record_id = records[0]["id"]
                     update_url = f"{self.API_BASE}/zones/{self.zone_id}/dns_records/{record_id}"
 
                     response = await client.put(update_url, headers=headers, json=data)
                     response.raise_for_status()
 
                     result = response.json()
-                    if result.get('success'):
+                    if result.get("success"):
                         self.logger.info(
                             f"Cloudflare {record_type} record updated: "
                             f"{self.record_name} -> {ip_address}"
@@ -97,7 +97,7 @@ class CloudflareDDNS(DDNSProvider):
                     response.raise_for_status()
 
                     result = response.json()
-                    if result.get('success'):
+                    if result.get("success"):
                         self.logger.info(
                             f"Cloudflare {record_type} record created: "
                             f"{self.record_name} -> {ip_address}"
@@ -108,7 +108,9 @@ class CloudflareDDNS(DDNSProvider):
                 return False
 
         except httpx.HTTPStatusError as e:
-            self.logger.error(f"Cloudflare HTTP error: {e.response.status_code} - {e.response.text}")
+            self.logger.error(
+                f"Cloudflare HTTP error: {e.response.status_code} - {e.response.text}"
+            )
             return False
         except Exception as e:
             self.logger.exception(f"Cloudflare DNS update failed: {e}")
@@ -127,12 +129,14 @@ class CloudflareDDNS(DDNSProvider):
             # Use DNS resolution to verify
             import dns.resolver
 
-            record_type = 'AAAA' if ':' in expected_ip else 'A'
+            record_type = "AAAA" if ":" in expected_ip else "A"
             answers = dns.resolver.resolve(self.record_name, record_type)
 
             for rdata in answers:
                 if str(rdata) == expected_ip:
-                    self.logger.info(f"Cloudflare DNS record verified: {self.record_name} = {expected_ip}")
+                    self.logger.info(
+                        f"Cloudflare DNS record verified: {self.record_name} = {expected_ip}"
+                    )
                     return True
 
             self.logger.warning(f"Cloudflare DNS record mismatch for {self.record_name}")
@@ -159,19 +163,19 @@ class CloudflareDDNS(DDNSProvider):
         try:
             async with httpx.AsyncClient(timeout=30) as client:
                 headers = {
-                    'Authorization': f'Bearer {self.api_token}',
-                    'Content-Type': 'application/json'
+                    "Authorization": f"Bearer {self.api_token}",
+                    "Content-Type": "application/json",
                 }
 
                 url = f"{self.API_BASE}/zones"
-                params = {'name': domain}
+                params = {"name": domain}
 
                 response = await client.get(url, headers=headers, params=params)
                 response.raise_for_status()
 
                 result = response.json()
-                if result.get('success') and result.get('result'):
-                    zone_id = result['result'][0]['id']
+                if result.get("success") and result.get("result"):
+                    zone_id = result["result"][0]["id"]
                     self.logger.info(f"Found Cloudflare zone ID for {domain}: {zone_id}")
                     return zone_id
 

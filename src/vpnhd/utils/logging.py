@@ -13,7 +13,7 @@ def setup_logging(
     log_level: str = "INFO",
     log_to_file: bool = True,
     log_to_console: bool = True,
-    verbose: bool = False
+    verbose: bool = False,
 ) -> None:
     """
     Set up logging configuration for the application.
@@ -39,13 +39,11 @@ def setup_logging(
 
     # Create formatters
     detailed_formatter = logging.Formatter(
-        fmt='%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
+        fmt="%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    simple_formatter = logging.Formatter(
-        fmt='%(levelname)s: %(message)s'
-    )
+    simple_formatter = logging.Formatter(fmt="%(levelname)s: %(message)s")
 
     # Console handler
     if log_to_console:
@@ -62,10 +60,7 @@ def setup_logging(
 
             # Create rotating file handler (max 10MB, keep 5 backups)
             file_handler = RotatingFileHandler(
-                LOG_FILE,
-                maxBytes=10 * 1024 * 1024,  # 10 MB
-                backupCount=5,
-                encoding='utf-8'
+                LOG_FILE, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"  # 10 MB
             )
             file_handler.setLevel(logging.DEBUG)  # Always log everything to file
             file_handler.setFormatter(detailed_formatter)
@@ -113,6 +108,7 @@ def log_function_call(func):
     Returns:
         Wrapped function
     """
+
     def wrapper(*args, **kwargs):
         logger = get_logger(func.__module__)
         logger.debug(f"Calling {func.__name__} with args={args}, kwargs={kwargs}")
@@ -137,6 +133,7 @@ def log_exceptions(func):
     Returns:
         Wrapped function
     """
+
     def wrapper(*args, **kwargs):
         logger = get_logger(func.__module__)
         try:
