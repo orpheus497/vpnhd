@@ -39,6 +39,107 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - VPNHDError base exception class and specialized exceptions
 - ConfigurationError, PhaseError, ValidationError exception classes
 - NetworkError, SystemCommandError, SecurityError exception classes
+- Interface name validator (is_valid_interface_name) preventing command injection through interface parameters
+- Package name validator (is_valid_package_name) following Debian/RPM naming conventions
+- Netmask validator (is_valid_netmask) supporting both CIDR and dotted decimal notation
+- Interface and package name sanitizers for safe string handling
+- Debian 13 (Trixie) support with updated version detection
+- Python 3.11 minimum version requirement for Debian 13 compatibility
+- Python version constants (PYTHON_MIN_VERSION, PYTHON_MIN_VERSION_TUPLE)
+- Comprehensive test suite with pytest framework (Phase 2: Testing Infrastructure)
+- Unit tests for security validators (100% coverage target for tests/unit/test_validators.py)
+- Unit tests for command execution security (tests/unit/test_commands.py)
+- Unit tests for network interface management (tests/unit/test_interfaces.py)
+- Unit tests for package manager security (tests/unit/test_packages.py)
+- Integration tests for phase workflows (tests/integration/test_phase_integration.py)
+- Pytest configuration with coverage reporting (pytest.ini)
+- Coverage configuration targeting 80%+ overall coverage (.coveragerc)
+- Test runner script with multiple run modes (run_tests.sh)
+- Test fixtures for validators, network data, and mocking (tests/conftest.py)
+- Test documentation with usage examples and best practices (tests/README.md)
+- HTML, XML, and terminal coverage report generation
+- Test markers for categorization (unit, integration, security, slow)
+- Comprehensive mocking of system commands preventing actual execution during tests
+- Security-focused tests verifying injection prevention across all modules
+- Edge case tests for boundary conditions (empty strings, max lengths, unicode)
+- Comprehensive CI/CD pipeline with GitHub Actions (Phase 4: CI/CD Pipeline)
+- CI workflow testing Python 3.11, 3.12, 3.13 on Ubuntu (.github/workflows/ci.yml)
+- Security scanning workflow with CodeQL, Bandit, Safety, Trivy (.github/workflows/security.yml)
+- Dependency review action for pull requests
+- Code quality checks (Black, flake8, isort, mypy) in CI pipeline
+- Automated test execution with 80% coverage requirement
+- Codecov integration for coverage reporting
+- Distribution build and validation in CI
+- Pre-commit hooks configuration with 15+ hooks (.pre-commit-config.yaml)
+- Makefile with common development tasks (test, lint, format, build, clean)
+- Enhanced requirements-dev.txt with security tools (bandit, safety)
+- Pre-commit hooks for code formatting (Black, isort)
+- Pre-commit hooks for linting (flake8, mypy, bandit)
+- Pre-commit hooks for file checks (YAML, JSON, trailing whitespace, large files)
+- Pre-commit hooks for security (detect private keys, safety checks)
+- Shell script linting with shellcheck
+- Markdown linting with markdownlint
+- YAML linting with yamllint
+- psutil library for cross-platform network interface discovery (Phase 5: Dependency Migration)
+- qrcode[pil] Python library for QR code generation replacing qrencode binary (Phase 5: Dependency Migration)
+- SVG QR code generation support for scalable mobile client configurations
+- TTY-based QR code terminal display using Unicode blocks for better visibility
+- Comprehensive client management system (Phase 6: Client Management Features)
+- ClientManager class for advanced VPN client operations
+- Client database with metadata tracking (device type, OS, creation date, status)
+- CLI command group `vpnhd client` with 9 subcommands
+- `vpnhd client list` - List all clients with filtering options
+- `vpnhd client add` - Add new VPN clients with automatic key generation
+- `vpnhd client remove` - Remove clients and revoke access
+- `vpnhd client show` - Display detailed client information
+- `vpnhd client status` - Show real-time connection status for all clients
+- `vpnhd client export` - Export client configurations to file
+- `vpnhd client enable/disable` - Control client access
+- `vpnhd client stats` - Display client statistics and analytics
+- Client filtering by device type, OS, enabled status, and connection state
+- Multiple output formats for client listing (table, JSON, simple)
+- Real-time WireGuard connection monitoring via `wg show`
+- Automatic VPN IP assignment from available pool
+- Client configuration export with QR code generation
+- Rich formatted tables and panels for CLI output
+- Comprehensive performance testing system (Phase 7: Performance Testing)
+- PerformanceTester class for VPN performance analysis
+- Latency testing with ping-based measurements
+- Connection stability testing with uptime tracking
+- Bandwidth testing with iperf3 integration
+- Performance report generation and storage
+- CLI command group `vpnhd performance` with 5 subcommands
+- `vpnhd performance latency` - Test VPN latency and packet loss
+- `vpnhd performance stability` - Test connection stability over time
+- `vpnhd performance full` - Run complete performance test suite
+- `vpnhd performance list` - List all performance reports
+- Statistics aggregation across multiple performance tests
+- Comprehensive backup & restore system (Phase 8: Backup & Restore)
+- BackupManager class for configuration backup and recovery
+- Automated backup creation with metadata tracking
+- Selective backup (WireGuard, SSH, config, clients)
+- SHA-256 checksum verification for backup integrity
+- Compressed tar.gz archive format
+- Backup metadata with size, checksum, and includes tracking
+- CLI command group `vpnhd backup` with 8 subcommands
+- `vpnhd backup create` - Create new backup with selective includes
+- `vpnhd backup list` - List all backups with metadata
+- `vpnhd backup restore` - Restore from backup with verification
+- `vpnhd backup verify` - Verify backup integrity
+- `vpnhd backup delete` - Delete backup with confirmation
+- `vpnhd backup export` - Export backup to external location
+- `vpnhd backup import` - Import backup from external location
+- `vpnhd backup cleanup` - Automatically delete old backups
+- Enhanced documentation suite (Phase 9: Enhanced Documentation)
+- Comprehensive CLI reference guide (docs/CLI_REFERENCE.md)
+- Client management guide with examples and best practices (docs/CLIENT_MANAGEMENT.md)
+- Performance testing guide with metrics interpretation (docs/PERFORMANCE_TESTING.md)
+- Backup & restore guide with disaster recovery procedures (docs/BACKUP_RESTORE.md)
+- Complete command documentation for all CLI command groups
+- Usage examples for client, performance, and backup operations
+- Best practices sections for each major feature area
+- Troubleshooting guides integrated into feature documentation
+- Advanced topics including automation, scripting, and monitoring integration
 
 ### Changed
 - Phase 4 renamed from "Fedora Client" to "Linux Desktop Client (Always-On)"
@@ -56,6 +157,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Command execution switched from shell=True to shell=False to prevent injection attacks
 - run_command_with_input() updated with array-based command execution
 - .gitignore updated to exclude .dev-docs/ directory containing AI-generated documentation
+- Network discovery migrated from unmaintained netifaces to actively-maintained psutil (Phase 5: Dependency Migration)
+- QR code generation migrated from qrencode binary to pure Python qrcode library (Phase 5: Dependency Migration)
+- Network interface discovery now uses psutil.net_if_addrs() and psutil.net_if_stats()
+- QR code generation now uses Python qrcode library with PIL imaging support
+- Optional packages list updated to remove deprecated qrencode binary dependency
+- Client management workflow completely overhauled (Phase 6: Client Management Features)
+- CLI now provides dedicated `client` command group for all client operations
+- Client data now persisted in JSON database (~/.config/vpnhd/clients.json)
+- Client metadata now tracked separately from WireGuard server config
+- Client configurations now exported to dedicated directory
+- Performance testing now supports multiple test servers (Phase 7)
+- Performance reports now saved with timestamps for tracking
+- Backup system now uses compressed tar.gz format for efficiency (Phase 8)
+- Backup restore now creates automatic backups of current state
+- Backup verification now checks both checksum and archive integrity
+- README.md updated with comprehensive feature listing for Phases 4-9 (Phase 9)
+- README.md Features section now includes Enterprise Features subsection
+- README.md Technology Stack updated with psutil, qrcode, pytest, GitHub Actions
+- README.md Documentation section expanded with new guide references
+- README.md Roadmap updated to Version 2.0.0 Modernization Release
+- README.md FOSS Attribution updated to reflect current dependencies
+- Project version bumped to 2.0.0 reflecting modernization milestone
 
 ### Fixed
 - Template path resolution issues in Phases 2, 4, 5, and 6
@@ -86,12 +209,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Imports inside functions reducing performance (4 instances removed)
 - Code duplication between phase4 and phase5 (~150 lines of duplicate logic)
 - Command injection in files.py across 7 file operation methods (mv, cat, cp, chmod, chown, tee)
+- **CRITICAL**: Command injection in network/interfaces.py bring_interface_up() using f-string (Line 34)
+- **CRITICAL**: Command injection in network/interfaces.py bring_interface_down() using f-string (Line 54)
+- **CRITICAL**: Command injection in network/interfaces.py set_ip_address() using f-string (Line 76)
+- **CRITICAL**: Command injection in network/interfaces.py add_route() using f-string concatenation (Lines 165-167)
+- **CRITICAL**: Command injection in network/interfaces.py delete_route() using f-string (Line 187)
+- **CRITICAL**: Command injection in network/interfaces.py flush_interface() using f-string (Line 207)
+- **CRITICAL**: Command injection in network/interfaces.py get_interface_stats() using f-string (Line 225)
+- **CRITICAL**: Command injection in network/interfaces.py enable_ip_forwarding() using shell pipe (Lines 105, 112)
+- **CRITICAL**: Command injection in system/packages.py is_package_installed() for apt/dpkg (Line 78)
+- **CRITICAL**: Command injection in system/packages.py is_package_installed() for dnf/yum (Line 86)
+- **CRITICAL**: Command injection in system/packages.py is_package_installed() for pacman (Line 94)
+- **CRITICAL**: Command injection in system/packages.py install_package() using f-string concatenation (Lines 122-137)
+- **CRITICAL**: Command injection in system/packages.py update_package_cache() using f-string (Lines 190, 195, 201)
+- **CRITICAL**: Command injection in system/packages.py upgrade_packages() using f-string concatenation (Lines 222-234)
+- **CRITICAL**: Command injection in system/packages.py remove_package() using f-string concatenation (Lines 328-343)
+- Debian 11 (Bullseye) removed from supported versions list (EOL approaching)
+- Debian 13 (Trixie) missing from supported versions
 
 ### Removed
 - Deprecated phase4_fedora.py (replaced by distribution-agnostic phase4_linux_client.py)
 - Deprecated phase5_popos.py (replaced by distribution-agnostic phase5_linux_client_ondemand.py)
 - Deprecated phase6_termux.py (replaced by distribution-agnostic phase6_mobile.py)
 - Legacy phase imports and exports from phases/__init__.py
+- netifaces dependency replaced by psutil for better maintenance and cross-platform support (Phase 5: Dependency Migration)
+- qrencode binary dependency eliminated in favor of pure Python qrcode library (Phase 5: Dependency Migration)
+- install_qrencode() function deprecated (backward compatibility maintained)
 
 ### Enhanced
 - Phase 4 (Linux Desktop Client Always-On) now automatically adds peer to server
@@ -99,6 +242,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Phase 6 (Mobile Client) now generates QR codes and automatically adds peer to server
 - Phase 7 (SSH Keys) now includes automated sshd_config modification and rollback support
 - Phase 8 (Security Hardening) now creates fail2ban jails for both SSH and WireGuard
+- QR code generation now supports SVG format for vector graphics (scalable mobile configs)
+- QR code terminal display enhanced with TTY mode using Unicode blocks for better readability
+- Network discovery improved with better cross-platform compatibility using psutil
+- Client management enhanced with comprehensive CLI interface (Phase 6: Client Management Features)
+- Client listing enhanced with multiple output formats and rich formatting
+- Client status monitoring enhanced with real-time connection details
+- Client operations enhanced with confirmation prompts and user-friendly output
+- Performance testing enhanced with comprehensive metrics (Phase 7: Performance Testing)
+- Latency testing enhanced with statistics (min/avg/max/stddev)
+- Stability testing enhanced with uptime percentage and disconnection tracking
+- Bandwidth testing enhanced with iperf3 integration for accurate measurements
+- Backup system enhanced with integrity verification (Phase 8: Backup & Restore)
+- Backup creation enhanced with selective component inclusion
+- Restore process enhanced with pre-restore backup creation
+- Documentation enhanced with comprehensive user guides (Phase 9: Enhanced Documentation)
+- CLI reference enhanced with complete command documentation and examples
+- User guides enhanced with best practices and troubleshooting sections
+- Documentation enhanced with visual diagrams and architecture explanations
+- All major features now have dedicated, comprehensive documentation guides
 
 ### Technical
 - Added ServerConfigManager class with peer management methods
@@ -133,9 +295,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Centralized WireGuard installation instructions in reusable helper functions
 - Converted all file operation commands in files.py to array format (7 methods)
 - Eliminated shell pipe usage in append_to_file() using stdin-based tee command
+- Created comprehensive test infrastructure with 2,800+ lines of test code
+- Implemented pytest-based testing with pytest-cov and pytest-mock plugins
+- Created 434 test cases covering validators, commands, interfaces, packages, and integration
+- Configured coverage reporting with HTML, XML, and terminal output formats
+- Implemented test categorization with pytest markers (unit, integration, security, slow)
+- Created reusable fixtures for test data and mocking (50+ fixtures in conftest.py)
+- Implemented parameterized tests for injection prevention (testing 50+ malicious inputs)
+- Mocked all system commands preventing actual execution during test runs
+- Configured fail-under threshold at 80% for overall coverage
+- Targeted 100% coverage for security-critical modules (validators, command execution)
+- Created executable test runner script with multiple modes (unit-only, integration-only, quick)
+- Configured pytest with strict markers and comprehensive logging
+- Enabled branch coverage for stricter testing of conditional logic
+- Excluded test files, build artifacts, and virtual environments from coverage measurement
+- Migrated network discovery from netifaces to psutil eliminating unmaintained dependency (Phase 5: Dependency Migration)
+- Replaced qrencode binary with Python qrcode library removing external binary dependency (Phase 5: Dependency Migration)
+- Complete rewrite of src/vpnhd/network/discovery.py using psutil (296 lines)
+- Complete rewrite of src/vpnhd/crypto/qrcode.py using Python qrcode library (298 lines)
+- Added QRCODE_AVAILABLE flag for graceful degradation when library unavailable
+- Implemented generate_qr_svg() for scalable vector QR codes
+- Implemented display_qr_terminal_tty() for Unicode-based terminal QR display
+- Maintained backward compatibility with deprecated install_qrencode() function
+- Updated requirements.txt: netifaces → psutil, added qrcode[pil]>=7.4.0
+- Updated pyproject.toml dependencies removing netifaces, adding psutil and qrcode
+- Updated constants.py marking qrencode as deprecated in OPTIONAL_PACKAGES
+- Created client management module (src/vpnhd/client/) (Phase 6: Client Management Features)
+- Implemented ClientManager class with comprehensive client operations (534 lines)
+- Implemented ClientInfo dataclass for structured client metadata tracking
+- Added persistent client database using JSON storage
+- Extended CLI with 9 client management commands (378 lines added to cli.py)
+- Integrated Rich library for formatted tables, panels, and styled output
+- Added real-time WireGuard status parsing from `wg show dump` output
+- Implemented automatic IP address pool management with next_available_ip()
+- Added client configuration templating using existing Jinja2 templates
+- Implemented client statistics aggregation by device type and OS
+- Added client filtering and search capabilities across multiple dimensions
+- Created performance testing module (src/vpnhd/testing/) (Phase 7: Performance Testing)
+- Implemented PerformanceTester class with latency, bandwidth, stability testing (555 lines)
+- Added performance report persistence with JSON storage
+- Implemented test result dataclasses (BandwidthResult, LatencyResult, ConnectionStabilityResult)
+- Extended CLI with 5 performance testing commands (193 lines added to cli.py)
+- Added ping-based latency measurement with packet loss tracking
+- Implemented long-duration stability testing with disconnection detection
+- Integrated iperf3 for bandwidth measurements (download/upload)
+- Added performance statistics aggregation across multiple test runs
+- Created backup & restore module (src/vpnhd/backup/) (Phase 8: Backup & Restore)
+- Implemented BackupManager class with comprehensive backup operations (687 lines)
+- Added BackupMetadata dataclass for structured backup information
+- Implemented tar.gz compression for backup archives
+- Added SHA-256 checksum calculation and verification
+- Extended CLI with 8 backup management commands (225 lines added to cli.py)
+- Implemented selective backup (WireGuard, SSH, config, clients)
+- Added backup import/export for external storage
+- Implemented automatic cleanup of old backups
+- Added backup integrity verification with checksum and tar validation
 
 ### Security
-- Eliminated 37 critical command injection vulnerabilities across codebase
+- Eliminated 52 critical command injection vulnerabilities across codebase (37 previously + 15 new)
+- **CRITICAL FIX**: Eliminated 8 command injection vulnerabilities in network/interfaces.py
+- **CRITICAL FIX**: Eliminated 7 command injection vulnerabilities in system/packages.py
 - **CRITICAL FIX**: Eliminated private key exposure in process listings (stdin-based key derivation)
 - Implemented comprehensive input validation framework preventing injection attacks
 - Created structured exception handling replacing unsafe bare except clauses
@@ -144,13 +363,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed 3 bare except clauses that could hide SystemExit and KeyboardInterrupt
 - Added hostname/IP validation preventing malicious input in network operations
 - Added port range validation preventing invalid or privileged port usage
-- Added interface name validation for VPN operations
-- Eliminated all shell pipe usage replacing with native command options
-- Converted all f-string command construction to safe array format
+- Added interface name validation for VPN operations preventing command injection
+- Added package name validation for package manager operations preventing command injection
+- Added netmask validation supporting both CIDR and dotted decimal formats
+- Eliminated all shell pipe usage replacing with native command options or Python file I/O
+- Converted all f-string command construction to safe array format in network and package modules
 - Ensured no shell=True usage in any subprocess operations
 - Extended validation coverage to all network testing functions
 - Private keys now transmitted via stdin only, never in command arguments
 - Type-safe enum comparisons for service status checks
+- All network interface operations now validate interface names before command execution
+- All package manager operations now validate package names before command execution
+- Network routing operations now validate CIDR blocks and gateway IPs
+- Comprehensive security test coverage verifying all injection prevention measures
+- Parameterized injection tests covering 50+ malicious input patterns (SQL, command, path traversal)
+- Verified shell=False enforcement across all subprocess operations in test suite
+- Tested validator rejection of all command injection attempts (;, &&, |, `, $(), etc.)
+- Validated that malicious inputs are safely passed as literal arguments, not executed
+- Ensured all array-based commands prevent shell interpretation of special characters
+- Created integration tests verifying security validation throughout end-to-end workflows
 
 ### Documentation
 - Updated README.md with distribution-agnostic language
@@ -160,6 +391,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added documentation for QR code usage
 - Added documentation for automated SSH configuration
 - Added documentation for fail2ban custom jails
+- Added comprehensive Debian 13 (Trixie) compatibility section to README (Phase 3: Full Debian 13 Integration)
+- Updated Python version requirement documentation (3.11+ enforced)
+- Created Debian 12/13 upgrade guide in README
+- Updated version-specific notes clarifying Debian 11 end-of-support
+- Updated Python version badges from 3.10+ to 3.11+ in README shields
+- Added Debian version badge showing 12 | 13 support
+- Updated setup.py python_requires from >=3.10 to >=3.11
+- Updated pyproject.toml requires-python from >=3.10 to >=3.11
+- Updated Python classifiers in setup.py (removed 3.10, added 3.13)
+- Updated Python classifiers in pyproject.toml (removed 3.10, added 3.13)
+- Updated Black target-version from py310 to py311 in pyproject.toml
+- Updated mypy python_version from 3.10 to 3.11 in pyproject.toml
+- Documented key Debian 13 compatibility features (version detection, package management)
+- Added upgrade instructions for existing Debian 12 users
+- Clarified that VPNHD auto-detects Debian version (no manual configuration needed)
 
 ## [v1.0.0] - 2025-11-08
 

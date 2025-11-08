@@ -9,6 +9,8 @@ from ..utils.constants import (
     REQUIRED_PACKAGES_FEDORA,
     COMMAND_TIMEOUT_INSTALL
 )
+from ..security.validators import is_valid_package_name
+from ..exceptions import ValidationError
 from .commands import execute_command, check_command_exists
 
 
@@ -72,10 +74,17 @@ class PackageManager:
 
         Returns:
             bool: True if installed
+
+        Raises:
+            ValidationError: If package name is invalid
         """
+        # SECURITY: Validate package name to prevent command injection
+        if not is_valid_package_name(package):
+            raise ValidationError("package", package, "Invalid package name format")
+
         if self.package_manager in ("apt", "apt-get"):
             result = execute_command(
-                f"dpkg -l {package}",
+                ["dpkg", "-l", package],
                 check=False,
                 capture_output=True
             )
@@ -83,7 +92,7 @@ class PackageManager:
 
         elif self.package_manager in ("dnf", "yum"):
             result = execute_command(
-                f"rpm -q {package}",
+                ["rpm", "-q", package],
                 check=False,
                 capture_output=True
             )
@@ -91,7 +100,7 @@ class PackageManager:
 
         elif self.package_manager == "pacman":
             result = execute_command(
-                f"pacman -Q {package}",
+                ["pacman", "-Q", package],
                 check=False,
                 capture_output=True
             )
@@ -109,32 +118,40 @@ class PackageManager:
 
         Returns:
             bool: True if installation succeeded
+
+        Raises:
+            ValidationError: If package name is invalid
         """
+        # SECURITY: Validate package name to prevent command injection
+        if not is_valid_package_name(package):
+            raise ValidationError("package", package, "Invalid package name format")
+
         self.logger.info(f"Installing package: {package}")
 
         # Check if already installed
-        if self.is_package_installed(package):
-            self.logger.info(f"Package {package} is already installed")
-            return True
+        try:
+            if self.is_package_installed(package):
+                self.logger.info(f"Package {package} is already installed")
+                return True
+        except ValidationError:
+            # Package name already validated above, but catch anyway
+            raise
 
-        # Build install command
+        # Build install command as array
         if self.package_manager in ("apt", "apt-get"):
-            cmd = f"{self.package_manager} install"
+            cmd = [self.package_manager, "install", package]
             if assume_yes:
-                cmd += " -y"
-            cmd += f" {package}"
+                cmd.insert(2, "-y")  # Insert -y before package name
 
         elif self.package_manager in ("dnf", "yum"):
-            cmd = f"{self.package_manager} install"
+            cmd = [self.package_manager, "install", package]
             if assume_yes:
-                cmd += " -y"
-            cmd += f" {package}"
+                cmd.insert(2, "-y")
 
         elif self.package_manager == "pacman":
-            cmd = f"pacman -S"
+            cmd = ["pacman", "-S", package]
             if assume_yes:
-                cmd += " --noconfirm"
-            cmd += f" {package}"
+                cmd.insert(2, "--noconfirm")
 
         else:
             self.logger.error(f"Unsupported package manager: {self.package_manager}")
@@ -165,14 +182,26 @@ class PackageManager:
 
         Returns:
             Tuple[List[str], List[str]]: (successful, failed) package lists
+
+        Raises:
+            ValidationError: If any package name is invalid
         """
+        # SECURITY: Validate all package names first
+        for package in packages:
+            if not is_valid_package_name(package):
+                raise ValidationError("package", package, "Invalid package name format")
+
         successful = []
         failed = []
 
         for package in packages:
-            if self.install_package(package, assume_yes):
-                successful.append(package)
-            else:
+            try:
+                if self.install_package(package, assume_yes):
+                    successful.append(package)
+                else:
+                    failed.append(package)
+            except ValidationError:
+                # Should not happen since we validated above, but catch anyway
                 failed.append(package)
 
         return successful, failed
@@ -187,18 +216,18 @@ class PackageManager:
         self.logger.info("Updating package cache")
 
         if self.package_manager in ("apt", "apt-get"):
-            cmd = f"{self.package_manager} update"
+            cmd = [self.package_manager, "update"]
             result = execute_command(cmd, sudo=True, check=False)
             return result.success
 
         elif self.package_manager in ("dnf", "yum"):
-            cmd = f"{self.package_manager} check-update"
+            cmd = [self.package_manager, "check-update"]
             result = execute_command(cmd, sudo=True, check=False)
             # dnf/yum check-update returns: 0 = no updates, 100 = updates available, other = error
             return result.exit_code in (0, 100)
 
         elif self.package_manager == "pacman":
-            cmd = "pacman -Sy"
+            cmd = ["pacman", "-Sy"]
             result = execute_command(cmd, sudo=True, check=False)
             return result.success
 
@@ -219,19 +248,19 @@ class PackageManager:
         self.logger.info("Upgrading packages")
 
         if self.package_manager in ("apt", "apt-get"):
-            cmd = f"{self.package_manager} upgrade"
+            cmd = [self.package_manager, "upgrade"]
             if assume_yes:
-                cmd += " -y"
+                cmd.append("-y")
 
         elif self.package_manager in ("dnf", "yum"):
-            cmd = f"{self.package_manager} upgrade"
+            cmd = [self.package_manager, "upgrade"]
             if assume_yes:
-                cmd += " -y"
+                cmd.append("-y")
 
         elif self.package_manager == "pacman":
-            cmd = "pacman -Syu"
+            cmd = ["pacman", "-Syu"]
             if assume_yes:
-                cmd += " --noconfirm"
+                cmd.append("--noconfirm")
 
         else:
             self.logger.error(f"Unsupported package manager: {self.package_manager}")
@@ -273,9 +302,13 @@ class PackageManager:
         missing = []
 
         for package in required:
-            if self.is_package_installed(package):
-                installed.append(package)
-            else:
+            try:
+                if self.is_package_installed(package):
+                    installed.append(package)
+                else:
+                    missing.append(package)
+            except ValidationError as e:
+                self.logger.warning(f"Invalid package name in requirements: {package}")
                 missing.append(package)
 
         return installed, missing
@@ -302,7 +335,11 @@ class PackageManager:
         self.update_package_cache()
 
         # Install missing packages
-        successful, failed = self.install_packages(missing, assume_yes)
+        try:
+            successful, failed = self.install_packages(missing, assume_yes)
+        except ValidationError as e:
+            self.logger.error(f"Invalid package name in requirements: {e}")
+            return False
 
         if failed:
             self.logger.error(f"Failed to install packages: {', '.join(failed)}")
@@ -321,26 +358,30 @@ class PackageManager:
 
         Returns:
             bool: True if removal succeeded
+
+        Raises:
+            ValidationError: If package name is invalid
         """
+        # SECURITY: Validate package name to prevent command injection
+        if not is_valid_package_name(package):
+            raise ValidationError("package", package, "Invalid package name format")
+
         self.logger.info(f"Removing package: {package}")
 
         if self.package_manager in ("apt", "apt-get"):
-            cmd = f"{self.package_manager} remove"
+            cmd = [self.package_manager, "remove", package]
             if assume_yes:
-                cmd += " -y"
-            cmd += f" {package}"
+                cmd.insert(2, "-y")
 
         elif self.package_manager in ("dnf", "yum"):
-            cmd = f"{self.package_manager} remove"
+            cmd = [self.package_manager, "remove", package]
             if assume_yes:
-                cmd += " -y"
-            cmd += f" {package}"
+                cmd.insert(2, "-y")
 
         elif self.package_manager == "pacman":
-            cmd = f"pacman -R"
+            cmd = ["pacman", "-R", package]
             if assume_yes:
-                cmd += " --noconfirm"
-            cmd += f" {package}"
+                cmd.insert(2, "--noconfirm")
 
         else:
             self.logger.error(f"Unsupported package manager: {self.package_manager}")
