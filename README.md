@@ -26,11 +26,11 @@ VPNHD is an interactive command-line tool that automates the complete setup of a
 1. **Phase 1: Debian Server Installation** - Guided Debian installation and validation
 2. **Phase 2: WireGuard Server** - Complete WireGuard server configuration
 3. **Phase 3: Router Port Forwarding** - Assisted router configuration
-4. **Phase 4: Fedora Client** - Always-on VPN client setup
-5. **Phase 5: Pop!_OS Client** - On-demand, isolated client setup
-6. **Phase 6: Termux/Android** - Mobile device configuration with QR codes
-7. **Phase 7: SSH Keys** - Key-based authentication setup
-8. **Phase 8: Security Hardening** - UFW firewall and fail2ban configuration
+4. **Phase 4: Linux Desktop Client (Always-On)** - Configure Linux desktop/laptop for always-on VPN (Fedora, Ubuntu, Debian, Pop!_OS, elementary OS, etc.)
+5. **Phase 5: Linux Desktop Client (On-Demand)** - Configure Linux desktop/laptop for on-demand VPN with isolation
+6. **Phase 6: Mobile Client (Android/iOS)** - Mobile device configuration with QR codes for easy setup
+7. **Phase 7: SSH Keys** - Automated key-based authentication setup with password auth disable
+8. **Phase 8: Security Hardening** - UFW firewall and fail2ban with custom jails for SSH and WireGuard
 
 ### Key Capabilities
 
@@ -48,7 +48,8 @@ VPNHD is an interactive command-line tool that automates the complete setup of a
 ### System Requirements
 
 - **Server**: Debian 12+ (Bookworm) x86_64
-- **Clients**: Fedora, Pop!_OS, or Android (Termux)
+- **Desktop Clients**: Any modern Linux distribution (Fedora, Ubuntu, Debian, Pop!_OS, elementary OS, Linux Mint, Arch, Manjaro, etc.)
+- **Mobile Clients**: Android or iOS devices
 - **Python**: 3.10 or higher
 - **Root Access**: Required for system configuration
 
@@ -147,11 +148,11 @@ VPNHD stores configuration in `~/.config/vpnhd/config.json`. This includes:
 1. **Install Debian server** (Phase 1)
 2. **Configure WireGuard server** (Phase 2)
 3. **Set up router port forwarding** (Phase 3)
-4. **Connect Fedora laptop** (Phase 4)
-5. **Connect Pop!_OS laptop** (Phase 5)
-6. **Connect Android phone** (Phase 6)
-7. **Enable SSH keys** (Phase 7)
-8. **Harden security** (Phase 8)
+4. **Connect Linux desktop (always-on mode)** (Phase 4)
+5. **Connect Linux laptop (on-demand mode)** (Phase 5)
+6. **Connect mobile device via QR code** (Phase 6)
+7. **Enable SSH key authentication** (Phase 7)
+8. **Harden security with firewall and intrusion prevention** (Phase 8)
 
 Each phase guides you through the process with clear explanations and validation.
 
