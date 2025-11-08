@@ -9,6 +9,7 @@ from .ui.display import Display
 from .ui.prompts import Prompts
 from .ui.menus import MainMenu
 from .phases import get_phase_class
+from .client import ClientManager
 from .utils.logging import setup_logging, get_logger
 from .utils.constants import APP_NAME, APP_VERSION
 from .__version__ import __version__
@@ -227,6 +228,379 @@ def export_config(ctx, output_path):
         display.success(f"Configuration exported to {output_path}")
     else:
         display.error("Failed to export configuration")
+
+
+# ==============================================================================
+# Client Management Commands
+# ==============================================================================
+
+@main.group()
+@click.pass_context
+def client(ctx):
+    """Manage VPN clients."""
+    # Initialize client manager if not already in context
+    if 'client_manager' not in ctx.obj:
+        ctx.obj['client_manager'] = ClientManager(ctx.obj['config'])
+
+
+@client.command('list')
+@click.option('--enabled', is_flag=True, help='Show only enabled clients')
+@click.option('--device-type', type=click.Choice(['desktop', 'mobile', 'server']), help='Filter by device type')
+@click.option('--os', help='Filter by operating system')
+@click.option('--connected', is_flag=True, help='Show only connected clients')
+@click.option('--format', type=click.Choice(['table', 'json', 'simple']), default='table', help='Output format')
+@click.pass_context
+def list_clients(ctx, enabled, device_type, os, connected, format):
+    """List all VPN clients."""
+    client_manager = ctx.obj['client_manager']
+    display = ctx.obj['display']
+
+    # Get clients with filters
+    clients = client_manager.list_clients(
+        enabled_only=enabled,
+        device_type=device_type,
+        os_filter=os
+    )
+
+    # Filter by connection status if requested
+    if connected:
+        connected_names = client_manager.get_all_connected_clients()
+        clients = [c for c in clients if c.name in connected_names]
+
+    if not clients:
+        display.info("No clients found")
+        return
+
+    if format == 'json':
+        import json
+        output = [c.to_dict() for c in clients]
+        click.echo(json.dumps(output, indent=2))
+    elif format == 'simple':
+        for client in clients:
+            status = "✓" if client.enabled else "✗"
+            click.echo(f"{status} {client.name} ({client.vpn_ip}) - {client.device_type}")
+    else:  # table
+        from rich.table import Table
+        from rich.console import Console
+
+        table = Table(title="VPN Clients")
+        table.add_column("Name", style="cyan")
+        table.add_column("IP", style="yellow")
+        table.add_column("Device", style="blue")
+        table.add_column("OS", style="green")
+        table.add_column("Status", style="magenta")
+        table.add_column("Created", style="white")
+
+        for client in clients:
+            status = "Enabled" if client.enabled else "Disabled"
+            created = client.created_at[:10] if client.created_at else "Unknown"
+            table.add_row(
+                client.name,
+                client.vpn_ip,
+                client.device_type or "Unknown",
+                client.os or "Unknown",
+                status,
+                created
+            )
+
+        Console().print(table)
+
+
+@client.command('add')
+@click.argument('name')
+@click.option('--description', default='', help='Client description')
+@click.option('--device-type', type=click.Choice(['desktop', 'mobile', 'server']), default='desktop', help='Device type')
+@click.option('--os', default='linux', help='Operating system')
+@click.option('--ip', help='Specific VPN IP address')
+@click.option('--qr', is_flag=True, help='Generate QR code (for mobile clients)')
+@click.pass_context
+def add_client(ctx, name, description, device_type, os, ip, qr):
+    """Add a new VPN client."""
+    client_manager = ctx.obj['client_manager']
+    display = ctx.obj['display']
+
+    display.info(f"Adding client '{name}'...")
+
+    client_info = client_manager.add_client(
+        name=name,
+        description=description,
+        device_type=device_type,
+        os=os,
+        vpn_ip=ip,
+        generate_qr=qr
+    )
+
+    if client_info:
+        display.success(f"✓ Client '{name}' added successfully")
+        display.print(f"  VPN IP: {client_info.vpn_ip}", style="yellow")
+        display.print(f"  Public Key: {client_info.public_key[:32]}...", style="cyan")
+
+        # Show next steps
+        display.newline()
+        display.heading("Next Steps:", style="cyan")
+        display.print(f"  1. Export config: vpnhd client export {name}")
+        if device_type == "mobile" and qr:
+            display.print(f"  2. Scan QR code with WireGuard app")
+        else:
+            display.print(f"  2. Copy config to client device")
+    else:
+        display.error(f"Failed to add client '{name}'")
+        sys.exit(1)
+
+
+@client.command('remove')
+@click.argument('name')
+@click.option('--yes', '-y', is_flag=True, help='Skip confirmation')
+@click.pass_context
+def remove_client(ctx, name, yes):
+    """Remove a VPN client."""
+    client_manager = ctx.obj['client_manager']
+    display = ctx.obj['display']
+    prompts = ctx.obj['prompts']
+
+    # Check if client exists
+    client = client_manager.get_client(name)
+    if not client:
+        display.error(f"Client '{name}' not found")
+        sys.exit(1)
+
+    # Confirm removal
+    if not yes:
+        display.warning(f"This will remove client '{name}' and revoke access")
+        if not prompts.confirm("Continue?", default=False):
+            display.info("Cancelled")
+            return
+
+    if client_manager.remove_client(name):
+        display.success(f"✓ Client '{name}' removed successfully")
+    else:
+        display.error(f"Failed to remove client '{name}'")
+        sys.exit(1)
+
+
+@client.command('show')
+@click.argument('name')
+@click.option('--show-keys', is_flag=True, help='Display full keys')
+@click.pass_context
+def show_client(ctx, name, show_keys):
+    """Show detailed information about a client."""
+    client_manager = ctx.obj['client_manager']
+    display = ctx.obj['display']
+    config_manager = ctx.obj['config']
+
+    client = client_manager.get_client(name)
+    if not client:
+        display.error(f"Client '{name}' not found")
+        sys.exit(1)
+
+    from rich.panel import Panel
+    from rich.console import Console
+
+    # Get connection status
+    status = client_manager.get_client_status(name)
+    connected = status.get("connected", False) if status else False
+
+    # Build info text
+    info_lines = [
+        f"[cyan]Name:[/cyan] {client.name}",
+        f"[cyan]VPN IP:[/cyan] {client.vpn_ip}",
+        f"[cyan]Device Type:[/cyan] {client.device_type or 'Unknown'}",
+        f"[cyan]OS:[/cyan] {client.os or 'Unknown'}",
+        f"[cyan]Status:[/cyan] {'[green]Enabled[/green]' if client.enabled else '[red]Disabled[/red]'}",
+        f"[cyan]Connected:[/cyan] {'[green]Yes[/green]' if connected else '[red]No[/red]'}",
+        f"[cyan]Created:[/cyan] {client.created_at[:19] if client.created_at else 'Unknown'}",
+    ]
+
+    if client.description:
+        info_lines.append(f"[cyan]Description:[/cyan] {client.description}")
+
+    if show_keys:
+        info_lines.append(f"[cyan]Public Key:[/cyan] {client.public_key}")
+        private_key = config_manager.get(f"clients.{name}.private_key")
+        if private_key:
+            info_lines.append(f"[cyan]Private Key:[/cyan] {private_key}")
+    else:
+        info_lines.append(f"[cyan]Public Key:[/cyan] {client.public_key[:32]}... (use --show-keys for full)")
+
+    # Show connection details if connected
+    if connected and status:
+        info_lines.append("")
+        info_lines.append("[yellow]Connection Details:[/yellow]")
+        if status.get("endpoint"):
+            info_lines.append(f"  [cyan]Endpoint:[/cyan] {status['endpoint']}")
+        if status.get("latest_handshake"):
+            info_lines.append(f"  [cyan]Last Handshake:[/cyan] {status['latest_handshake']}")
+        if status.get("transfer_rx"):
+            info_lines.append(f"  [cyan]Data Received:[/cyan] {status['transfer_rx']} bytes")
+        if status.get("transfer_tx"):
+            info_lines.append(f"  [cyan]Data Sent:[/cyan] {status['transfer_tx']} bytes")
+
+    panel = Panel(
+        "\n".join(info_lines),
+        title=f"Client: {name}",
+        border_style="cyan"
+    )
+    Console().print(panel)
+
+
+@client.command('status')
+@click.option('--all', is_flag=True, help='Show all clients (not just connected)')
+@click.pass_context
+def client_status(ctx, all):
+    """Show connection status of clients."""
+    client_manager = ctx.obj['client_manager']
+    display = ctx.obj['display']
+
+    from rich.table import Table
+    from rich.console import Console
+
+    clients = client_manager.list_clients()
+
+    table = Table(title="Client Connection Status")
+    table.add_column("Name", style="cyan")
+    table.add_column("IP", style="yellow")
+    table.add_column("Connected", style="green")
+    table.add_column("Endpoint", style="blue")
+    table.add_column("Last Handshake", style="magenta")
+    table.add_column("Transfer (RX/TX)", style="white")
+
+    for client in clients:
+        status = client_manager.get_client_status(client.name)
+        connected = status.get("connected", False) if status else False
+
+        # Skip disconnected clients unless --all specified
+        if not connected and not all:
+            continue
+
+        conn_status = "[green]✓[/green]" if connected else "[red]✗[/red]"
+        endpoint = status.get("endpoint", "-") if status and connected else "-"
+        handshake = status.get("latest_handshake", "-") if status and connected else "-"
+
+        if status and connected:
+            rx = status.get("transfer_rx", "0")
+            tx = status.get("transfer_tx", "0")
+            transfer = f"{rx}/{tx}"
+        else:
+            transfer = "-"
+
+        table.add_row(
+            client.name,
+            client.vpn_ip,
+            conn_status,
+            endpoint,
+            handshake,
+            transfer
+        )
+
+    Console().print(table)
+
+
+@client.command('export')
+@click.argument('name')
+@click.option('--output', '-o', help='Output file path')
+@click.option('--qr', is_flag=True, help='Also generate QR code')
+@click.pass_context
+def export_client_config(ctx, name, output, qr):
+    """Export client configuration file."""
+    client_manager = ctx.obj['client_manager']
+    display = ctx.obj['display']
+
+    client = client_manager.get_client(name)
+    if not client:
+        display.error(f"Client '{name}' not found")
+        sys.exit(1)
+
+    # Export config file
+    config_path = client_manager.export_client_config(name, output)
+    if config_path:
+        display.success(f"✓ Configuration exported to: {config_path}")
+    else:
+        display.error("Failed to export configuration")
+        sys.exit(1)
+
+    # Generate QR code if requested
+    if qr:
+        from ..crypto.qrcode import create_qr_with_metadata
+        from ..utils.constants import QR_CODE_DIR
+
+        config_text = Path(config_path).read_text()
+        qr_path = create_qr_with_metadata(
+            config_text=config_text,
+            client_name=name,
+            output_dir=QR_CODE_DIR
+        )
+        if qr_path:
+            display.success(f"✓ QR code generated: {qr_path}")
+        else:
+            display.warning("Failed to generate QR code")
+
+
+@client.command('enable')
+@click.argument('name')
+@click.pass_context
+def enable_client(ctx, name):
+    """Enable a client."""
+    client_manager = ctx.obj['client_manager']
+    display = ctx.obj['display']
+
+    if client_manager.enable_client(name):
+        display.success(f"✓ Client '{name}' enabled")
+    else:
+        display.error(f"Failed to enable client '{name}'")
+        sys.exit(1)
+
+
+@client.command('disable')
+@click.argument('name')
+@click.pass_context
+def disable_client(ctx, name):
+    """Disable a client."""
+    client_manager = ctx.obj['client_manager']
+    display = ctx.obj['display']
+
+    if client_manager.disable_client(name):
+        display.success(f"✓ Client '{name}' disabled")
+    else:
+        display.error(f"Failed to disable client '{name}'")
+        sys.exit(1)
+
+
+@client.command('stats')
+@click.pass_context
+def client_stats(ctx):
+    """Show client statistics."""
+    client_manager = ctx.obj['client_manager']
+
+    from rich.panel import Panel
+    from rich.console import Console
+
+    stats = client_manager.get_statistics()
+
+    lines = [
+        f"[cyan]Total Clients:[/cyan] {stats['total']}",
+        f"[cyan]Enabled:[/cyan] [green]{stats['enabled']}[/green]",
+        f"[cyan]Disabled:[/cyan] [red]{stats['disabled']}[/red]",
+        f"[cyan]Connected:[/cyan] [yellow]{stats['connected']}[/yellow]",
+    ]
+
+    if stats['by_device_type']:
+        lines.append("")
+        lines.append("[yellow]By Device Type:[/yellow]")
+        for dtype, count in stats['by_device_type'].items():
+            lines.append(f"  {dtype}: {count}")
+
+    if stats['by_os']:
+        lines.append("")
+        lines.append("[yellow]By Operating System:[/yellow]")
+        for os_name, count in stats['by_os'].items():
+            lines.append(f"  {os_name}: {count}")
+
+    panel = Panel(
+        "\n".join(lines),
+        title="Client Statistics",
+        border_style="cyan"
+    )
+    Console().print(panel)
 
 
 if __name__ == '__main__':
