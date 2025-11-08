@@ -1,0 +1,7 @@
+rich>=13.0.0
+click>=8.0.0
+pyyaml>=6.0.0
+jsonschema>=4.0.0
+python-dotenv>=1.0.0
+netifaces>=0.11.0
+jinja2>=3.0.0

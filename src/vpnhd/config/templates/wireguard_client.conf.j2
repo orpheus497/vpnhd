@@ -1,0 +1,28 @@
+[Interface]
+# Client VPN IP address
+Address = {{ client_vpn_ip }}/{{ vpn_subnet_mask }}
+
+# Client private key
+PrivateKey = {{ client_private_key }}
+
+# DNS servers (optional)
+{% if dns_servers %}
+DNS = {{ dns_servers|join(', ') }}
+{% endif %}
+
+[Peer]
+# Server public key
+PublicKey = {{ server_public_key }}
+
+# Server endpoint (public IP:port)
+Endpoint = {{ server_public_ip }}:{{ wireguard_port }}
+
+# Allowed IPs (0.0.0.0/0 routes all traffic through VPN)
+{% if route_all_traffic %}
+AllowedIPs = 0.0.0.0/0
+{% else %}
+AllowedIPs = {{ vpn_network }}
+{% endif %}
+
+# Persistent keepalive (helps with NAT traversal)
+PersistentKeepalive = 25

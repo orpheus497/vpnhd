@@ -1,0 +1,33 @@
+[Interface]
+# Server VPN IP address
+Address = {{ vpn_server_ip }}/{{ vpn_subnet_mask }}
+
+# Server private key
+PrivateKey = {{ server_private_key }}
+
+# WireGuard listening port
+ListenPort = {{ wireguard_port }}
+
+# Post-up: Run when VPN starts
+# - Enable forwarding from VPN to LAN
+# - Enable NAT (MASQUERADE) for internet access
+# - Allow VPN traffic input
+PostUp = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o {{ server_interface }} -j MASQUERADE; iptables -A INPUT -i wg0 -j ACCEPT
+
+# Post-down: Run when VPN stops
+# - Remove the above rules
+PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o {{ server_interface }} -j MASQUERADE; iptables -D INPUT -i wg0 -j ACCEPT
+
+{% for client in clients %}
+# Client: {{ client.name }}
+[Peer]
+# Client public key
+PublicKey = {{ client.public_key }}
+
+# Allowed IPs for this client
+AllowedIPs = {{ client.vpn_ip }}/32
+{% if client.comment %}
+# {{ client.comment }}
+{% endif %}
+
+{% endfor %}
