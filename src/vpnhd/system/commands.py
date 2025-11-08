@@ -26,35 +26,20 @@ SENSITIVE_PARAMS = {
 }
 
 
-def _sanitize_command_for_logging(command_list: List[str]) -> str:
+def _has_sensitive_params(command_list: List[str]) -> bool:
     """
-    Sanitize command for safe logging by redacting sensitive parameters.
+    Check if command contains sensitive parameters.
 
     Args:
         command_list: Command as list of strings
 
     Returns:
-        Sanitized command string safe for logging
+        True if command contains sensitive parameters
     """
-    sanitized = []
-    redact_next = False
-
     for arg in command_list:
-        if redact_next:
-            sanitized.append("***REDACTED***")
-            redact_next = False
-        elif any(arg.lower().startswith(param) for param in SENSITIVE_PARAMS):
-            # Handle --key=value format
-            if "=" in arg:
-                key, _ = arg.split("=", 1)
-                sanitized.append(f"{key}=***REDACTED***")
-            else:
-                sanitized.append(arg)
-                redact_next = True
-        else:
-            sanitized.append(arg)
-
-    return " ".join(sanitized)
+        if any(arg.lower().startswith(param) for param in SENSITIVE_PARAMS):
+            return True
+    return False
 
 
 @dataclass
@@ -117,10 +102,12 @@ def execute_command(
     if timeout is None:
         timeout = COMMAND_TIMEOUT_DEFAULT
 
-    # Log command for debugging (sanitized to avoid exposing sensitive data)
+    # Log command for debugging (only if it doesn't contain sensitive parameters)
     command_str = " ".join(command_list)
-    safe_command_str = _sanitize_command_for_logging(command_list)
-    logger.debug(f"Executing command: {safe_command_str}")
+    if not _has_sensitive_params(command_list):
+        logger.debug(f"Executing command: {command_str}")
+    else:
+        logger.debug("Executing command with sensitive parameters (not logged for security)")
 
     try:
         # Execute command safely WITHOUT shell=True
@@ -138,9 +125,10 @@ def execute_command(
         success = result.returncode == 0
 
         if not success:
-            logger.warning(
-                f"Command failed with exit code {result.returncode}: {safe_command_str}"
-            )
+            if not _has_sensitive_params(command_list):
+                logger.warning(f"Command failed with exit code {result.returncode}: {command_str}")
+            else:
+                logger.warning(f"Command with sensitive parameters failed with exit code {result.returncode}")
             if result.stderr:
                 logger.warning(f"  stderr: {result.stderr.strip()}")
 
@@ -158,7 +146,10 @@ def execute_command(
         )
 
     except subprocess.TimeoutExpired as e:
-        logger.error(f"Command timed out after {timeout}s: {safe_command_str}")
+        if not _has_sensitive_params(command_list):
+            logger.error(f"Command timed out after {timeout}s: {command_str}")
+        else:
+            logger.error(f"Command with sensitive parameters timed out after {timeout}s")
         return CommandResult(
             exit_code=-1,
             stdout="",

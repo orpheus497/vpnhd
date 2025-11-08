@@ -260,8 +260,8 @@ class TestInstallPackage:
 
     def test_fedora_install_uses_dnf(self, mocker):
         """Test that Fedora uses dnf for installation."""
-        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=fedora"))
-        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+        _ = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=fedora"))
+        _ = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
         mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
@@ -276,8 +276,8 @@ class TestInstallPackage:
 
     def test_install_without_assume_yes(self, mocker):
         """Test installation without -y flag."""
-        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
-        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+         _ = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+         _ = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
         mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
@@ -292,8 +292,8 @@ class TestInstallPackage:
 
     def test_install_already_installed_package(self, mocker):
         """Test installing already installed package."""
-        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
-        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+        _ = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+        _ = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
         mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
@@ -309,8 +309,8 @@ class TestInstallPackage:
 
     def test_install_uses_array_commands(self, mocker):
         """Test that install uses array-based commands (secure)."""
-        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
-        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+        _ = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+        _ = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
         mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
@@ -329,8 +329,8 @@ class TestInstallPackages:
 
     def test_install_multiple_packages_success(self, mocker):
         """Test installing multiple packages successfully."""
-        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
-        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+        _ = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+        _ = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
         mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
@@ -344,8 +344,8 @@ class TestInstallPackages:
 
     def test_install_with_one_failure(self, mocker):
         """Test batch install with one failure."""
-        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
-        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+        _ = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+        _ = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
         mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
 
         # First package succeeds, second fails, third succeeds
@@ -369,8 +369,8 @@ class TestInstallPackages:
 
     def test_install_packages_validates_all_first(self, mocker):
         """Test that all packages are validated before any installation."""
-        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
-        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+        _ = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+        _ = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
 
         pm = PackageManager()
 
@@ -388,8 +388,8 @@ class TestUpdatePackageCache:
 
     def test_debian_update_uses_apt_update(self, mocker):
         """Test that Debian uses apt update."""
-        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
-        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+        _ = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+        _ = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
         mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
@@ -404,8 +404,8 @@ class TestUpdatePackageCache:
 
     def test_fedora_update_uses_dnf_check_update(self, mocker):
         """Test that Fedora uses dnf check-update."""
-        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=fedora"))
-        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+        _ = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=fedora"))
+        _ = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
         mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
@@ -419,7 +419,7 @@ class TestUpdatePackageCache:
 
     def test_dnf_check_update_exit_code_100_is_success(self, mocker):
         """Test that dnf check-update exit code 100 is treated as success."""
-        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=fedora"))
+        _ = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=fedora"))
         _ = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
         mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
         # Exit code 100 means updates available
@@ -439,8 +439,8 @@ class TestRemovePackage:
 
     def test_valid_package_removal(self, mocker):
         """Test removing valid package."""
-        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
-        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+        _ = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+        _ = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
         mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 
@@ -643,7 +643,7 @@ class TestEdgeCases:
 
     def test_package_with_special_characters(self, mocker):
         """Test valid packages with special characters."""
-        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+        _ = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
         mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
         mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
