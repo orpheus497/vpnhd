@@ -74,6 +74,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Command injection in commands.py get_command_version() using f-string
 - Missing input validation in network/testing.py ping_host() and traceroute()
 - Missing port validation in phase8_security.py _configure_ufw() method
+- Method name mismatch in ssh_config.py calling restart() instead of restart_service()
+
+### Removed
+- Deprecated phase4_fedora.py (replaced by distribution-agnostic phase4_linux_client.py)
+- Deprecated phase5_popos.py (replaced by distribution-agnostic phase5_linux_client_ondemand.py)
+- Deprecated phase6_termux.py (replaced by distribution-agnostic phase6_mobile.py)
+- Legacy phase imports and exports from phases/__init__.py
 
 ### Enhanced
 - Phase 4 (Linux Desktop Client Always-On) now automatically adds peer to server
@@ -104,6 +111,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Converted all remaining f-string commands to secure array format
 - Eliminated shell pipe usage in ssh_config.py using systemctl exit codes
 - Added proper logging for exception cases instead of silent failures
+- Removed 217 lines of deprecated code reducing maintenance burden
+- Cleaned up phase module exports to only include active implementations
+- Fixed method name mismatch preventing AttributeError in SSH service restart
 
 ### Security
 - Eliminated 26 critical command injection vulnerabilities across codebase
