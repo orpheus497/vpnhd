@@ -22,6 +22,7 @@ from .qrcode import (
     generate_qr_for_config_file,
     verify_qrcode_available
 )
+from .rotation import KeyRotationManager
 
 __all__ = [
     'generate_keypair',
@@ -39,5 +40,6 @@ __all__ = [
     'save_qr_code',
     'display_qr_terminal',
     'generate_qr_for_config_file',
-    'verify_qrcode_available'
+    'verify_qrcode_available',
+    'KeyRotationManager'
 ]
