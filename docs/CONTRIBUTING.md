@@ -61,9 +61,9 @@ Look for issues that interest you and leave a comment saying you'd like to work 
 
 ### Prerequisites
 
-- Python 3.10 or higher
+- Python 3.11 or higher (required for Debian 13 compatibility)
 - Git
-- Debian 12+ (for testing)
+- Debian 12 or 13 (for testing)
 - Virtual environment tool (venv or conda)
 
 ### Clone Repository
