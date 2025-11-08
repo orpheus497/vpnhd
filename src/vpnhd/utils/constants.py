@@ -99,9 +99,9 @@ REQUIRED_PACKAGES_FEDORA = [
     "net-tools",
 ]
 
-# Optional Packages
+# Optional Packages (deprecated - Python libraries used instead)
 OPTIONAL_PACKAGES = [
-    "qrencode",  # For QR code generation
+    # "qrencode" is deprecated - using Python qrcode library instead
 ]
 
 # Supported Linux Distributions for Clients

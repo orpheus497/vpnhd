@@ -80,6 +80,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Shell script linting with shellcheck
 - Markdown linting with markdownlint
 - YAML linting with yamllint
+- psutil library for cross-platform network interface discovery (Phase 5: Dependency Migration)
+- qrcode[pil] Python library for QR code generation replacing qrencode binary (Phase 5: Dependency Migration)
+- SVG QR code generation support for scalable mobile client configurations
+- TTY-based QR code terminal display using Unicode blocks for better visibility
 
 ### Changed
 - Phase 4 renamed from "Fedora Client" to "Linux Desktop Client (Always-On)"
@@ -97,6 +101,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Command execution switched from shell=True to shell=False to prevent injection attacks
 - run_command_with_input() updated with array-based command execution
 - .gitignore updated to exclude .dev-docs/ directory containing AI-generated documentation
+- Network discovery migrated from unmaintained netifaces to actively-maintained psutil (Phase 5: Dependency Migration)
+- QR code generation migrated from qrencode binary to pure Python qrcode library (Phase 5: Dependency Migration)
+- Network interface discovery now uses psutil.net_if_addrs() and psutil.net_if_stats()
+- QR code generation now uses Python qrcode library with PIL imaging support
+- Optional packages list updated to remove deprecated qrencode binary dependency
 
 ### Fixed
 - Template path resolution issues in Phases 2, 4, 5, and 6
@@ -150,6 +159,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Deprecated phase5_popos.py (replaced by distribution-agnostic phase5_linux_client_ondemand.py)
 - Deprecated phase6_termux.py (replaced by distribution-agnostic phase6_mobile.py)
 - Legacy phase imports and exports from phases/__init__.py
+- netifaces dependency replaced by psutil for better maintenance and cross-platform support (Phase 5: Dependency Migration)
+- qrencode binary dependency eliminated in favor of pure Python qrcode library (Phase 5: Dependency Migration)
+- install_qrencode() function deprecated (backward compatibility maintained)
 
 ### Enhanced
 - Phase 4 (Linux Desktop Client Always-On) now automatically adds peer to server
@@ -157,6 +169,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Phase 6 (Mobile Client) now generates QR codes and automatically adds peer to server
 - Phase 7 (SSH Keys) now includes automated sshd_config modification and rollback support
 - Phase 8 (Security Hardening) now creates fail2ban jails for both SSH and WireGuard
+- QR code generation now supports SVG format for vector graphics (scalable mobile configs)
+- QR code terminal display enhanced with TTY mode using Unicode blocks for better readability
+- Network discovery improved with better cross-platform compatibility using psutil
 
 ### Technical
 - Added ServerConfigManager class with peer management methods
@@ -205,6 +220,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configured pytest with strict markers and comprehensive logging
 - Enabled branch coverage for stricter testing of conditional logic
 - Excluded test files, build artifacts, and virtual environments from coverage measurement
+- Migrated network discovery from netifaces to psutil eliminating unmaintained dependency (Phase 5: Dependency Migration)
+- Replaced qrencode binary with Python qrcode library removing external binary dependency (Phase 5: Dependency Migration)
+- Complete rewrite of src/vpnhd/network/discovery.py using psutil (296 lines)
+- Complete rewrite of src/vpnhd/crypto/qrcode.py using Python qrcode library (298 lines)
+- Added QRCODE_AVAILABLE flag for graceful degradation when library unavailable
+- Implemented generate_qr_svg() for scalable vector QR codes
+- Implemented display_qr_terminal_tty() for Unicode-based terminal QR display
+- Maintained backward compatibility with deprecated install_qrencode() function
+- Updated requirements.txt: netifaces → psutil, added qrcode[pil]>=7.4.0
+- Updated pyproject.toml dependencies removing netifaces, adding psutil and qrcode
+- Updated constants.py marking qrencode as deprecated in OPTIONAL_PACKAGES
 
 ### Security
 - Eliminated 52 critical command injection vulnerabilities across codebase (37 previously + 15 new)

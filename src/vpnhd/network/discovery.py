@@ -3,7 +3,7 @@
 import socket
 from dataclasses import dataclass
 from typing import List, Dict, Optional
-import netifaces
+import psutil
 
 from ..utils.logging import get_logger
 from ..system.commands import execute_command, get_command_output
@@ -44,28 +44,35 @@ def get_all_interfaces() -> List[NetworkInterface]:
     interfaces = []
 
     try:
-        for iface_name in netifaces.interfaces():
-            try:
-                addrs = netifaces.ifaddresses(iface_name)
+        # Get all network interfaces with psutil
+        net_if_addrs = psutil.net_if_addrs()
+        net_if_stats = psutil.net_if_stats()
 
+        for iface_name, addrs in net_if_addrs.items():
+            try:
                 # Get MAC address
                 mac = None
-                if netifaces.AF_LINK in addrs:
-                    mac = addrs[netifaces.AF_LINK][0].get('addr', '')
+                for addr in addrs:
+                    if addr.family == psutil.AF_LINK:
+                        mac = addr.address
+                        break
 
                 # Get IPv4 information
                 ip_address = None
                 netmask = None
                 broadcast = None
 
-                if netifaces.AF_INET in addrs:
-                    ipv4_info = addrs[netifaces.AF_INET][0]
-                    ip_address = ipv4_info.get('addr')
-                    netmask = ipv4_info.get('netmask')
-                    broadcast = ipv4_info.get('broadcast')
+                for addr in addrs:
+                    if addr.family == socket.AF_INET:  # IPv4
+                        ip_address = addr.address
+                        netmask = addr.netmask
+                        broadcast = addr.broadcast
+                        break
 
                 # Check if interface is up
-                is_up = ip_address is not None
+                is_up = False
+                if iface_name in net_if_stats:
+                    is_up = net_if_stats[iface_name].isup
 
                 # Check if loopback
                 is_loopback = iface_name == 'lo' or (ip_address and ip_address.startswith('127.'))
@@ -98,17 +105,20 @@ def get_primary_interface() -> Optional[NetworkInterface]:
         Optional[NetworkInterface]: Primary interface or None
     """
     try:
-        # Get default gateway info
-        gateways = netifaces.gateways()
+        # Get default gateway info using ip route
+        output = get_command_output("ip route show default")
+        if output:
+            parts = output.split()
+            if 'dev' in parts:
+                dev_index = parts.index('dev')
+                if dev_index + 1 < len(parts):
+                    default_iface = parts[dev_index + 1]
 
-        if 'default' in gateways and netifaces.AF_INET in gateways['default']:
-            default_iface = gateways['default'][netifaces.AF_INET][1]
-
-            # Get information for this interface
-            interfaces = get_all_interfaces()
-            for iface in interfaces:
-                if iface.name == default_iface:
-                    return iface
+                    # Get information for this interface
+                    interfaces = get_all_interfaces()
+                    for iface in interfaces:
+                        if iface.name == default_iface:
+                            return iface
 
     except Exception as e:
         logger.error(f"Error getting primary interface: {e}")
@@ -130,27 +140,19 @@ def get_default_gateway() -> Optional[str]:
         Optional[str]: Gateway IP or None
     """
     try:
-        gateways = netifaces.gateways()
-
-        if 'default' in gateways and netifaces.AF_INET in gateways['default']:
-            gateway_ip = gateways['default'][netifaces.AF_INET][0]
-
-            if validate_ip_address(gateway_ip):
-                return gateway_ip
+        # Use ip route command to get default gateway
+        output = get_command_output("ip route show default")
+        if output:
+            parts = output.split()
+            if 'via' in parts:
+                via_index = parts.index('via')
+                if via_index + 1 < len(parts):
+                    gateway = parts[via_index + 1]
+                    if validate_ip_address(gateway):
+                        return gateway
 
     except Exception as e:
         logger.error(f"Error getting default gateway: {e}")
-
-    # Fallback: try using ip route command
-    output = get_command_output("ip route show default")
-    if output:
-        parts = output.split()
-        if 'via' in parts:
-            via_index = parts.index('via')
-            if via_index + 1 < len(parts):
-                gateway = parts[via_index + 1]
-                if validate_ip_address(gateway):
-                    return gateway
 
     return None
 

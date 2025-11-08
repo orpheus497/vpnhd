@@ -6,10 +6,16 @@ making it easy to configure mobile devices by scanning.
 
 from pathlib import Path
 from typing import Optional
-import subprocess
-import tempfile
+import io
 
-from ..system.commands import execute_command, check_command_exists, run_command_with_input
+try:
+    import qrcode
+    import qrcode.image.svg
+    from PIL import Image
+    QRCODE_AVAILABLE = True
+except ImportError:
+    QRCODE_AVAILABLE = False
+
 from ..utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -25,27 +31,17 @@ def generate_qr_code(config_text: str, output_path: Optional[str] = None) -> boo
     Returns:
         True if QR code was generated successfully, False otherwise
     """
-    try:
-        # Check if qrencode is installed
-        if not check_command_exists("qrencode"):
-            logger.error(
-                "qrencode is not installed. Install with: "
-                "apt install qrencode (Debian/Ubuntu) or "
-                "dnf install qrencode (Fedora)"
-            )
-            return False
+    if not QRCODE_AVAILABLE:
+        logger.error(
+            "qrcode library is not installed. Install with: "
+            "pip install qrcode[pil]"
+        )
+        return False
 
+    try:
         if output_path:
             # Generate QR code and save to file
-            cmd = f"qrencode -t PNG -o {output_path} -l L"
-            result = run_command_with_input(cmd, input_data=config_text)
-
-            if result.success:
-                logger.info(f"QR code saved to {output_path}")
-                return True
-            else:
-                logger.error(f"Failed to generate QR code: {result.stderr}")
-                return False
+            return save_qr_code(config_text, output_path)
         else:
             # Generate QR code to stdout (terminal display)
             return display_qr_terminal(config_text)
@@ -65,7 +61,34 @@ def save_qr_code(config_text: str, output_path: str) -> bool:
     Returns:
         True if QR code was saved successfully, False otherwise
     """
-    return generate_qr_code(config_text, output_path)
+    if not QRCODE_AVAILABLE:
+        logger.error("qrcode library is not installed")
+        return False
+
+    try:
+        # Create QR code instance
+        qr = qrcode.QRCode(
+            version=None,  # Auto-determine version
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+
+        # Add data
+        qr.add_data(config_text)
+        qr.make(fit=True)
+
+        # Create image
+        img = qr.make_image(fill_color="black", back_color="white")
+
+        # Save image
+        img.save(output_path)
+        logger.info(f"QR code saved to {output_path}")
+        return True
+
+    except Exception as e:
+        logger.exception(f"Error saving QR code: {e}")
+        return False
 
 
 def display_qr_terminal(config_text: str) -> bool:
@@ -77,34 +100,71 @@ def display_qr_terminal(config_text: str) -> bool:
     Returns:
         True if QR code was displayed successfully, False otherwise
     """
+    if not QRCODE_AVAILABLE:
+        logger.error("qrcode library is not installed")
+        return False
+
     try:
-        # Check if qrencode is installed
-        if not check_command_exists("qrencode"):
-            logger.error("qrencode is not installed")
-            return False
+        # Create QR code instance
+        qr = qrcode.QRCode(
+            version=None,  # Auto-determine version
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=1,
+            border=2,
+        )
 
-        # Generate QR code as ASCII art (terminal output)
-        # -t ANSIUTF8 creates colored terminal output
-        # -t UTF8 creates black and white terminal output
-        # We'll use ANSIUTF8 for better visibility
-        result = run_command_with_input("qrencode -t ANSIUTF8", input_data=config_text)
+        # Add data
+        qr.add_data(config_text)
+        qr.make(fit=True)
 
-        if result.success:
-            print(result.stdout)
-            return True
-        else:
-            # Fallback to UTF8 if ANSIUTF8 not supported
-            result = run_command_with_input("qrencode -t UTF8", input_data=config_text)
-            if result.success:
-                print(result.stdout)
-                return True
-            else:
-                logger.error(f"Failed to display QR code: {result.stderr}")
-                return False
+        # Print to terminal using ASCII characters
+        # Use white/black blocks for better visibility
+        qr.print_ascii(invert=True)
+
+        return True
 
     except Exception as e:
         logger.exception(f"Error displaying QR code in terminal: {e}")
         return False
+
+
+def display_qr_terminal_tty(config_text: str) -> bool:
+    """Display a QR code in the terminal using Unicode blocks.
+
+    This version uses Unicode block characters for better visual quality.
+
+    Args:
+        config_text: WireGuard configuration file content
+
+    Returns:
+        True if QR code was displayed successfully, False otherwise
+    """
+    if not QRCODE_AVAILABLE:
+        logger.error("qrcode library is not installed")
+        return False
+
+    try:
+        # Create QR code instance
+        qr = qrcode.QRCode(
+            version=None,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=1,
+            border=2,
+        )
+
+        # Add data
+        qr.add_data(config_text)
+        qr.make(fit=True)
+
+        # Print using Unicode block characters
+        qr.print_tty()
+
+        return True
+
+    except Exception as e:
+        logger.exception(f"Error displaying QR code with TTY: {e}")
+        # Fallback to ASCII
+        return display_qr_terminal(config_text)
 
 
 def generate_qr_for_config_file(config_file_path: str, output_path: Optional[str] = None) -> bool:
@@ -136,41 +196,28 @@ def generate_qr_for_config_file(config_file_path: str, output_path: Optional[str
 
 
 def verify_qrcode_available() -> bool:
-    """Verify that qrencode is available on the system.
+    """Verify that qrcode library is available.
 
     Returns:
-        True if qrencode is installed, False otherwise
+        True if qrcode is installed, False otherwise
     """
-    return check_command_exists("qrencode")
+    return QRCODE_AVAILABLE
 
 
 def install_qrencode() -> bool:
-    """Attempt to install qrencode using the system package manager.
+    """Attempt to install qrcode library using pip.
+
+    Note: This function is deprecated and kept for backwards compatibility.
+    The qrcode library should be installed via requirements.txt.
 
     Returns:
-        True if installation was successful, False otherwise
+        False (manual installation required)
     """
-    try:
-        # Try to detect package manager and install
-        if check_command_exists("apt"):
-            result = execute_command(["apt", "install", "-y", "qrencode"], sudo=True)
-            return result.success
-        elif check_command_exists("dnf"):
-            result = execute_command(["dnf", "install", "-y", "qrencode"], sudo=True)
-            return result.success
-        elif check_command_exists("yum"):
-            result = execute_command(["yum", "install", "-y", "qrencode"], sudo=True)
-            return result.success
-        elif check_command_exists("pacman"):
-            result = execute_command(["pacman", "-S", "--noconfirm", "qrencode"], sudo=True)
-            return result.success
-        else:
-            logger.error("Could not detect package manager to install qrencode")
-            return False
-
-    except Exception as e:
-        logger.exception(f"Error installing qrencode: {e}")
-        return False
+    logger.warning(
+        "install_qrencode() is deprecated. "
+        "Please install qrcode library via: pip install qrcode[pil]"
+    )
+    return False
 
 
 def create_qr_with_metadata(
@@ -205,3 +252,46 @@ def create_qr_with_metadata(
     except Exception as e:
         logger.exception(f"Error creating QR code with metadata: {e}")
         return None
+
+
+def generate_qr_svg(config_text: str, output_path: str) -> bool:
+    """Generate a QR code as an SVG image.
+
+    Args:
+        config_text: WireGuard configuration file content
+        output_path: Path to save QR code SVG file
+
+    Returns:
+        True if QR code was saved successfully, False otherwise
+    """
+    if not QRCODE_AVAILABLE:
+        logger.error("qrcode library is not installed")
+        return False
+
+    try:
+        # Create QR code instance with SVG factory
+        qr = qrcode.QRCode(
+            version=None,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+            image_factory=qrcode.image.svg.SvgPathImage
+        )
+
+        # Add data
+        qr.add_data(config_text)
+        qr.make(fit=True)
+
+        # Create SVG image
+        img = qr.make_image(fill_color="black", back_color="white")
+
+        # Save SVG
+        with open(output_path, 'wb') as f:
+            img.save(f)
+
+        logger.info(f"QR code SVG saved to {output_path}")
+        return True
+
+    except Exception as e:
+        logger.exception(f"Error generating SVG QR code: {e}")
+        return False
