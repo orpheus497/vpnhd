@@ -82,6 +82,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CRITICAL**: Private key exposure in process list (crypto/wireguard.py)
 - dnf/yum check-update exit code 100 misinterpreted as failure (packages.py)
 - ServiceStatus enum compared to string instead of enum value (fail2ban_config.py)
+- TOCTOU race condition in file creation (utils/helpers.py)
+- Imports inside functions reducing performance (4 instances removed)
 
 ### Removed
 - Deprecated phase4_fedora.py (replaced by distribution-agnostic phase4_linux_client.py)
@@ -121,6 +123,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed 217 lines of deprecated code reducing maintenance burden
 - Cleaned up phase module exports to only include active implementations
 - Fixed method name mismatch preventing AttributeError in SSH service restart
+- Moved 4 function-level imports to module level improving performance
+- Fixed TOCTOU race condition using atomic file creation (open with 'x' mode)
+- Improved code organization following Python best practices
 
 ### Security
 - Eliminated 30 critical command injection vulnerabilities across codebase
