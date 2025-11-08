@@ -10,6 +10,53 @@ from ..utils.logging import get_logger
 from ..utils.constants import COMMAND_TIMEOUT_DEFAULT
 
 
+# Sensitive parameter patterns that should be redacted in logs
+SENSITIVE_PARAMS = {
+    "-p",
+    "--password",
+    "--pass",
+    "--key",
+    "--secret",
+    "--token",
+    "--api-key",
+    "--apikey",
+    "--auth",
+    "--credential",
+    "--private-key",
+}
+
+
+def _sanitize_command_for_logging(command_list: List[str]) -> str:
+    """
+    Sanitize command for safe logging by redacting sensitive parameters.
+
+    Args:
+        command_list: Command as list of strings
+
+    Returns:
+        Sanitized command string safe for logging
+    """
+    sanitized = []
+    redact_next = False
+
+    for arg in command_list:
+        if redact_next:
+            sanitized.append("***REDACTED***")
+            redact_next = False
+        elif any(arg.lower().startswith(param) for param in SENSITIVE_PARAMS):
+            # Handle --key=value format
+            if "=" in arg:
+                key, _ = arg.split("=", 1)
+                sanitized.append(f"{key}=***REDACTED***")
+            else:
+                sanitized.append(arg)
+                redact_next = True
+        else:
+            sanitized.append(arg)
+
+    return " ".join(sanitized)
+
+
 @dataclass
 class CommandResult:
     """Result of command execution."""
@@ -70,9 +117,10 @@ def execute_command(
     if timeout is None:
         timeout = COMMAND_TIMEOUT_DEFAULT
 
-    # Log command for debugging (join list for readability)
+    # Log command for debugging (sanitized to avoid exposing sensitive data)
     command_str = " ".join(command_list)
-    logger.debug(f"Executing command: {command_str}")
+    safe_command_str = _sanitize_command_for_logging(command_list)
+    logger.debug(f"Executing command: {safe_command_str}")
 
     try:
         # Execute command safely WITHOUT shell=True
@@ -90,7 +138,9 @@ def execute_command(
         success = result.returncode == 0
 
         if not success:
-            logger.warning(f"Command failed with exit code {result.returncode}: {command_str}")
+            logger.warning(
+                f"Command failed with exit code {result.returncode}: {safe_command_str}"
+            )
             if result.stderr:
                 logger.warning(f"  stderr: {result.stderr.strip()}")
 
@@ -108,7 +158,7 @@ def execute_command(
         )
 
     except subprocess.TimeoutExpired as e:
-        logger.error(f"Command timed out after {timeout}s: {command_str}")
+        logger.error(f"Command timed out after {timeout}s: {safe_command_str}")
         return CommandResult(
             exit_code=-1,
             stdout="",

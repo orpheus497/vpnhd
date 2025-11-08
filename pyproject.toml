@@ -85,7 +85,6 @@ dev = [
     "mypy~=1.8.0",
     "types-PyYAML~=6.0.12",
     "bandit[toml]~=1.7.7",
-    "safety~=3.0.1",
     "pre-commit~=3.6.0",
     "coverage[toml]~=7.4.1",
     "sphinx~=7.2.6",
@@ -140,7 +139,6 @@ extend-exclude = '''
 [tool.isort]
 profile = "black"
 line_length = 100
-multi_line_mode = 3
 include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true

@@ -420,7 +420,7 @@ class TestUpdatePackageCache:
     def test_dnf_check_update_exit_code_100_is_success(self, mocker):
         """Test that dnf check-update exit code 100 is treated as success."""
         mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=fedora"))
-        mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+        _ = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
         mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
         # Exit code 100 means updates available
         mock_cmd.return_value = mocker.Mock(success=False, exit_code=100, stdout="", stderr="")

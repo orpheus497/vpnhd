@@ -343,7 +343,7 @@ class TestMultiDistroSupport:
         from vpnhd.system.packages import PackageManager
 
         # Test Debian
-        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+        _ = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
         mock_check = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
         mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
@@ -357,7 +357,7 @@ class TestMultiDistroSupport:
         assert "apt" in call_args[0][0]
 
         # Test Fedora
-        mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=fedora"))
+        _ = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=fedora"))
         mock_cmd.reset_mock()
 
         pm_fedora = PackageManager()

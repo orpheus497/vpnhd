@@ -22,7 +22,6 @@ types-PyYAML>=6.0.0
 
 # Security
 bandit[toml]>=1.7.0
-safety>=3.7.0
 
 # Pre-commit
 pre-commit>=3.0.0
