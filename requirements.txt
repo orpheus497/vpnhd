@@ -1,8 +1,37 @@
-rich>=13.0.0
-click>=8.0.0
-pyyaml>=6.0.0
-jsonschema>=4.0.0
-python-dotenv>=1.0.0
-psutil>=5.9.0
-qrcode[pil]>=7.4.0
-jinja2>=3.0.0
+# VPNHD Production Dependencies
+# Version 2.0.0 - Modernized Stack
+# All dependencies are FOSS (MIT, BSD, Apache-2.0, ISC licenses)
+
+# Core CLI & UI
+rich~=13.7.1              # Terminal UI, tables, progress bars (MIT)
+click~=8.1.7              # CLI framework and command groups (BSD-3-Clause)
+
+# Configuration & Validation
+pydantic~=2.6.0           # Data validation and settings management (MIT)
+pydantic-settings~=2.1.0  # Environment-based configuration (MIT)
+pyyaml~=6.0.2             # YAML parsing for configs (MIT)
+jinja2~=3.1.3             # Template rendering for configs (BSD-3-Clause)
+python-dotenv~=1.0.1      # Environment variable management (BSD-3-Clause)
+
+# Async & I/O
+aiofiles~=23.2.1          # Async file I/O (Apache-2.0)
+httpx~=0.26.0             # Async HTTP client (BSD-3-Clause)
+
+# Network & System
+psutil~=5.9.8             # Network interface discovery (BSD-3-Clause)
+dnspython~=2.5.0          # DNS resolution and DDNS (ISC)
+
+# Cryptography & Security
+qrcode[pil]~=7.4.2        # QR code generation (BSD)
+Pillow~=10.2.0            # Image processing for QR codes (HPND)
+cryptography~=42.0.0      # Advanced cryptography (Apache-2.0/BSD)
+
+# Logging & Monitoring
+structlog~=24.1.0         # Structured logging (MIT/Apache-2.0)
+python-json-logger~=2.0.7 # JSON log formatting (BSD-2-Clause)
+prometheus-client~=0.19.0 # Metrics export for Prometheus (Apache-2.0)
+
+# Utilities
+cachetools~=5.3.2         # Caching utilities (MIT)
+validators~=0.22.0        # Additional validation utilities (MIT)
+schedule~=1.2.1           # Task scheduling for key rotation (MIT)

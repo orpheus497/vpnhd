@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vpnhd"
-version = "1.0.0"
-description = "Privacy-first home VPN setup automation"
+version = "2.0.0"
+description = "Privacy-first home VPN setup automation with IPv6, multi-server, and advanced monitoring"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "GPL-3.0"}
@@ -19,7 +19,10 @@ keywords = [
     "security",
     "home-network",
     "automation",
-    "cli"
+    "cli",
+    "ipv6",
+    "monitoring",
+    "prometheus"
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -29,35 +32,69 @@ classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Natural Language :: English",
     "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Topic :: System :: Networking",
     "Topic :: System :: Systems Administration",
+    "Topic :: System :: Monitoring",
     "Topic :: Utilities"
 ]
 
 dependencies = [
-    "rich>=13.0.0",
-    "click>=8.0.0",
-    "pyyaml>=6.0.0",
-    "jsonschema>=4.0.0",
-    "python-dotenv>=1.0.0",
-    "psutil>=5.9.0",
-    "qrcode[pil]>=7.4.0",
-    "jinja2>=3.0.0"
+    "rich~=13.7.1",
+    "click~=8.1.7",
+    "pydantic~=2.6.0",
+    "pydantic-settings~=2.1.0",
+    "pyyaml~=6.0.2",
+    "jinja2~=3.1.3",
+    "python-dotenv~=1.0.1",
+    "aiofiles~=23.2.1",
+    "httpx~=0.26.0",
+    "psutil~=5.9.8",
+    "dnspython~=2.5.0",
+    "qrcode[pil]~=7.4.2",
+    "Pillow~=10.2.0",
+    "cryptography~=42.0.0",
+    "structlog~=24.1.0",
+    "python-json-logger~=2.0.7",
+    "prometheus-client~=0.19.0",
+    "cachetools~=5.3.2",
+    "validators~=0.22.0",
+    "schedule~=1.2.1"
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0",
-    "pytest-cov>=4.0",
-    "black>=22.0",
-    "flake8>=4.0",
-    "isort>=5.0",
-    "mypy>=0.950",
-    "pre-commit>=2.15"
+    "pytest~=8.0.0",
+    "pytest-cov~=4.1.0",
+    "pytest-asyncio~=0.23.4",
+    "pytest-mock~=3.12.0",
+    "pytest-benchmark~=4.0.0",
+    "pytest-timeout~=2.2.0",
+    "faker~=22.6.0",
+    "responses~=0.25.0",
+    "black~=24.1.0",
+    "isort~=5.13.2",
+    "flake8~=7.0.0",
+    "flake8-docstrings~=1.7.0",
+    "flake8-bugbear~=24.1.0",
+    "flake8-comprehensions~=3.14.0",
+    "flake8-simplify~=0.21.0",
+    "mypy~=1.8.0",
+    "types-PyYAML~=6.0.12",
+    "bandit[toml]~=1.7.7",
+    "safety~=3.0.1",
+    "pre-commit~=3.6.0",
+    "coverage[toml]~=7.4.1",
+    "sphinx~=7.2.6",
+    "sphinx-rtd-theme~=2.0.0",
+    "sphinx-autodoc-typehints~=2.0.0",
+    "myst-parser~=2.0.0",
+    "build~=1.0.3",
+    "twine~=5.0.0"
 ]
 
 [project.urls]
@@ -67,7 +104,8 @@ Documentation = "https://github.com/orpheus497/vpnhd/tree/main/docs"
 "Source Code" = "https://github.com/orpheus497/vpnhd"
 
 [project.scripts]
-vpnhd = "vpnhd.cli:main"
+vpnhd = "vpnhd.cli.main:main"
+vpnhd-metrics = "vpnhd.monitoring.exporter:main"
 
 [tool.setuptools]
 packages = ["vpnhd"]
@@ -109,7 +147,7 @@ force_grid_wrap = 0
 use_parentheses = true
 ensure_newline_before_comments = true
 known_first_party = ["vpnhd"]
-known_third_party = ["rich", "click", "yaml", "jinja2"]
+known_third_party = ["rich", "click", "yaml", "jinja2", "pydantic", "structlog", "prometheus_client", "httpx", "aiofiles"]
 
 # mypy configuration
 [tool.mypy]
@@ -127,8 +165,10 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = [
-    "netifaces",
     "yaml",
+    "prometheus_client",
+    "schedule",
+    "validators",
 ]
 ignore_missing_imports = true
 
@@ -138,14 +178,16 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
-addopts = "--strict-markers -ra -q --cov=src/vpnhd --cov-report=html --cov-report=term-missing"
+addopts = "--strict-markers -ra -q --cov=src/vpnhd --cov-report=html --cov-report=term-missing --asyncio-mode=auto"
 markers = [
     "unit: Unit tests",
     "integration: Integration tests",
     "system: System tests (requires root)",
     "slow: Slow tests",
-    "skip_ci: Skip in CI environments"
+    "skip_ci: Skip in CI environments",
+    "asyncio: Async tests"
 ]
+asyncio_mode = "auto"
 
 # Coverage configuration
 [tool.coverage.run]
