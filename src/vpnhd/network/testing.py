@@ -26,6 +26,21 @@ def test_connectivity(host: str = "8.8.8.8", port: int = 53, timeout: int = 5) -
     Returns:
         bool: True if connected successfully
     """
+    # Validate host input
+    if not (is_valid_hostname(host) or is_valid_ip(host)):
+        logger.error(f"Invalid hostname or IP address: {host}")
+        return False
+
+    # Validate port number
+    if not (1 <= port <= 65535):
+        logger.error(f"Invalid port number: {port}")
+        return False
+
+    # Validate timeout
+    if not (1 <= timeout <= 60):
+        logger.error(f"Invalid timeout: {timeout}")
+        return False
+
     try:
         socket.setdefaulttimeout(timeout)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -51,6 +66,21 @@ def test_port_open(host: str, port: int, timeout: int = 5) -> bool:
     Returns:
         bool: True if port is open
     """
+    # Validate host input
+    if not (is_valid_hostname(host) or is_valid_ip(host)):
+        logger.error(f"Invalid hostname or IP address: {host}")
+        return False
+
+    # Validate port number
+    if not (1 <= port <= 65535):
+        logger.error(f"Invalid port number: {port}")
+        return False
+
+    # Validate timeout
+    if not (1 <= timeout <= 60):
+        logger.error(f"Invalid timeout: {timeout}")
+        return False
+
     try:
         socket.setdefaulttimeout(timeout)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -234,6 +264,16 @@ def check_port_forwarding(external_ip: str, port: int, timeout: int = 10) -> boo
     Returns:
         bool: True if port is accessible from outside
     """
+    # Validate IP address
+    if not is_valid_ip(external_ip):
+        logger.error(f"Invalid IP address: {external_ip}")
+        return False
+
+    # Validate port number
+    if not (1 <= port <= 65535):
+        logger.error(f"Invalid port number: {port}")
+        return False
+
     logger.info(f"Testing port forwarding for {external_ip}:{port}")
 
     # Note: This is a basic check that requires the service to be running
@@ -242,12 +282,12 @@ def check_port_forwarding(external_ip: str, port: int, timeout: int = 10) -> boo
 
     # For now, just verify the port is listening locally
     result = execute_command(
-        f"ss -tuln | grep ':{port}'",
+        ["ss", "-tuln"],
         check=False,
         capture_output=True
     )
 
-    if result.success and str(port) in result.stdout:
+    if result.success and f":{port}" in result.stdout:
         logger.info(f"Port {port} is listening locally")
         return True
 
@@ -266,8 +306,18 @@ def measure_latency(host: str, count: int = 10) -> Optional[float]:
     Returns:
         Optional[float]: Average latency in ms or None if failed
     """
+    # Validate host input
+    if not (is_valid_hostname(host) or is_valid_ip(host)):
+        logger.error(f"Invalid hostname or IP address: {host}")
+        return None
+
+    # Validate count
+    if not (1 <= count <= 100):
+        logger.error(f"Invalid ping count: {count}")
+        return None
+
     result = execute_command(
-        f"ping -c {count} {host}",
+        ["ping", "-c", str(count), host],
         check=False,
         capture_output=True
     )
@@ -296,9 +346,20 @@ def test_vpn_connectivity(vpn_server_ip: str, vpn_interface: str = "wg0") -> boo
     Returns:
         bool: True if VPN is connected and working
     """
+    # Validate VPN server IP
+    if not is_valid_ip(vpn_server_ip):
+        logger.error(f"Invalid VPN server IP address: {vpn_server_ip}")
+        return False
+
+    # Validate interface name (alphanumeric, hyphens, underscores only)
+    import re
+    if not re.match(r'^[a-zA-Z0-9_-]+$', vpn_interface):
+        logger.error(f"Invalid VPN interface name: {vpn_interface}")
+        return False
+
     # Check if VPN interface exists
     result = execute_command(
-        f"ip link show {vpn_interface}",
+        ["ip", "link", "show", vpn_interface],
         check=False,
         capture_output=True
     )
