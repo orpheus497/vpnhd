@@ -8,7 +8,7 @@ version = "2.0.0"
 description = "Privacy-first home VPN setup automation with IPv6, multi-server, and advanced monitoring"
 readme = "README.md"
 requires-python = ">=3.11"
-license = {text = "GPL-3.0"}
+license = "GPL-3.0"
 authors = [
     {name = "orpheus497", email = "vpnhd@example.com"}
 ]
@@ -29,7 +29,6 @@ classifiers = [
     "Environment :: Console",
     "Intended Audience :: System Administrators",
     "Intended Audience :: End Users/Desktop",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Natural Language :: English",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS",

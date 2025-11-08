@@ -3,7 +3,6 @@
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from typing import List
 from .base import NotificationChannel
 from ..events import NotificationEvent
 from ...utils.logging import get_logger

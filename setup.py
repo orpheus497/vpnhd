@@ -28,7 +28,7 @@ if requirements_file.exists():
     requirements = [
         line.strip()
         for line in requirements_file.read_text(encoding="utf-8").split("\n")
-        if line.strip() and not line.startswith("#")
+        if line.strip() and not line.startswith("#") and not line.startswith("-")
     ]
 
 # Read development requirements
@@ -39,7 +39,7 @@ if dev_requirements_file.exists():
     dev_requirements = [
         line.strip()
         for line in dev_requirements_file.read_text(encoding="utf-8").split("\n")
-        if line.strip() and not line.startswith("#")
+        if line.strip() and not line.startswith("#") and not line.startswith("-")
     ]
 
 setup(
@@ -69,7 +69,6 @@ setup(
         "Environment :: Console",
         "Intended Audience :: System Administrators",
         "Intended Audience :: End Users/Desktop",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Natural Language :: English",
         "Operating System :: POSIX :: Linux",
         "Programming Language :: Python :: 3",
