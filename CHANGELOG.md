@@ -85,6 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TOCTOU race condition in file creation (utils/helpers.py)
 - Imports inside functions reducing performance (4 instances removed)
 - Code duplication between phase4 and phase5 (~150 lines of duplicate logic)
+- Command injection in files.py across 7 file operation methods (mv, cat, cp, chmod, chown, tee)
 
 ### Removed
 - Deprecated phase4_fedora.py (replaced by distribution-agnostic phase4_linux_client.py)
@@ -130,9 +131,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Created distribution_helpers module extracting common distribution selection logic
 - Eliminated ~150 lines of duplicated code between phase4 and phase5
 - Centralized WireGuard installation instructions in reusable helper functions
+- Converted all file operation commands in files.py to array format (7 methods)
+- Eliminated shell pipe usage in append_to_file() using stdin-based tee command
 
 ### Security
-- Eliminated 30 critical command injection vulnerabilities across codebase
+- Eliminated 37 critical command injection vulnerabilities across codebase
 - **CRITICAL FIX**: Eliminated private key exposure in process listings (stdin-based key derivation)
 - Implemented comprehensive input validation framework preventing injection attacks
 - Created structured exception handling replacing unsafe bare except clauses

@@ -8,7 +8,7 @@ import filecmp
 from ..utils.logging import get_logger
 from ..utils.helpers import ensure_directory_exists, calculate_file_hash
 from ..utils.constants import PERM_PRIVATE_KEY, PERM_CONFIG_FILE
-from .commands import execute_command
+from .commands import execute_command, run_command_with_input
 
 
 class FileManager:
@@ -106,7 +106,7 @@ class FileManager:
 
                 # Move to final location with sudo
                 result = execute_command(
-                    f"mv {tmp_path} {file_path}",
+                    ["mv", tmp_path, str(file_path)],
                     sudo=True,
                     check=False
                 )
@@ -152,7 +152,7 @@ class FileManager:
 
             if sudo:
                 result = execute_command(
-                    f"cat {file_path}",
+                    ["cat", str(file_path)],
                     sudo=True,
                     check=False,
                     capture_output=True
@@ -189,10 +189,12 @@ class FileManager:
         """
         try:
             if sudo:
-                # Use tee -a to append with sudo
-                result = execute_command(
-                    f"echo '{content}' | sudo tee -a {file_path} > /dev/null",
-                    check=False
+                # Use tee -a to append with sudo, pass content via stdin
+                result = run_command_with_input(
+                    ["tee", "-a", str(file_path)],
+                    input_data=content,
+                    sudo=True,
+                    capture_output=True
                 )
                 return result.success
 
@@ -265,9 +267,10 @@ class FileManager:
             ensure_directory_exists(destination.parent)
 
             if sudo:
-                cmd = f"cp {source} {destination}"
                 if preserve_permissions:
-                    cmd = f"cp -p {source} {destination}"
+                    cmd = ["cp", "-p", str(source), str(destination)]
+                else:
+                    cmd = ["cp", str(source), str(destination)]
 
                 result = execute_command(cmd, sudo=True, check=False)
                 return result.success
@@ -306,7 +309,7 @@ class FileManager:
 
             if sudo:
                 result = execute_command(
-                    f"mv {source} {destination}",
+                    ["mv", str(source), str(destination)],
                     sudo=True,
                     check=False
                 )
@@ -340,7 +343,7 @@ class FileManager:
 
             if sudo:
                 result = execute_command(
-                    f"chmod {oct(mode)[2:]} {file_path}",
+                    ["chmod", oct(mode)[2:], str(file_path)],
                     sudo=True,
                     check=False
                 )
@@ -378,7 +381,7 @@ class FileManager:
                 owner_spec = f"{owner}:{group}"
 
             result = execute_command(
-                f"chown {owner_spec} {file_path}",
+                ["chown", owner_spec, str(file_path)],
                 sudo=sudo,
                 check=False
             )
