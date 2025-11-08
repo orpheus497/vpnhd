@@ -79,6 +79,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Command injection in network/testing.py measure_latency() using f-string
 - Command injection in network/testing.py test_vpn_connectivity() using f-string
 - Missing input validation in test_connectivity() and test_port_open()
+- **CRITICAL**: Private key exposure in process list (crypto/wireguard.py)
+- dnf/yum check-update exit code 100 misinterpreted as failure (packages.py)
+- ServiceStatus enum compared to string instead of enum value (fail2ban_config.py)
 
 ### Removed
 - Deprecated phase4_fedora.py (replaced by distribution-agnostic phase4_linux_client.py)
@@ -120,7 +123,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed method name mismatch preventing AttributeError in SSH service restart
 
 ### Security
-- Eliminated 29 critical command injection vulnerabilities across codebase
+- Eliminated 30 critical command injection vulnerabilities across codebase
+- **CRITICAL FIX**: Eliminated private key exposure in process listings (stdin-based key derivation)
 - Implemented comprehensive input validation framework preventing injection attacks
 - Created structured exception handling replacing unsafe bare except clauses
 - Added security-focused logging throughout command execution paths
@@ -133,6 +137,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Converted all f-string command construction to safe array format
 - Ensured no shell=True usage in any subprocess operations
 - Extended validation coverage to all network testing functions
+- Private keys now transmitted via stdin only, never in command arguments
+- Type-safe enum comparisons for service status checks
 
 ### Documentation
 - Updated README.md with distribution-agnostic language
