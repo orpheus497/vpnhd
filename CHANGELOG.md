@@ -102,6 +102,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automatic VPN IP assignment from available pool
 - Client configuration export with QR code generation
 - Rich formatted tables and panels for CLI output
+- Comprehensive performance testing system (Phase 7: Performance Testing)
+- PerformanceTester class for VPN performance analysis
+- Latency testing with ping-based measurements
+- Connection stability testing with uptime tracking
+- Bandwidth testing with iperf3 integration
+- Performance report generation and storage
+- CLI command group `vpnhd performance` with 5 subcommands
+- `vpnhd performance latency` - Test VPN latency and packet loss
+- `vpnhd performance stability` - Test connection stability over time
+- `vpnhd performance full` - Run complete performance test suite
+- `vpnhd performance list` - List all performance reports
+- Statistics aggregation across multiple performance tests
+- Comprehensive backup & restore system (Phase 8: Backup & Restore)
+- BackupManager class for configuration backup and recovery
+- Automated backup creation with metadata tracking
+- Selective backup (WireGuard, SSH, config, clients)
+- SHA-256 checksum verification for backup integrity
+- Compressed tar.gz archive format
+- Backup metadata with size, checksum, and includes tracking
+- CLI command group `vpnhd backup` with 8 subcommands
+- `vpnhd backup create` - Create new backup with selective includes
+- `vpnhd backup list` - List all backups with metadata
+- `vpnhd backup restore` - Restore from backup with verification
+- `vpnhd backup verify` - Verify backup integrity
+- `vpnhd backup delete` - Delete backup with confirmation
+- `vpnhd backup export` - Export backup to external location
+- `vpnhd backup import` - Import backup from external location
+- `vpnhd backup cleanup` - Automatically delete old backups
 
 ### Changed
 - Phase 4 renamed from "Fedora Client" to "Linux Desktop Client (Always-On)"
@@ -129,6 +157,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client data now persisted in JSON database (~/.config/vpnhd/clients.json)
 - Client metadata now tracked separately from WireGuard server config
 - Client configurations now exported to dedicated directory
+- Performance testing now supports multiple test servers (Phase 7)
+- Performance reports now saved with timestamps for tracking
+- Backup system now uses compressed tar.gz format for efficiency (Phase 8)
+- Backup restore now creates automatic backups of current state
+- Backup verification now checks both checksum and archive integrity
 
 ### Fixed
 - Template path resolution issues in Phases 2, 4, 5, and 6
@@ -199,6 +232,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client listing enhanced with multiple output formats and rich formatting
 - Client status monitoring enhanced with real-time connection details
 - Client operations enhanced with confirmation prompts and user-friendly output
+- Performance testing enhanced with comprehensive metrics (Phase 7: Performance Testing)
+- Latency testing enhanced with statistics (min/avg/max/stddev)
+- Stability testing enhanced with uptime percentage and disconnection tracking
+- Bandwidth testing enhanced with iperf3 integration for accurate measurements
+- Backup system enhanced with integrity verification (Phase 8: Backup & Restore)
+- Backup creation enhanced with selective component inclusion
+- Restore process enhanced with pre-restore backup creation
 
 ### Technical
 - Added ServerConfigManager class with peer management methods
@@ -269,6 +309,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added client configuration templating using existing Jinja2 templates
 - Implemented client statistics aggregation by device type and OS
 - Added client filtering and search capabilities across multiple dimensions
+- Created performance testing module (src/vpnhd/testing/) (Phase 7: Performance Testing)
+- Implemented PerformanceTester class with latency, bandwidth, stability testing (555 lines)
+- Added performance report persistence with JSON storage
+- Implemented test result dataclasses (BandwidthResult, LatencyResult, ConnectionStabilityResult)
+- Extended CLI with 5 performance testing commands (193 lines added to cli.py)
+- Added ping-based latency measurement with packet loss tracking
+- Implemented long-duration stability testing with disconnection detection
+- Integrated iperf3 for bandwidth measurements (download/upload)
+- Added performance statistics aggregation across multiple test runs
+- Created backup & restore module (src/vpnhd/backup/) (Phase 8: Backup & Restore)
+- Implemented BackupManager class with comprehensive backup operations (687 lines)
+- Added BackupMetadata dataclass for structured backup information
+- Implemented tar.gz compression for backup archives
+- Added SHA-256 checksum calculation and verification
+- Extended CLI with 8 backup management commands (225 lines added to cli.py)
+- Implemented selective backup (WireGuard, SSH, config, clients)
+- Added backup import/export for external storage
+- Implemented automatic cleanup of old backups
+- Added backup integrity verification with checksum and tar validation
 
 ### Security
 - Eliminated 52 critical command injection vulnerabilities across codebase (37 previously + 15 new)

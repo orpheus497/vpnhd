@@ -10,6 +10,8 @@ from .ui.prompts import Prompts
 from .ui.menus import MainMenu
 from .phases import get_phase_class
 from .client import ClientManager
+from .testing import PerformanceTester
+from .backup import BackupManager
 from .utils.logging import setup_logging, get_logger
 from .utils.constants import APP_NAME, APP_VERSION
 from .__version__ import __version__
@@ -601,6 +603,423 @@ def client_stats(ctx):
         border_style="cyan"
     )
     Console().print(panel)
+
+
+# ==============================================================================
+# Performance Testing Commands
+# ==============================================================================
+
+@main.group()
+@click.pass_context
+def performance(ctx):
+    """Performance testing for VPN connections."""
+    if 'perf_tester' not in ctx.obj:
+        ctx.obj['perf_tester'] = PerformanceTester()
+
+
+@performance.command('latency')
+@click.option('--count', default=20, help='Number of ping packets')
+@click.option('--server', default='8.8.8.8', help='Test server')
+@click.pass_context
+def test_latency(ctx, count, server):
+    """Test VPN latency."""
+    perf_tester = ctx.obj['perf_tester']
+    perf_tester.test_server = server
+    display = ctx.obj['display']
+
+    display.info(f"Testing latency to {server} with {count} packets...")
+
+    result = perf_tester.test_latency(count=count)
+
+    if result:
+        from rich.panel import Panel
+        from rich.console import Console
+
+        lines = [
+            f"[cyan]Min:[/cyan] {result.min_ms:.2f} ms",
+            f"[cyan]Avg:[/cyan] {result.avg_ms:.2f} ms",
+            f"[cyan]Max:[/cyan] {result.max_ms:.2f} ms",
+            f"[cyan]Std Dev:[/cyan] {result.stddev_ms:.2f} ms",
+            f"[cyan]Packet Loss:[/cyan] {result.packet_loss_percent:.1f}%",
+            f"[cyan]Packets:[/cyan] {result.packets_received}/{result.packets_sent}"
+        ]
+
+        panel = Panel(
+            "\n".join(lines),
+            title="Latency Test Results",
+            border_style="green" if result.packet_loss_percent < 1 else "yellow"
+        )
+        Console().print(panel)
+    else:
+        display.error("Latency test failed")
+        sys.exit(1)
+
+
+@performance.command('stability')
+@click.option('--duration', default=60, help='Test duration in seconds')
+@click.option('--interval', default=1, help='Ping interval in seconds')
+@click.option('--server', default='8.8.8.8', help='Test server')
+@click.pass_context
+def test_stability(ctx, duration, interval, server):
+    """Test VPN connection stability."""
+    perf_tester = ctx.obj['perf_tester']
+    perf_tester.test_server = server
+    display = ctx.obj['display']
+
+    display.info(f"Testing connection stability for {duration} seconds...")
+
+    result = perf_tester.test_connection_stability(
+        duration_seconds=duration,
+        interval_seconds=interval
+    )
+
+    if result:
+        from rich.panel import Panel
+        from rich.console import Console
+
+        lines = [
+            f"[cyan]Test Duration:[/cyan] {result.test_duration_seconds} seconds",
+            f"[cyan]Total Pings:[/cyan] {result.total_pings}",
+            f"[cyan]Successful:[/cyan] [green]{result.successful_pings}[/green]",
+            f"[cyan]Failed:[/cyan] [red]{result.failed_pings}[/red]",
+            f"[cyan]Uptime:[/cyan] {result.uptime_percent:.1f}%",
+            f"[cyan]Disconnections:[/cyan] {result.disconnections}",
+            f"[cyan]Avg Latency:[/cyan] {result.avg_latency_ms:.2f} ms"
+        ]
+
+        panel = Panel(
+            "\n".join(lines),
+            title="Connection Stability Results",
+            border_style="green" if result.uptime_percent > 99 else "yellow"
+        )
+        Console().print(panel)
+    else:
+        display.error("Stability test failed")
+        sys.exit(1)
+
+
+@performance.command('full')
+@click.option('--iperf-server', help='iperf3 server for bandwidth test')
+@click.option('--latency-count', default=20, help='Ping count for latency')
+@click.option('--stability-duration', default=60, help='Stability test duration')
+@click.option('--server', default='8.8.8.8', help='Test server for ping tests')
+@click.pass_context
+def full_test(ctx, iperf_server, latency_count, stability_duration, server):
+    """Run complete performance test suite."""
+    perf_tester = ctx.obj['perf_tester']
+    perf_tester.test_server = server
+    display = ctx.obj['display']
+
+    display.heading("Running Full Performance Test Suite", style="cyan bold")
+    display.newline()
+
+    report = perf_tester.run_full_test(
+        include_bandwidth=bool(iperf_server),
+        iperf_server=iperf_server,
+        latency_count=latency_count,
+        stability_duration=stability_duration
+    )
+
+    from rich.table import Table
+    from rich.console import Console
+
+    table = Table(title="Performance Test Results")
+    table.add_column("Test", style="cyan")
+    table.add_column("Result", style="yellow")
+
+    if report.latency:
+        table.add_row(
+            "Latency (avg)",
+            f"{report.latency.avg_ms:.2f} ms"
+        )
+        table.add_row(
+            "Packet Loss",
+            f"{report.latency.packet_loss_percent:.1f}%"
+        )
+
+    if report.stability:
+        table.add_row(
+            "Uptime",
+            f"{report.stability.uptime_percent:.1f}%"
+        )
+        table.add_row(
+            "Disconnections",
+            str(report.stability.disconnections)
+        )
+
+    if report.bandwidth:
+        table.add_row(
+            "Download",
+            f"{report.bandwidth.download_mbps:.2f} Mbps"
+        )
+        table.add_row(
+            "Upload",
+            f"{report.bandwidth.upload_mbps:.2f} Mbps"
+        )
+
+    Console().print(table)
+    display.newline()
+    display.success(f"Report saved to performance results directory")
+
+
+@performance.command('list')
+@click.pass_context
+def list_reports(ctx):
+    """List all performance reports."""
+    perf_tester = ctx.obj['perf_tester']
+
+    reports = perf_tester.list_reports()
+
+    if not reports:
+        ctx.obj['display'].info("No performance reports found")
+        return
+
+    from rich.table import Table
+    from rich.console import Console
+
+    table = Table(title="Performance Reports")
+    table.add_column("Report File", style="cyan")
+    table.add_column("Date", style="yellow")
+    table.add_column("Size", style="green")
+
+    for report_path in reports:
+        date_str = report_path.stem.replace("performance_report_", "")
+        size_kb = report_path.stat().st_size / 1024
+
+        table.add_row(
+            report_path.name,
+            date_str,
+            f"{size_kb:.2f} KB"
+        )
+
+    Console().print(table)
+
+
+# ==============================================================================
+# Backup & Restore Commands
+# ==============================================================================
+
+@main.group()
+@click.pass_context
+def backup(ctx):
+    """Backup and restore VPN configuration."""
+    if 'backup_manager' not in ctx.obj:
+        ctx.obj['backup_manager'] = BackupManager()
+
+
+@backup.command('create')
+@click.option('--description', default='', help='Backup description')
+@click.option('--no-wireguard', is_flag=True, help='Exclude WireGuard config')
+@click.option('--no-ssh', is_flag=True, help='Exclude SSH keys')
+@click.option('--no-config', is_flag=True, help='Exclude VPNHD config')
+@click.option('--no-clients', is_flag=True, help='Exclude client database')
+@click.pass_context
+def create_backup(ctx, description, no_wireguard, no_ssh, no_config, no_clients):
+    """Create a new backup."""
+    backup_manager = ctx.obj['backup_manager']
+    display = ctx.obj['display']
+
+    display.info("Creating backup...")
+
+    backup_id = backup_manager.create_backup(
+        description=description,
+        include_wireguard=not no_wireguard,
+        include_ssh=not no_ssh,
+        include_config=not no_config,
+        include_clients=not no_clients
+    )
+
+    if backup_id:
+        metadata = backup_manager.get_backup_metadata(backup_id)
+        size_kb = metadata.size_bytes / 1024 if metadata else 0
+
+        display.success(f"✓ Backup created: {backup_id}")
+        display.print(f"  Size: {size_kb:.2f} KB", style="yellow")
+        display.print(f"  Includes: {', '.join(metadata.includes) if metadata else 'N/A'}", style="cyan")
+    else:
+        display.error("Failed to create backup")
+        sys.exit(1)
+
+
+@backup.command('list')
+@click.pass_context
+def list_backups(ctx):
+    """List all backups."""
+    backup_manager = ctx.obj['backup_manager']
+
+    backups = backup_manager.list_backups()
+
+    if not backups:
+        ctx.obj['display'].info("No backups found")
+        return
+
+    from rich.table import Table
+    from rich.console import Console
+
+    table = Table(title="Backups")
+    table.add_column("ID", style="cyan")
+    table.add_column("Date", style="yellow")
+    table.add_column("Size", style="green")
+    table.add_column("Description", style="white")
+    table.add_column("Includes", style="blue")
+
+    for bkp in backups:
+        size_kb = bkp.size_bytes / 1024
+        created = bkp.created_at[:19] if bkp.created_at else "Unknown"
+        includes = ", ".join(bkp.includes[:2])
+        if len(bkp.includes) > 2:
+            includes += f" (+{len(bkp.includes) - 2})"
+
+        table.add_row(
+            bkp.backup_id,
+            created,
+            f"{size_kb:.2f} KB",
+            bkp.description or "-",
+            includes
+        )
+
+    Console().print(table)
+
+
+@backup.command('restore')
+@click.argument('backup_id')
+@click.option('--no-wireguard', is_flag=True, help='Do not restore WireGuard config')
+@click.option('--no-ssh', is_flag=True, help='Do not restore SSH keys')
+@click.option('--no-config', is_flag=True, help='Do not restore VPNHD config')
+@click.option('--no-clients', is_flag=True, help='Do not restore client database')
+@click.option('--skip-verification', is_flag=True, help='Skip checksum verification')
+@click.option('--yes', '-y', is_flag=True, help='Skip confirmation')
+@click.pass_context
+def restore_backup(ctx, backup_id, no_wireguard, no_ssh, no_config, no_clients, skip_verification, yes):
+    """Restore from a backup."""
+    backup_manager = ctx.obj['backup_manager']
+    display = ctx.obj['display']
+    prompts = ctx.obj['prompts']
+
+    # Confirm restore
+    if not yes:
+        display.warning(f"This will restore backup: {backup_id}")
+        display.warning("Current configuration will be backed up first")
+        if not prompts.confirm("Continue with restore?", default=False):
+            display.info("Cancelled")
+            return
+
+    display.info(f"Restoring backup: {backup_id}...")
+
+    success = backup_manager.restore_backup(
+        backup_id=backup_id,
+        restore_wireguard=not no_wireguard,
+        restore_ssh=not no_ssh,
+        restore_config=not no_config,
+        restore_clients=not no_clients,
+        verify_checksum=not skip_verification
+    )
+
+    if success:
+        display.success(f"✓ Backup {backup_id} restored successfully")
+    else:
+        display.error("Failed to restore backup")
+        sys.exit(1)
+
+
+@backup.command('verify')
+@click.argument('backup_id')
+@click.pass_context
+def verify_backup(ctx, backup_id):
+    """Verify backup integrity."""
+    backup_manager = ctx.obj['backup_manager']
+    display = ctx.obj['display']
+
+    display.info(f"Verifying backup: {backup_id}...")
+
+    if backup_manager.verify_backup(backup_id):
+        display.success(f"✓ Backup {backup_id} is valid")
+    else:
+        display.error(f"Backup {backup_id} verification failed")
+        sys.exit(1)
+
+
+@backup.command('delete')
+@click.argument('backup_id')
+@click.option('--yes', '-y', is_flag=True, help='Skip confirmation')
+@click.pass_context
+def delete_backup(ctx, backup_id, yes):
+    """Delete a backup."""
+    backup_manager = ctx.obj['backup_manager']
+    display = ctx.obj['display']
+    prompts = ctx.obj['prompts']
+
+    if not yes:
+        display.warning(f"This will permanently delete backup: {backup_id}")
+        if not prompts.confirm("Continue?", default=False):
+            display.info("Cancelled")
+            return
+
+    if backup_manager.delete_backup(backup_id):
+        display.success(f"✓ Backup {backup_id} deleted")
+    else:
+        display.error("Failed to delete backup")
+        sys.exit(1)
+
+
+@backup.command('export')
+@click.argument('backup_id')
+@click.argument('destination')
+@click.pass_context
+def export_backup(ctx, backup_id, destination):
+    """Export backup to external location."""
+    backup_manager = ctx.obj['backup_manager']
+    display = ctx.obj['display']
+
+    if backup_manager.export_backup(backup_id, destination):
+        display.success(f"✓ Backup exported to: {destination}")
+    else:
+        display.error("Failed to export backup")
+        sys.exit(1)
+
+
+@backup.command('import')
+@click.argument('source_path')
+@click.pass_context
+def import_backup(ctx, source_path):
+    """Import backup from external location."""
+    backup_manager = ctx.obj['backup_manager']
+    display = ctx.obj['display']
+
+    backup_id = backup_manager.import_backup(source_path)
+
+    if backup_id:
+        display.success(f"✓ Backup imported: {backup_id}")
+    else:
+        display.error("Failed to import backup")
+        sys.exit(1)
+
+
+@backup.command('cleanup')
+@click.option('--keep', default=10, help='Number of recent backups to keep')
+@click.option('--yes', '-y', is_flag=True, help='Skip confirmation')
+@click.pass_context
+def cleanup_backups(ctx, keep, yes):
+    """Delete old backups, keeping only recent ones."""
+    backup_manager = ctx.obj['backup_manager']
+    display = ctx.obj['display']
+    prompts = ctx.obj['prompts']
+
+    backups = backup_manager.list_backups()
+    to_delete = len(backups) - keep
+
+    if to_delete <= 0:
+        display.info(f"No cleanup needed (only {len(backups)} backups)")
+        return
+
+    if not yes:
+        display.warning(f"This will delete {to_delete} old backups")
+        if not prompts.confirm("Continue?", default=False):
+            display.info("Cancelled")
+            return
+
+    deleted = backup_manager.cleanup_old_backups(keep_count=keep)
+    display.success(f"✓ Deleted {deleted} old backups")
 
 
 if __name__ == '__main__':
