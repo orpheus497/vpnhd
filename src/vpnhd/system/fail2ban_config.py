@@ -10,7 +10,7 @@ from jinja2 import Template
 
 from .commands import execute_command
 from .files import FileManager
-from .services import ServiceManager
+from .services import ServiceManager, ServiceStatus
 from ..utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -377,7 +377,7 @@ backend = systemd
         Returns:
             True if running, False otherwise
         """
-        return self.service_manager.get_service_status("fail2ban") == "active"
+        return self.service_manager.get_service_status("fail2ban") == ServiceStatus.ACTIVE
 
     def get_jail_status(self, jail_name: str) -> Optional[Dict[str, any]]:
         """Get detailed status of a specific jail.

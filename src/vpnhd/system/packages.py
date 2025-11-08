@@ -188,19 +188,23 @@ class PackageManager:
 
         if self.package_manager in ("apt", "apt-get"):
             cmd = f"{self.package_manager} update"
+            result = execute_command(cmd, sudo=True, check=False)
+            return result.success
 
         elif self.package_manager in ("dnf", "yum"):
             cmd = f"{self.package_manager} check-update"
+            result = execute_command(cmd, sudo=True, check=False)
+            # dnf/yum check-update returns: 0 = no updates, 100 = updates available, other = error
+            return result.exit_code in (0, 100)
 
         elif self.package_manager == "pacman":
             cmd = "pacman -Sy"
+            result = execute_command(cmd, sudo=True, check=False)
+            return result.success
 
         else:
             self.logger.error(f"Unsupported package manager: {self.package_manager}")
             return False
-
-        result = execute_command(cmd, sudo=True, check=False)
-        return result.success
 
     def upgrade_packages(self, assume_yes: bool = True) -> bool:
         """
