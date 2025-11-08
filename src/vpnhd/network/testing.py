@@ -127,9 +127,7 @@ def ping_host(host: str, count: int = 4, timeout: int = 5) -> bool:
 
     # Execute ping command safely
     result = execute_command(
-        ["ping", "-c", str(count), "-W", str(timeout), host],
-        check=False,
-        capture_output=True
+        ["ping", "-c", str(count), "-W", str(timeout), host], check=False, capture_output=True
     )
 
     if result.success:
@@ -150,10 +148,11 @@ def get_public_ip() -> Optional[str]:
             logger.debug(f"Trying to get public IP from {service_url}")
 
             with urllib.request.urlopen(service_url, timeout=10) as response:
-                ip = response.read().decode('utf-8').strip()
+                ip = response.read().decode("utf-8").strip()
 
                 # Validate it's an IP address
                 from .validation import validate_ip_address
+
                 if validate_ip_address(ip):
                     logger.info(f"Public IP: {ip}")
                     return ip
@@ -237,10 +236,7 @@ def traceroute(host: str, max_hops: int = 30) -> Optional[str]:
 
     # Execute traceroute command safely
     result = execute_command(
-        ["traceroute", "-m", str(max_hops), host],
-        check=False,
-        capture_output=True,
-        timeout=60
+        ["traceroute", "-m", str(max_hops), host], check=False, capture_output=True, timeout=60
     )
 
     if result.success:
@@ -281,11 +277,7 @@ def check_port_forwarding(external_ip: str, port: int, timeout: int = 10) -> boo
     # A real check would require an external service
 
     # For now, just verify the port is listening locally
-    result = execute_command(
-        ["ss", "-tuln"],
-        check=False,
-        capture_output=True
-    )
+    result = execute_command(["ss", "-tuln"], check=False, capture_output=True)
 
     if result.success and f":{port}" in result.stdout:
         logger.info(f"Port {port} is listening locally")
@@ -316,16 +308,13 @@ def measure_latency(host: str, count: int = 10) -> Optional[float]:
         logger.error(f"Invalid ping count: {count}")
         return None
 
-    result = execute_command(
-        ["ping", "-c", str(count), host],
-        check=False,
-        capture_output=True
-    )
+    result = execute_command(["ping", "-c", str(count), host], check=False, capture_output=True)
 
     if result.success:
         # Parse average latency from output
         import re
-        match = re.search(r'avg[^0-9]+([\d.]+)', result.stdout)
+
+        match = re.search(r"avg[^0-9]+([\d.]+)", result.stdout)
         if match:
             try:
                 return float(match.group(1))
@@ -353,15 +342,14 @@ def test_vpn_connectivity(vpn_server_ip: str, vpn_interface: str = "wg0") -> boo
 
     # Validate interface name (alphanumeric, hyphens, underscores only)
     import re
-    if not re.match(r'^[a-zA-Z0-9_-]+$', vpn_interface):
+
+    if not re.match(r"^[a-zA-Z0-9_-]+$", vpn_interface):
         logger.error(f"Invalid VPN interface name: {vpn_interface}")
         return False
 
     # Check if VPN interface exists
     result = execute_command(
-        ["ip", "link", "show", vpn_interface],
-        check=False,
-        capture_output=True
+        ["ip", "link", "show", vpn_interface], check=False, capture_output=True
     )
 
     if not result.success:

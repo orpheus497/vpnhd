@@ -9,7 +9,7 @@ from ..utils.constants import TEMPLATE_DIR
 from ..utils.logging import get_logger
 from ..utils.distribution_helpers import (
     prompt_for_distribution,
-    generate_wireguard_install_instructions
+    generate_wireguard_install_instructions,
 )
 
 logger = get_logger(__name__)
@@ -74,7 +74,7 @@ CentOS, RHEL, Arch Linux, Manjaro, and other modern Linux distributions."""
                 vpn_ip=vpn_ip,
                 private_key=private_key,
                 public_key=public_key,
-                always_on=True
+                always_on=True,
             )
 
             # Display configuration
@@ -119,7 +119,7 @@ CentOS, RHEL, Arch Linux, Manjaro, and other modern Linux distributions."""
         return self.prompts.text(
             "Enter a name for this client device",
             default=default_name,
-            help_text="This helps identify the device (e.g., work-laptop, home-desktop)"
+            help_text="This helps identify the device (e.g., work-laptop, home-desktop)",
         )
 
     def _create_client_config(
@@ -128,7 +128,7 @@ CentOS, RHEL, Arch Linux, Manjaro, and other modern Linux distributions."""
         vpn_ip: str,
         private_key: str,
         public_key: str,
-        always_on: bool = True
+        always_on: bool = True,
     ) -> str:
         """Create WireGuard client configuration from template.
 
@@ -160,7 +160,7 @@ CentOS, RHEL, Arch Linux, Manjaro, and other modern Linux distributions."""
             wireguard_port=self.config.get("network.wireguard_port", 51820),
             route_all_traffic=always_on,
             dns_servers=["1.1.1.1", "8.8.8.8"],
-            vpn_network=self.config.get("network.vpn.network", "10.66.66.0/24")
+            vpn_network=self.config.get("network.vpn.network", "10.66.66.0/24"),
         )
 
         return config
@@ -179,9 +179,7 @@ CentOS, RHEL, Arch Linux, Manjaro, and other modern Linux distributions."""
         try:
             server_config_mgr = ServerConfigManager()
             return server_config_mgr.add_peer_to_server(
-                client_name=client_name,
-                public_key=public_key,
-                vpn_ip=vpn_ip
+                client_name=client_name, public_key=public_key, vpn_ip=vpn_ip
             )
         except Exception as e:
             logger.exception(f"Error adding peer to server: {e}")

@@ -16,6 +16,7 @@ logger = get_logger("network.discovery")
 @dataclass
 class NetworkInterface:
     """Network interface information."""
+
     name: str
     mac_address: str
     ip_address: Optional[str]
@@ -28,6 +29,7 @@ class NetworkInterface:
 @dataclass
 class NetworkInfo:
     """Complete network information."""
+
     interfaces: List[NetworkInterface]
     default_gateway: Optional[str]
     dns_servers: List[str]
@@ -75,17 +77,19 @@ def get_all_interfaces() -> List[NetworkInterface]:
                     is_up = net_if_stats[iface_name].isup
 
                 # Check if loopback
-                is_loopback = iface_name == 'lo' or (ip_address and ip_address.startswith('127.'))
+                is_loopback = iface_name == "lo" or (ip_address and ip_address.startswith("127."))
 
-                interfaces.append(NetworkInterface(
-                    name=iface_name,
-                    mac_address=mac or "",
-                    ip_address=ip_address,
-                    netmask=netmask,
-                    broadcast=broadcast,
-                    is_up=is_up,
-                    is_loopback=is_loopback
-                ))
+                interfaces.append(
+                    NetworkInterface(
+                        name=iface_name,
+                        mac_address=mac or "",
+                        ip_address=ip_address,
+                        netmask=netmask,
+                        broadcast=broadcast,
+                        is_up=is_up,
+                        is_loopback=is_loopback,
+                    )
+                )
 
             except Exception as e:
                 logger.warning(f"Error getting info for interface {iface_name}: {e}")
@@ -109,8 +113,8 @@ def get_primary_interface() -> Optional[NetworkInterface]:
         output = get_command_output("ip route show default")
         if output:
             parts = output.split()
-            if 'dev' in parts:
-                dev_index = parts.index('dev')
+            if "dev" in parts:
+                dev_index = parts.index("dev")
                 if dev_index + 1 < len(parts):
                     default_iface = parts[dev_index + 1]
 
@@ -144,8 +148,8 @@ def get_default_gateway() -> Optional[str]:
         output = get_command_output("ip route show default")
         if output:
             parts = output.split()
-            if 'via' in parts:
-                via_index = parts.index('via')
+            if "via" in parts:
+                via_index = parts.index("via")
                 if via_index + 1 < len(parts):
                     gateway = parts[via_index + 1]
                     if validate_ip_address(gateway):
@@ -185,10 +189,10 @@ def get_dns_servers() -> List[str]:
 
     try:
         # Try reading /etc/resolv.conf
-        with open('/etc/resolv.conf', 'r') as f:
+        with open("/etc/resolv.conf", "r") as f:
             for line in f:
                 line = line.strip()
-                if line.startswith('nameserver'):
+                if line.startswith("nameserver"):
                     parts = line.split()
                     if len(parts) >= 2:
                         dns_ip = parts[1]
@@ -229,10 +233,7 @@ def discover_network() -> NetworkInfo:
     hostname = get_hostname()
 
     network_info = NetworkInfo(
-        interfaces=interfaces,
-        default_gateway=gateway,
-        dns_servers=dns,
-        hostname=hostname
+        interfaces=interfaces, default_gateway=gateway, dns_servers=dns, hostname=hostname
     )
 
     logger.debug(f"Found {len(interfaces)} interfaces")

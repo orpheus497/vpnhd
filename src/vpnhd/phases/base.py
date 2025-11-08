@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
 class PhaseStatus(Enum):
     """Phase execution status."""
+
     NOT_STARTED = "not_started"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
@@ -24,7 +25,7 @@ class PhaseStatus(Enum):
 class Phase(ABC):
     """Base class for all setup phases."""
 
-    def __init__(self, config_manager: 'ConfigManager', display: 'Display', prompts: 'Prompts'):
+    def __init__(self, config_manager: "ConfigManager", display: "Display", prompts: "Prompts"):
         """
         Initialize phase.
 
@@ -115,7 +116,7 @@ class Phase(ABC):
             "name": self.name,
             "number": self.number,
             "status": self.status.value,
-            "error_message": self.error_message
+            "error_message": self.error_message,
         }
 
     def show_introduction(self) -> None:
@@ -125,10 +126,7 @@ class Phase(ABC):
         self.display.newline()
 
         # Show ELI5 explanation
-        self.display.eli5_explanation(
-            f"What is {self.name.split(':')[0]}?",
-            self.long_description
-        )
+        self.display.eli5_explanation(f"What is {self.name.split(':')[0]}?", self.long_description)
 
         self.display.newline()
         self.display.heading("What this phase does:")

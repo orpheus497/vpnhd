@@ -48,6 +48,7 @@ class Phase2WireGuardServer(Phase):
 
             # Install WireGuard
             from ..system.packages import PackageManager
+
             pkg_mgr = PackageManager()
             if not pkg_mgr.is_package_installed("wireguard"):
                 self.display.info("Installing WireGuard...")
@@ -107,7 +108,7 @@ class Phase2WireGuardServer(Phase):
             server_private_key=private_key,
             wireguard_port=self.config.get("network.wireguard_port"),
             server_interface=self.config.get("server.interface"),
-            clients=[]  # Will add clients in later phases
+            clients=[],  # Will add clients in later phases
         )
 
         config_path = Path("/etc/wireguard/wg0.conf")

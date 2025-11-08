@@ -19,7 +19,7 @@ from ..utils.constants import (
     COLOR_ERROR,
     COLOR_WARNING,
     COLOR_INFO,
-    COLOR_HEADING
+    COLOR_HEADING,
 )
 
 
@@ -96,7 +96,7 @@ class Display:
         title: Optional[str] = None,
         columns: Optional[List[str]] = None,
         rows: Optional[List[List[str]]] = None,
-        show_header: bool = True
+        show_header: bool = True,
     ) -> Table:
         """
         Create and display a table.
@@ -123,7 +123,9 @@ class Display:
         self.console.print(table)
         return table
 
-    def phase_status(self, phase_number: int, name: str, completed: bool, in_progress: bool = False) -> None:
+    def phase_status(
+        self, phase_number: int, name: str, completed: bool, in_progress: bool = False
+    ) -> None:
         """
         Display phase status.
 
@@ -146,10 +148,7 @@ class Display:
             style = "dim"
             status = "NOT STARTED"
 
-        self.console.print(
-            f"  {symbol} Phase {phase_number}: {name} [{status}]",
-            style=style
-        )
+        self.console.print(f"  {symbol} Phase {phase_number}: {name} [{status}]", style=style)
 
     def progress_bar(self, total: int, description: str = "Processing") -> Progress:
         """
@@ -167,7 +166,7 @@ class Display:
             TextColumn("[progress.description]{task.description}"),
             BarColumn(),
             TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-            console=self.console
+            console=self.console,
         )
 
         return progress
@@ -217,9 +216,12 @@ class Display:
             style: Rule style
         """
         from rich.rule import Rule
+
         self.console.print(Rule(title, style=style))
 
-    def list_items(self, items: List[str], numbered: bool = False, style: Optional[str] = None) -> None:
+    def list_items(
+        self, items: List[str], numbered: bool = False, style: Optional[str] = None
+    ) -> None:
         """
         Display a list of items.
 
@@ -234,7 +236,9 @@ class Display:
             else:
                 self.console.print(f"  • {item}", style=style)
 
-    def key_value(self, key: str, value: str, key_style: str = "cyan", value_style: Optional[str] = None) -> None:
+    def key_value(
+        self, key: str, value: str, key_style: str = "cyan", value_style: Optional[str] = None
+    ) -> None:
         """
         Display key-value pair.
 

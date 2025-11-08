@@ -100,7 +100,7 @@ class ConfigValidator:
         Returns:
             bool: True if valid
         """
-        pattern = r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$'
+        pattern = r"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$"
         return bool(re.match(pattern, mac))
 
     @staticmethod
@@ -130,55 +130,63 @@ class ConfigValidator:
         errors = []
 
         # Validate LAN configuration
-        if 'lan' in config:
-            lan = config['lan']
+        if "lan" in config:
+            lan = config["lan"]
 
-            if lan.get('router_ip') and not ConfigValidator.validate_ip_address(lan['router_ip']):
+            if lan.get("router_ip") and not ConfigValidator.validate_ip_address(lan["router_ip"]):
                 errors.append(f"Invalid LAN router IP: {lan['router_ip']}")
 
-            if lan.get('server_ip') and not ConfigValidator.validate_ip_address(lan['server_ip']):
+            if lan.get("server_ip") and not ConfigValidator.validate_ip_address(lan["server_ip"]):
                 errors.append(f"Invalid LAN server IP: {lan['server_ip']}")
 
-            if lan.get('subnet') and not ConfigValidator.validate_network(lan['subnet']):
+            if lan.get("subnet") and not ConfigValidator.validate_network(lan["subnet"]):
                 errors.append(f"Invalid LAN subnet: {lan['subnet']}")
 
             # Check if server IP is in subnet
-            if lan.get('server_ip') and lan.get('subnet'):
-                if not ConfigValidator.validate_ip_in_network(lan['server_ip'], lan['subnet']):
+            if lan.get("server_ip") and lan.get("subnet"):
+                if not ConfigValidator.validate_ip_in_network(lan["server_ip"], lan["subnet"]):
                     errors.append(f"Server IP {lan['server_ip']} is not in subnet {lan['subnet']}")
 
         # Validate VPN configuration
-        if 'vpn' in config:
-            vpn = config['vpn']
+        if "vpn" in config:
+            vpn = config["vpn"]
 
-            if vpn.get('network') and not ConfigValidator.validate_network(vpn['network']):
+            if vpn.get("network") and not ConfigValidator.validate_network(vpn["network"]):
                 errors.append(f"Invalid VPN network: {vpn['network']}")
 
-            if vpn.get('server_ip') and not ConfigValidator.validate_ip_address(vpn['server_ip']):
+            if vpn.get("server_ip") and not ConfigValidator.validate_ip_address(vpn["server_ip"]):
                 errors.append(f"Invalid VPN server IP: {vpn['server_ip']}")
 
             # Check if VPN server IP is in VPN network
-            if vpn.get('server_ip') and vpn.get('network'):
-                if not ConfigValidator.validate_ip_in_network(vpn['server_ip'], vpn['network']):
-                    errors.append(f"VPN server IP {vpn['server_ip']} is not in VPN network {vpn['network']}")
+            if vpn.get("server_ip") and vpn.get("network"):
+                if not ConfigValidator.validate_ip_in_network(vpn["server_ip"], vpn["network"]):
+                    errors.append(
+                        f"VPN server IP {vpn['server_ip']} is not in VPN network {vpn['network']}"
+                    )
 
             # Validate client IPs
-            if 'clients' in vpn:
-                for client_name, client_config in vpn['clients'].items():
-                    if 'ip' in client_config:
-                        if not ConfigValidator.validate_ip_address(client_config['ip']):
-                            errors.append(f"Invalid client IP for {client_name}: {client_config['ip']}")
-                        elif vpn.get('network'):
-                            if not ConfigValidator.validate_ip_in_network(client_config['ip'], vpn['network']):
-                                errors.append(f"Client IP {client_config['ip']} for {client_name} is not in VPN network")
+            if "clients" in vpn:
+                for client_name, client_config in vpn["clients"].items():
+                    if "ip" in client_config:
+                        if not ConfigValidator.validate_ip_address(client_config["ip"]):
+                            errors.append(
+                                f"Invalid client IP for {client_name}: {client_config['ip']}"
+                            )
+                        elif vpn.get("network"):
+                            if not ConfigValidator.validate_ip_in_network(
+                                client_config["ip"], vpn["network"]
+                            ):
+                                errors.append(
+                                    f"Client IP {client_config['ip']} for {client_name} is not in VPN network"
+                                )
 
         # Validate ports
-        if 'wireguard_port' in config:
-            if not ConfigValidator.validate_port_number(config['wireguard_port']):
+        if "wireguard_port" in config:
+            if not ConfigValidator.validate_port_number(config["wireguard_port"]):
                 errors.append(f"Invalid WireGuard port: {config['wireguard_port']}")
 
-        if 'ssh_port' in config:
-            if not ConfigValidator.validate_port_number(config['ssh_port']):
+        if "ssh_port" in config:
+            if not ConfigValidator.validate_port_number(config["ssh_port"]):
                 errors.append(f"Invalid SSH port: {config['ssh_port']}")
 
         return len(errors) == 0, errors
@@ -196,13 +204,17 @@ class ConfigValidator:
         """
         errors = []
 
-        if config.get('hostname') and not ConfigValidator.validate_hostname_format(config['hostname']):
+        if config.get("hostname") and not ConfigValidator.validate_hostname_format(
+            config["hostname"]
+        ):
             errors.append(f"Invalid hostname format: {config['hostname']}")
 
-        if config.get('lan_ip') and not ConfigValidator.validate_ip_address(config['lan_ip']):
+        if config.get("lan_ip") and not ConfigValidator.validate_ip_address(config["lan_ip"]):
             errors.append(f"Invalid server LAN IP: {config['lan_ip']}")
 
-        if config.get('mac_address') and not ConfigValidator.validate_mac_address(config['mac_address']):
+        if config.get("mac_address") and not ConfigValidator.validate_mac_address(
+            config["mac_address"]
+        ):
             errors.append(f"Invalid MAC address: {config['mac_address']}")
 
         return len(errors) == 0, errors
@@ -221,19 +233,19 @@ class ConfigValidator:
         all_errors = []
 
         # Validate required top-level keys
-        required_keys = ['version', 'network', 'server', 'clients', 'security', 'phases', 'paths']
+        required_keys = ["version", "network", "server", "clients", "security", "phases", "paths"]
         for key in required_keys:
             if key not in config:
                 all_errors.append(f"Missing required configuration key: {key}")
 
         # Validate network configuration
-        if 'network' in config:
-            valid, errors = ConfigValidator.validate_network_config(config['network'])
+        if "network" in config:
+            valid, errors = ConfigValidator.validate_network_config(config["network"])
             all_errors.extend(errors)
 
         # Validate server configuration
-        if 'server' in config:
-            valid, errors = ConfigValidator.validate_server_config(config['server'])
+        if "server" in config:
+            valid, errors = ConfigValidator.validate_server_config(config["server"])
             all_errors.extend(errors)
 
         return len(all_errors) == 0, all_errors
@@ -259,6 +271,7 @@ class ConfigValidator:
 
         # Check if it's valid base64
         import base64
+
         try:
             decoded = base64.b64decode(key)
             return len(decoded) == 32

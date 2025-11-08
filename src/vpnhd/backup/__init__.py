@@ -2,4 +2,4 @@
 
 from .manager import BackupManager, BackupMetadata
 
-__all__ = ['BackupManager', 'BackupMetadata']
+__all__ = ["BackupManager", "BackupMetadata"]

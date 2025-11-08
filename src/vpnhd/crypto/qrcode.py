@@ -12,6 +12,7 @@ try:
     import qrcode
     import qrcode.image.svg
     from PIL import Image
+
     QRCODE_AVAILABLE = True
 except ImportError:
     QRCODE_AVAILABLE = False
@@ -32,10 +33,7 @@ def generate_qr_code(config_text: str, output_path: Optional[str] = None) -> boo
         True if QR code was generated successfully, False otherwise
     """
     if not QRCODE_AVAILABLE:
-        logger.error(
-            "qrcode library is not installed. Install with: "
-            "pip install qrcode[pil]"
-        )
+        logger.error("qrcode library is not installed. Install with: " "pip install qrcode[pil]")
         return False
 
     try:
@@ -220,9 +218,7 @@ def install_qrencode() -> bool:
     return False
 
 
-def create_qr_with_metadata(
-    config_text: str, client_name: str, output_dir: str
-) -> Optional[str]:
+def create_qr_with_metadata(config_text: str, client_name: str, output_dir: str) -> Optional[str]:
     """Create a QR code with metadata and save to a structured directory.
 
     Args:
@@ -275,7 +271,7 @@ def generate_qr_svg(config_text: str, output_path: str) -> bool:
             error_correction=qrcode.constants.ERROR_CORRECT_L,
             box_size=10,
             border=4,
-            image_factory=qrcode.image.svg.SvgPathImage
+            image_factory=qrcode.image.svg.SvgPathImage,
         )
 
         # Add data
@@ -286,7 +282,7 @@ def generate_qr_svg(config_text: str, output_path: str) -> bool:
         img = qr.make_image(fill_color="black", back_color="white")
 
         # Save SVG
-        with open(output_path, 'wb') as f:
+        with open(output_path, "wb") as f:
             img.save(f)
 
         logger.info(f"QR code SVG saved to {output_path}")

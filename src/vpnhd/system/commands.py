@@ -10,9 +10,42 @@ from ..utils.logging import get_logger
 from ..utils.constants import COMMAND_TIMEOUT_DEFAULT
 
 
+# Sensitive parameter patterns that should be redacted in logs
+SENSITIVE_PARAMS = {
+    "-p",
+    "--password",
+    "--pass",
+    "--key",
+    "--secret",
+    "--token",
+    "--api-key",
+    "--apikey",
+    "--auth",
+    "--credential",
+    "--private-key",
+}
+
+
+def _has_sensitive_params(command_list: List[str]) -> bool:
+    """
+    Check if command contains sensitive parameters.
+
+    Args:
+        command_list: Command as list of strings
+
+    Returns:
+        True if command contains sensitive parameters
+    """
+    for arg in command_list:
+        if any(arg.lower().startswith(param) for param in SENSITIVE_PARAMS):
+            return True
+    return False
+
+
 @dataclass
 class CommandResult:
     """Result of command execution."""
+
     exit_code: int
     stdout: str
     stderr: str
@@ -31,7 +64,7 @@ def execute_command(
     capture_output: bool = True,
     timeout: Optional[int] = None,
     cwd: Optional[Path] = None,
-    env: Optional[dict] = None
+    env: Optional[dict] = None,
 ) -> CommandResult:
     """
     Execute command safely without shell injection vulnerabilities.
@@ -69,9 +102,12 @@ def execute_command(
     if timeout is None:
         timeout = COMMAND_TIMEOUT_DEFAULT
 
-    # Log command for debugging (join list for readability)
+    # Log command for debugging (only if it doesn't contain sensitive parameters)
     command_str = " ".join(command_list)
-    logger.debug(f"Executing command: {command_str}")
+    if not _has_sensitive_params(command_list):
+        logger.debug(f"Executing command: {command_str}")
+    else:
+        logger.debug("Executing command with sensitive parameters (not logged for security)")
 
     try:
         # Execute command safely WITHOUT shell=True
@@ -83,22 +119,22 @@ def execute_command(
             timeout=timeout,
             cwd=cwd,
             env=env,
-            check=False  # We handle errors manually
+            check=False,  # We handle errors manually
         )
 
         success = result.returncode == 0
 
         if not success:
-            logger.warning(f"Command failed with exit code {result.returncode}: {command_str}")
+            if not _has_sensitive_params(command_list):
+                logger.warning(f"Command failed with exit code {result.returncode}: {command_str}")
+            else:
+                logger.warning(f"Command with sensitive parameters failed with exit code {result.returncode}")
             if result.stderr:
                 logger.warning(f"  stderr: {result.stderr.strip()}")
 
         if check and not success:
             raise subprocess.CalledProcessError(
-                result.returncode,
-                command_str,
-                output=result.stdout,
-                stderr=result.stderr
+                result.returncode, command_str, output=result.stdout, stderr=result.stderr
             )
 
         return CommandResult(
@@ -106,27 +142,26 @@ def execute_command(
             stdout=result.stdout if capture_output else "",
             stderr=result.stderr if capture_output else "",
             success=success,
-            command=command_str
+            command=command_str,
         )
 
     except subprocess.TimeoutExpired as e:
-        logger.error(f"Command timed out after {timeout}s: {command_str}")
+        if not _has_sensitive_params(command_list):
+            logger.error(f"Command timed out after {timeout}s: {command_str}")
+        else:
+            logger.error(f"Command with sensitive parameters timed out after {timeout}s")
         return CommandResult(
             exit_code=-1,
             stdout="",
             stderr=f"Command timed out after {timeout} seconds",
             success=False,
-            command=command_str
+            command=command_str,
         )
 
     except Exception as e:
         logger.error(f"Error executing command: {e}")
         return CommandResult(
-            exit_code=-1,
-            stdout="",
-            stderr=str(e),
-            success=False,
-            command=command_str
+            exit_code=-1, stdout="", stderr=str(e), success=False, command=command_str
         )
 
 
@@ -134,7 +169,7 @@ def execute_commands(
     commands: List[str],
     sudo: bool = False,
     stop_on_error: bool = True,
-    timeout: Optional[int] = None
+    timeout: Optional[int] = None,
 ) -> List[CommandResult]:
     """
     Execute multiple commands in sequence.
@@ -152,12 +187,7 @@ def execute_commands(
     results = []
 
     for command in commands:
-        result = execute_command(
-            command,
-            sudo=sudo,
-            check=False,
-            timeout=timeout
-        )
+        result = execute_command(command, sudo=sudo, check=False, timeout=timeout)
 
         results.append(result)
 
@@ -178,11 +208,7 @@ def check_command_exists(command: str) -> bool:
     Returns:
         bool: True if command exists
     """
-    result = execute_command(
-        f"command -v {shlex.quote(command)}",
-        check=False,
-        capture_output=True
-    )
+    result = execute_command(f"command -v {shlex.quote(command)}", check=False, capture_output=True)
     return result.success
 
 
@@ -191,7 +217,7 @@ def run_command_with_input(
     input_data: str,
     sudo: bool = False,
     timeout: Optional[int] = None,
-    capture_output: bool = True
+    capture_output: bool = True,
 ) -> CommandResult:
     """
     Run command with stdin input safely.
@@ -235,7 +261,7 @@ def run_command_with_input(
             capture_output=capture_output,
             text=True,
             timeout=timeout,
-            check=False
+            check=False,
         )
 
         success = result.returncode == 0
@@ -245,7 +271,7 @@ def run_command_with_input(
             stdout=result.stdout if capture_output else "",
             stderr=result.stderr if capture_output else "",
             success=success,
-            command=command_str
+            command=command_str,
         )
 
     except subprocess.TimeoutExpired as e:
@@ -255,17 +281,13 @@ def run_command_with_input(
             stdout="",
             stderr=f"Command timed out after {timeout} seconds",
             success=False,
-            command=command_str
+            command=command_str,
         )
 
     except Exception as e:
         logger.error(f"Error executing command with input: {e}")
         return CommandResult(
-            exit_code=-1,
-            stdout="",
-            stderr=str(e),
-            success=False,
-            command=command_str
+            exit_code=-1, stdout="", stderr=str(e), success=False, command=command_str
         )
 
 
@@ -315,6 +337,6 @@ def get_command_version(command: str, version_flag: str = "--version") -> Option
 
     result = execute_command([command, version_flag], check=False)
     if result.success:
-        return result.stdout.strip().split('\n')[0]
+        return result.stdout.strip().split("\n")[0]
 
     return None

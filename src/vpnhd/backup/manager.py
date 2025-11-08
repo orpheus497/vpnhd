@@ -23,6 +23,7 @@ logger = get_logger(__name__)
 @dataclass
 class BackupMetadata:
     """Metadata for a backup."""
+
     backup_id: str
     created_at: str
     description: str
@@ -36,7 +37,7 @@ class BackupMetadata:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'BackupMetadata':
+    def from_dict(cls, data: Dict[str, Any]) -> "BackupMetadata":
         """Create from dictionary."""
         return cls(**data)
 
@@ -59,7 +60,7 @@ class BackupManager:
         include_wireguard: bool = True,
         include_ssh: bool = True,
         include_config: bool = True,
-        include_clients: bool = True
+        include_clients: bool = True,
     ) -> Optional[str]:
         """Create a new backup.
 
@@ -140,12 +141,12 @@ class BackupManager:
                 version="1.0.0",
                 size_bytes=0,  # Will be updated
                 checksum="",  # Will be updated
-                includes=includes
+                includes=includes,
             )
 
             # Write metadata
             metadata_file = temp_dir / "metadata.json"
-            with open(metadata_file, 'w') as f:
+            with open(metadata_file, "w") as f:
                 json.dump(metadata.to_dict(), f, indent=2)
 
             # Create tar.gz archive
@@ -164,7 +165,7 @@ class BackupManager:
 
             # Save updated metadata separately
             metadata_path = self.backup_dir / f"{backup_id}_metadata.json"
-            with open(metadata_path, 'w') as f:
+            with open(metadata_path, "w") as f:
                 json.dump(metadata.to_dict(), f, indent=2)
 
             # Clean up temp directory
@@ -191,7 +192,7 @@ class BackupManager:
         restore_ssh: bool = True,
         restore_config: bool = True,
         restore_clients: bool = True,
-        verify_checksum: bool = True
+        verify_checksum: bool = True,
     ) -> bool:
         """Restore from a backup.
 
@@ -308,7 +309,7 @@ class BackupManager:
 
         for metadata_file in self.backup_dir.glob("backup_*_metadata.json"):
             try:
-                with open(metadata_file, 'r') as f:
+                with open(metadata_file, "r") as f:
                     data = json.load(f)
                     metadata = BackupMetadata.from_dict(data)
                     backups.append(metadata)
@@ -334,7 +335,7 @@ class BackupManager:
             return None
 
         try:
-            with open(metadata_file, 'r') as f:
+            with open(metadata_file, "r") as f:
                 data = json.load(f)
                 return BackupMetadata.from_dict(data)
         except Exception as e:
@@ -445,11 +446,7 @@ class BackupManager:
         logger.info(f"Cleaned up {deleted_count} old backups")
         return deleted_count
 
-    def export_backup(
-        self,
-        backup_id: str,
-        destination: str
-    ) -> bool:
+    def export_backup(self, backup_id: str, destination: str) -> bool:
         """Export a backup to external location.
 
         Args:
@@ -534,8 +531,8 @@ class BackupManager:
         """
         sha256 = hashlib.sha256()
 
-        with open(filepath, 'rb') as f:
-            for chunk in iter(lambda: f.read(4096), b''):
+        with open(filepath, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
                 sha256.update(chunk)
 
         return sha256.hexdigest()

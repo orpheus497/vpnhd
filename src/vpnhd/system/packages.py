@@ -7,7 +7,7 @@ from ..utils.logging import get_logger
 from ..utils.constants import (
     REQUIRED_PACKAGES_DEBIAN,
     REQUIRED_PACKAGES_FEDORA,
-    COMMAND_TIMEOUT_INSTALL
+    COMMAND_TIMEOUT_INSTALL,
 )
 from ..security.validators import is_valid_package_name
 from ..exceptions import ValidationError
@@ -32,11 +32,11 @@ class PackageManager:
         """
         try:
             # Try to read /etc/os-release
-            with open('/etc/os-release', 'r') as f:
+            with open("/etc/os-release", "r") as f:
                 lines = f.readlines()
                 for line in lines:
-                    if line.startswith('ID='):
-                        distro = line.split('=')[1].strip().strip('"')
+                    if line.startswith("ID="):
+                        distro = line.split("=")[1].strip().strip('"')
                         self.logger.debug(f"Detected distribution: {distro}")
                         return distro
         except Exception as e:
@@ -83,27 +83,15 @@ class PackageManager:
             raise ValidationError("package", package, "Invalid package name format")
 
         if self.package_manager in ("apt", "apt-get"):
-            result = execute_command(
-                ["dpkg", "-l", package],
-                check=False,
-                capture_output=True
-            )
+            result = execute_command(["dpkg", "-l", package], check=False, capture_output=True)
             return result.success
 
         elif self.package_manager in ("dnf", "yum"):
-            result = execute_command(
-                ["rpm", "-q", package],
-                check=False,
-                capture_output=True
-            )
+            result = execute_command(["rpm", "-q", package], check=False, capture_output=True)
             return result.success
 
         elif self.package_manager == "pacman":
-            result = execute_command(
-                ["pacman", "-Q", package],
-                check=False,
-                capture_output=True
-            )
+            result = execute_command(["pacman", "-Q", package], check=False, capture_output=True)
             return result.success
 
         return False
@@ -158,12 +146,7 @@ class PackageManager:
             return False
 
         # Execute installation
-        result = execute_command(
-            cmd,
-            sudo=True,
-            check=False,
-            timeout=COMMAND_TIMEOUT_INSTALL
-        )
+        result = execute_command(cmd, sudo=True, check=False, timeout=COMMAND_TIMEOUT_INSTALL)
 
         if result.success:
             self.logger.info(f"Successfully installed {package}")
@@ -172,7 +155,9 @@ class PackageManager:
 
         return result.success
 
-    def install_packages(self, packages: List[str], assume_yes: bool = True) -> Tuple[List[str], List[str]]:
+    def install_packages(
+        self, packages: List[str], assume_yes: bool = True
+    ) -> Tuple[List[str], List[str]]:
         """
         Install multiple packages.
 
@@ -266,12 +251,7 @@ class PackageManager:
             self.logger.error(f"Unsupported package manager: {self.package_manager}")
             return False
 
-        result = execute_command(
-            cmd,
-            sudo=True,
-            check=False,
-            timeout=COMMAND_TIMEOUT_INSTALL
-        )
+        result = execute_command(cmd, sudo=True, check=False, timeout=COMMAND_TIMEOUT_INSTALL)
 
         return result.success
 

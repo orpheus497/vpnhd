@@ -36,11 +36,11 @@ def is_valid_hostname(hostname: str) -> bool:
         return False
 
     # Check each label
-    labels = hostname.split('.')
+    labels = hostname.split(".")
     for label in labels:
         if not label or len(label) > 63:
             return False
-        if not re.match(r'^[a-z0-9]([a-z0-9-]*[a-z0-9])?$', label, re.IGNORECASE):
+        if not re.match(r"^[a-z0-9]([a-z0-9-]*[a-z0-9])?$", label, re.IGNORECASE):
             return False
 
     return True
@@ -154,7 +154,7 @@ def is_valid_mac_address(mac: str) -> bool:
         False
     """
     # Support both : and - separators
-    pattern = r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$'
+    pattern = r"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$"
     return bool(re.match(pattern, mac))
 
 
@@ -178,7 +178,7 @@ def is_safe_path(path: str) -> bool:
         p = Path(path).resolve()
 
         # Check for common dangerous patterns
-        dangerous_patterns = ['..', '~']
+        dangerous_patterns = ["..", "~"]
         path_str = str(p)
 
         for pattern in dangerous_patterns:
@@ -210,7 +210,7 @@ def is_valid_wireguard_key(key: str) -> bool:
         return False
 
     # Check base64 format
-    pattern = r'^[A-Za-z0-9+/]{43}=$'
+    pattern = r"^[A-Za-z0-9+/]{43}=$"
     return bool(re.match(pattern, key))
 
 
@@ -231,10 +231,10 @@ def sanitize_hostname(hostname: str) -> str:
     hostname = hostname.lower()
 
     # Remove invalid characters
-    hostname = re.sub(r'[^a-z0-9-]', '', hostname)
+    hostname = re.sub(r"[^a-z0-9-]", "", hostname)
 
     # Remove leading/trailing hyphens
-    hostname = hostname.strip('-')
+    hostname = hostname.strip("-")
 
     # Limit length
     hostname = hostname[:63]
@@ -256,14 +256,14 @@ def sanitize_filename(filename: str) -> str:
         "my_file.conf"
     """
     # Replace spaces with underscores
-    filename = filename.replace(' ', '_')
+    filename = filename.replace(" ", "_")
 
     # Remove dangerous characters
-    filename = re.sub(r'[^a-zA-Z0-9._-]', '', filename)
+    filename = re.sub(r"[^a-zA-Z0-9._-]", "", filename)
 
     # Prevent hidden files
-    if filename.startswith('.'):
-        filename = '_' + filename[1:]
+    if filename.startswith("."):
+        filename = "_" + filename[1:]
 
     return filename
 
@@ -277,7 +277,7 @@ def validate_email(email: str) -> bool:
     Returns:
         True if valid email format, False otherwise
     """
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
     return bool(re.match(pattern, email))
 
 
@@ -304,7 +304,7 @@ def is_valid_interface_name(interface: str) -> bool:
         return False
 
     # Only alphanumeric, underscore, hyphen, period (common in interface names)
-    pattern = r'^[a-zA-Z0-9._-]+$'
+    pattern = r"^[a-zA-Z0-9._-]+$"
     return bool(re.match(pattern, interface))
 
 
@@ -337,7 +337,7 @@ def is_valid_package_name(package: str) -> bool:
 
     # Debian/RPM package naming conventions
     # Must start with alphanumeric, can contain +-._
-    pattern = r'^[a-zA-Z0-9][a-zA-Z0-9+._-]*$'
+    pattern = r"^[a-zA-Z0-9][a-zA-Z0-9+._-]*$"
     return bool(re.match(pattern, package))
 
 
@@ -408,7 +408,7 @@ def sanitize_interface_name(interface: str) -> str:
         "wg-0"
     """
     # Remove invalid characters (keep alphanumeric, underscore, hyphen, period)
-    interface = re.sub(r'[^a-zA-Z0-9._-]', '', interface)
+    interface = re.sub(r"[^a-zA-Z0-9._-]", "", interface)
 
     # Limit length to 15 characters (IFNAMSIZ - 1)
     interface = interface[:15]
@@ -432,11 +432,11 @@ def sanitize_package_name(package: str) -> str:
         "vimmalware"
     """
     # Remove all characters except alphanumeric and +-._-
-    package = re.sub(r'[^a-zA-Z0-9+._-]', '', package)
+    package = re.sub(r"[^a-zA-Z0-9+._-]", "", package)
 
     # Ensure starts with alphanumeric
     if package and not package[0].isalnum():
-        package = package.lstrip('+._-')
+        package = package.lstrip("+._-")
 
     # Limit length
     package = package[:256]

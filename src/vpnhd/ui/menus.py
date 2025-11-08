@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class MainMenu:
     """Main menu handler."""
 
-    def __init__(self, config_manager: 'ConfigManager'):
+    def __init__(self, config_manager: "ConfigManager"):
         """
         Initialize main menu.
 
@@ -47,10 +47,7 @@ class MainMenu:
             phase_info = self.config.get_phase_info(phase_num)
             if phase_info:
                 self.display.phase_status(
-                    phase_num,
-                    phase_info['name'],
-                    phase_info['completed'],
-                    in_progress=False
+                    phase_num, phase_info["name"], phase_info["completed"], in_progress=False
                 )
 
         # Show progress
@@ -58,7 +55,7 @@ class MainMenu:
         self.display.newline()
         self.display.print(
             f"Progress: {completion:.0f}% complete ({sum(1 for i in range(1, 9) if self.config.is_phase_complete(i))}/8 phases)",
-            style="yellow"
+            style="yellow",
         )
 
         # Display menu options
@@ -70,7 +67,7 @@ class MainMenu:
             ("4", "Show phase details"),
             ("5", "Troubleshooting"),
             ("6", "View guide documentation"),
-            ("0", "Exit")
+            ("0", "Exit"),
         ]
 
         choice = self.prompts.menu("Main Menu", options)
@@ -95,7 +92,7 @@ class MainMenu:
 
         choice = self.prompts.menu("Available Phases", options, allow_back=True)
 
-        if choice == 'b':
+        if choice == "b":
             return None
 
         return int(choice)
@@ -114,7 +111,9 @@ class MainMenu:
         self.display.newline()
         self.display.key_value("VPN Network", self.config.get("network.vpn.network", "Not set"))
         self.display.key_value("Server VPN IP", self.config.get("network.vpn.server_ip", "Not set"))
-        self.display.key_value("WireGuard Port", str(self.config.get("network.wireguard_port", "Not set")))
+        self.display.key_value(
+            "WireGuard Port", str(self.config.get("network.wireguard_port", "Not set"))
+        )
 
         # Server Information
         self.display.newline()
@@ -136,7 +135,7 @@ class MainMenu:
             status = "Configured" if client_data.get("configured", False) else "Not configured"
             self.display.key_value(
                 name,
-                f"IP: {client_data.get('vpn_ip', 'N/A')} - Mode: {client_data.get('vpn_mode', 'N/A')} - {status}"
+                f"IP: {client_data.get('vpn_ip', 'N/A')} - Mode: {client_data.get('vpn_mode', 'N/A')} - {status}",
             )
 
         # Security
@@ -145,20 +144,16 @@ class MainMenu:
 
         security = self.config.get("security", {})
         self.display.key_value(
-            "SSH Keys",
-            "Enabled" if security.get("ssh_key_auth_enabled") else "Disabled"
+            "SSH Keys", "Enabled" if security.get("ssh_key_auth_enabled") else "Disabled"
         )
         self.display.key_value(
-            "Password Auth",
-            "Disabled" if security.get("ssh_password_auth_disabled") else "Enabled"
+            "Password Auth", "Disabled" if security.get("ssh_password_auth_disabled") else "Enabled"
         )
         self.display.key_value(
-            "Firewall (UFW)",
-            "Active" if security.get("firewall_enabled") else "Inactive"
+            "Firewall (UFW)", "Active" if security.get("firewall_enabled") else "Inactive"
         )
         self.display.key_value(
-            "fail2ban",
-            "Running" if security.get("fail2ban_enabled") else "Not running"
+            "fail2ban", "Running" if security.get("fail2ban_enabled") else "Not running"
         )
 
         self.display.separator()
@@ -182,23 +177,23 @@ class MainMenu:
         self.display.separator()
 
         # Status
-        status = "COMPLETED" if phase_info['completed'] else "NOT STARTED"
-        status_style = "green" if phase_info['completed'] else "yellow"
+        status = "COMPLETED" if phase_info["completed"] else "NOT STARTED"
+        status_style = "green" if phase_info["completed"] else "yellow"
         self.display.print(f"Status: {status}", style=status_style)
 
         # Completion date
-        if phase_info['date_completed']:
-            self.display.key_value("Completed", phase_info['date_completed'])
+        if phase_info["date_completed"]:
+            self.display.key_value("Completed", phase_info["date_completed"])
 
         # Notes
-        if phase_info.get('notes'):
+        if phase_info.get("notes"):
             self.display.newline()
             self.display.heading("Notes:")
-            self.display.print(phase_info['notes'])
+            self.display.print(phase_info["notes"])
 
         # Phase-specific details
         if phase_number == 2:  # WireGuard Server
-            server_pubkey = phase_info.get('server_public_key')
+            server_pubkey = phase_info.get("server_public_key")
             if server_pubkey:
                 self.display.newline()
                 self.display.key_value("Server Public Key", server_pubkey)
@@ -219,7 +214,7 @@ class MainMenu:
             "No internet through VPN",
             "SSH connection refused",
             "Port forwarding not working",
-            "Firewall blocking connections"
+            "Firewall blocking connections",
         ]
 
         self.display.list_items(issues, numbered=True)
@@ -244,6 +239,5 @@ class MainMenu:
         """
         self.display.newline()
         return self.prompts.confirm(
-            f"Ready to execute Phase {phase_number}: {phase_name}?",
-            default=True
+            f"Ready to execute Phase {phase_number}: {phase_name}?", default=True
         )

@@ -46,7 +46,7 @@ def ensure_file_exists(path: Path, content: str = "", mode: int = 0o600) -> bool
         # Use 'x' mode to atomically create file only if it doesn't exist
         # This prevents TOCTOU race conditions
         try:
-            with path.open('x') as f:
+            with path.open("x") as f:
                 f.write(content)
             path.chmod(mode)
         except FileExistsError:
@@ -70,7 +70,7 @@ def read_json_file(path: Path) -> Optional[Dict[str, Any]]:
     try:
         if not path.exists():
             return None
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             return json.load(f)
     except Exception:
         return None
@@ -90,7 +90,7 @@ def write_json_file(path: Path, data: Dict[str, Any], mode: int = 0o600) -> bool
     """
     try:
         ensure_directory_exists(path.parent)
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             json.dump(data, f, indent=2)
         path.chmod(mode)
         return True
@@ -105,7 +105,7 @@ def get_timestamp() -> str:
     Returns:
         str: ISO formatted timestamp
     """
-    return datetime.utcnow().isoformat() + 'Z'
+    return datetime.utcnow().isoformat() + "Z"
 
 
 def get_timestamp_filename() -> str:
@@ -131,7 +131,7 @@ def validate_hostname(hostname: str) -> bool:
     if not hostname or len(hostname) > 63:
         return False
 
-    pattern = r'^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$'
+    pattern = r"^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$"
     return bool(re.match(pattern, hostname.lower()))
 
 
@@ -156,6 +156,7 @@ def is_root() -> bool:
         bool: True if running as root
     """
     import os
+
     return os.geteuid() == 0
 
 
@@ -167,7 +168,8 @@ def get_username() -> str:
         str: Username
     """
     import os
-    return os.environ.get('USER', os.environ.get('USERNAME', 'unknown'))
+
+    return os.environ.get("USER", os.environ.get("USERNAME", "unknown"))
 
 
 def get_hostname() -> str:
@@ -194,7 +196,7 @@ def truncate_string(s: str, max_length: int = 50, suffix: str = "...") -> str:
     """
     if len(s) <= max_length:
         return s
-    return s[:max_length - len(suffix)] + suffix
+    return s[: max_length - len(suffix)] + suffix
 
 
 def get_nested_value(data: Dict[str, Any], key_path: str, default: Any = None) -> Any:
@@ -209,7 +211,7 @@ def get_nested_value(data: Dict[str, Any], key_path: str, default: Any = None) -
     Returns:
         Any: Value at key path or default
     """
-    keys = key_path.split('.')
+    keys = key_path.split(".")
     value = data
 
     for key in keys:
@@ -230,7 +232,7 @@ def set_nested_value(data: Dict[str, Any], key_path: str, value: Any) -> None:
         key_path: Dot-separated key path (e.g., "network.lan.router_ip")
         value: Value to set
     """
-    keys = key_path.split('.')
+    keys = key_path.split(".")
     current = data
 
     for key in keys[:-1]:
@@ -251,14 +253,14 @@ def format_bytes(bytes_count: int) -> str:
     Returns:
         str: Formatted string (e.g., "1.5 MB")
     """
-    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+    for unit in ["B", "KB", "MB", "GB", "TB"]:
         if bytes_count < 1024.0:
             return f"{bytes_count:.1f} {unit}"
         bytes_count /= 1024.0
     return f"{bytes_count:.1f} PB"
 
 
-def calculate_file_hash(path: Path, algorithm: str = 'sha256') -> Optional[str]:
+def calculate_file_hash(path: Path, algorithm: str = "sha256") -> Optional[str]:
     """
     Calculate hash of a file.
 
@@ -271,8 +273,8 @@ def calculate_file_hash(path: Path, algorithm: str = 'sha256') -> Optional[str]:
     """
     try:
         hash_obj = hashlib.new(algorithm)
-        with open(path, 'rb') as f:
-            for chunk in iter(lambda: f.read(4096), b''):
+        with open(path, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
                 hash_obj.update(chunk)
         return hash_obj.hexdigest()
     except Exception:
@@ -290,10 +292,10 @@ def sanitize_filename(filename: str) -> str:
         str: Sanitized filename
     """
     # Remove path separators and null bytes
-    filename = filename.replace('/', '_').replace('\\', '_').replace('\0', '')
+    filename = filename.replace("/", "_").replace("\\", "_").replace("\0", "")
 
     # Remove control characters
-    filename = ''.join(char for char in filename if ord(char) >= 32)
+    filename = "".join(char for char in filename if ord(char) >= 32)
 
     # Limit length
     if len(filename) > 255:
@@ -312,7 +314,7 @@ def yes_no_to_bool(value: str) -> bool:
     Returns:
         bool: True for yes, False for no
     """
-    return value.lower() in ('y', 'yes', 'true', '1')
+    return value.lower() in ("y", "yes", "true", "1")
 
 
 def bool_to_yes_no(value: bool) -> str:
@@ -380,7 +382,7 @@ def is_valid_file_path(path: Path) -> bool:
 
         # Check if path contains any suspicious patterns
         path_str = str(path)
-        if '..' in path_str or path_str.startswith('/dev') or path_str.startswith('/proc'):
+        if ".." in path_str or path_str.startswith("/dev") or path_str.startswith("/proc"):
             return False
 
         return True

@@ -152,7 +152,9 @@ backend = systemd
             logger.exception(f"Error creating WireGuard jail: {e}")
             return False
 
-    def configure_ban_settings(self, ban_time: int, find_time: int, max_retry: int) -> Dict[str, int]:
+    def configure_ban_settings(
+        self, ban_time: int, find_time: int, max_retry: int
+    ) -> Dict[str, int]:
         """Configure default ban settings.
 
         Args:
@@ -263,9 +265,7 @@ backend = systemd
                         for jail in jails:
                             jail_result = execute_command(["fail2ban-client", "status", jail])
                             if jail_result.success:
-                                banned_ips.extend(
-                                    self._parse_banned_ips(jail_result.stdout, jail)
-                                )
+                                banned_ips.extend(self._parse_banned_ips(jail_result.stdout, jail))
 
         except Exception as e:
             logger.exception(f"Error getting banned IPs: {e}")
@@ -314,9 +314,7 @@ backend = systemd
         """
         try:
             if jail_name:
-                result = execute_command(
-                    ["fail2ban-client", "set", jail_name, "unbanip", ip]
-                )
+                result = execute_command(["fail2ban-client", "set", jail_name, "unbanip", ip])
                 if result.success:
                     logger.info(f"Unbanned {ip} from {jail_name}")
                     return True

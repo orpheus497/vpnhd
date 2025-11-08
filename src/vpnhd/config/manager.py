@@ -12,7 +12,7 @@ from ..utils.helpers import (
     get_timestamp,
     get_timestamp_filename,
     get_nested_value,
-    set_nested_value
+    set_nested_value,
 )
 from ..utils.logging import get_logger
 from .schema import get_default_config
@@ -73,7 +73,7 @@ class ConfigManager:
         """
         try:
             # Update last modified timestamp
-            self.config['last_modified'] = get_timestamp()
+            self.config["last_modified"] = get_timestamp()
 
             # Write to file
             if write_json_file(self.config_path, self.config):
@@ -382,7 +382,7 @@ class ConfigManager:
             "completed": phase_data.get("completed", False),
             "date_completed": phase_data.get("date_completed"),
             "notes": phase_data.get("notes", ""),
-            **phase_data
+            **phase_data,
         }
 
     def get_all_phases_info(self) -> List[Dict[str, Any]]:

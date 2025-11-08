@@ -20,7 +20,7 @@ class Prompts:
         message: str,
         default: Optional[str] = None,
         validator: Optional[Callable[[str], tuple[bool, Optional[str]]]] = None,
-        password: bool = False
+        password: bool = False,
     ) -> str:
         """
         Prompt for text input.
@@ -35,12 +35,7 @@ class Prompts:
             str: User input
         """
         while True:
-            value = Prompt.ask(
-                message,
-                default=default,
-                password=password,
-                console=self.console
-            )
+            value = Prompt.ask(message, default=default, password=password, console=self.console)
 
             if validator:
                 is_valid, error = validator(value)
@@ -63,12 +58,7 @@ class Prompts:
         """
         return Confirm.ask(message, default=default, console=self.console)
 
-    def choice(
-        self,
-        message: str,
-        choices: List[str],
-        default: Optional[str] = None
-    ) -> str:
+    def choice(self, message: str, choices: List[str], default: Optional[str] = None) -> str:
         """
         Prompt for single choice from list.
 
@@ -92,7 +82,7 @@ class Prompts:
         message: str,
         default: Optional[int] = None,
         min_val: Optional[int] = None,
-        max_val: Optional[int] = None
+        max_val: Optional[int] = None,
     ) -> int:
         """
         Prompt for integer input.
@@ -128,11 +118,7 @@ class Prompts:
             except ValueError:
                 self.console.print("[red]Please enter a valid number[/red]")
 
-    def ip_address(
-        self,
-        message: str,
-        default: Optional[str] = None
-    ) -> str:
+    def ip_address(self, message: str, default: Optional[str] = None) -> str:
         """
         Prompt for IP address with validation.
 
@@ -143,17 +129,9 @@ class Prompts:
         Returns:
             str: Valid IP address
         """
-        return self.text(
-            message,
-            default=default,
-            validator=self.validator.validate_ip
-        )
+        return self.text(message, default=default, validator=self.validator.validate_ip)
 
-    def network(
-        self,
-        message: str,
-        default: Optional[str] = None
-    ) -> str:
+    def network(self, message: str, default: Optional[str] = None) -> str:
         """
         Prompt for network in CIDR notation.
 
@@ -164,17 +142,9 @@ class Prompts:
         Returns:
             str: Valid network
         """
-        return self.text(
-            message,
-            default=default,
-            validator=self.validator.validate_network_cidr
-        )
+        return self.text(message, default=default, validator=self.validator.validate_network_cidr)
 
-    def hostname(
-        self,
-        message: str,
-        default: Optional[str] = None
-    ) -> str:
+    def hostname(self, message: str, default: Optional[str] = None) -> str:
         """
         Prompt for hostname with validation.
 
@@ -185,17 +155,9 @@ class Prompts:
         Returns:
             str: Valid hostname
         """
-        return self.text(
-            message,
-            default=default,
-            validator=self.validator.validate_hostname
-        )
+        return self.text(message, default=default, validator=self.validator.validate_hostname)
 
-    def port(
-        self,
-        message: str,
-        default: Optional[int] = None
-    ) -> int:
+    def port(self, message: str, default: Optional[int] = None) -> int:
         """
         Prompt for port number with validation.
 
@@ -210,17 +172,12 @@ class Prompts:
             value_str = self.text(
                 message,
                 default=str(default) if default else None,
-                validator=self.validator.validate_port
+                validator=self.validator.validate_port,
             )
 
             return int(value_str)
 
-    def password(
-        self,
-        message: str = "Password",
-        confirm: bool = True,
-        min_length: int = 8
-    ) -> str:
+    def password(self, message: str = "Password", confirm: bool = True, min_length: int = 8) -> str:
         """
         Prompt for password input.
 
@@ -248,12 +205,7 @@ class Prompts:
 
             return password
 
-    def menu(
-        self,
-        title: str,
-        options: List[tuple[str, str]],
-        allow_back: bool = False
-    ) -> str:
+    def menu(self, title: str, options: List[tuple[str, str]], allow_back: bool = False) -> str:
         """
         Display a menu and get user choice.
 
@@ -290,15 +242,14 @@ class Prompts:
 
         # Get user choice
         while True:
-            choice = Prompt.ask(
-                "\nYour choice",
-                console=self.console
-            ).lower()
+            choice = Prompt.ask("\nYour choice", console=self.console).lower()
 
             if choice in valid_choices:
                 return choice
 
-            self.console.print(f"[red]Invalid choice. Please enter one of: {', '.join(valid_choices)}[/red]")
+            self.console.print(
+                f"[red]Invalid choice. Please enter one of: {', '.join(valid_choices)}[/red]"
+            )
 
     def pause(self, message: str = "Press Enter to continue...") -> None:
         """
@@ -330,7 +281,7 @@ class Prompts:
                 break
             lines.append(line)
 
-        result = '\n'.join(lines)
+        result = "\n".join(lines)
 
         if not result and default:
             return default

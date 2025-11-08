@@ -103,7 +103,7 @@ class InputValidator:
         if not value:
             return False, "Email cannot be empty"
 
-        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         if re.match(pattern, value):
             return True, None
         else:
@@ -137,7 +137,7 @@ class InputValidator:
             tuple: (is_valid, error_message)
         """
         value_lower = value.lower().strip()
-        if value_lower in ('y', 'yes', 'n', 'no'):
+        if value_lower in ("y", "yes", "n", "no"):
             return True, None
         else:
             return False, "Please enter 'y' or 'n'"
@@ -160,7 +160,9 @@ class InputValidator:
             return False, f"Invalid choice. Must be one of: {', '.join(str(c) for c in choices)}"
 
     @staticmethod
-    def validate_integer(value: str, min_val: Optional[int] = None, max_val: Optional[int] = None) -> tuple[bool, Optional[str]]:
+    def validate_integer(
+        value: str, min_val: Optional[int] = None, max_val: Optional[int] = None
+    ) -> tuple[bool, Optional[str]]:
         """
         Validate integer input.
 
@@ -216,8 +218,7 @@ class InputValidator:
 
     @staticmethod
     def create_custom_validator(
-        validation_func: Callable[[str], bool],
-        error_message: str
+        validation_func: Callable[[str], bool], error_message: str
     ) -> Callable[[str], tuple[bool, Optional[str]]]:
         """
         Create a custom validator.
@@ -229,6 +230,7 @@ class InputValidator:
         Returns:
             Callable: Validator function
         """
+
         def validator(value: str) -> tuple[bool, Optional[str]]:
             if validation_func(value):
                 return True, None

@@ -2,7 +2,12 @@
 
 from pathlib import Path
 from .base import Phase
-from ..crypto.ssh import generate_ssh_keypair, get_ssh_public_key, add_ssh_key_to_authorized_keys, test_ssh_key_auth
+from ..crypto.ssh import (
+    generate_ssh_keypair,
+    get_ssh_public_key,
+    add_ssh_key_to_authorized_keys,
+    test_ssh_key_auth,
+)
 from ..system.ssh_config import SSHConfigManager
 from ..utils.logging import get_logger
 
@@ -101,7 +106,9 @@ class Phase7SSHKeys(Phase):
 
     def verify(self) -> bool:
         """Verify that SSH keys are properly configured."""
-        ssh_key_path = Path(self.config.get("phases.phase7_ssh_keys.ssh_key_path", "~/.ssh/id_ed25519"))
+        ssh_key_path = Path(
+            self.config.get("phases.phase7_ssh_keys.ssh_key_path", "~/.ssh/id_ed25519")
+        )
         ssh_key_path = ssh_key_path.expanduser()
         return ssh_key_path.exists()
 

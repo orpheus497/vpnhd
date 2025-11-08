@@ -15,7 +15,7 @@ def generate_ssh_keypair(
     key_path: Path,
     key_type: str = SSH_KEY_DEFAULT_TYPE,
     comment: Optional[str] = None,
-    passphrase: str = ""
+    passphrase: str = "",
 ) -> bool:
     """
     Generate SSH keypair.
@@ -49,6 +49,7 @@ def generate_ssh_keypair(
             # Use default comment (user@hostname)
             import socket
             from ..utils.helpers import get_username
+
             comment = f"{get_username()}@{socket.gethostname()}"
             cmd += f" -C '{comment}'"
 
@@ -100,9 +101,7 @@ def get_ssh_public_key(private_key_path: Path) -> Optional[str]:
 
         # Try to derive public key from private key
         result = execute_command(
-            f"ssh-keygen -y -f {private_key_path}",
-            check=False,
-            capture_output=True
+            f"ssh-keygen -y -f {private_key_path}", check=False, capture_output=True
         )
 
         if result.success:
@@ -116,9 +115,7 @@ def get_ssh_public_key(private_key_path: Path) -> Optional[str]:
 
 
 def add_ssh_key_to_authorized_keys(
-    public_key: str,
-    username: Optional[str] = None,
-    remote_host: Optional[str] = None
+    public_key: str, username: Optional[str] = None, remote_host: Optional[str] = None
 ) -> bool:
     """
     Add SSH public key to authorized_keys.
@@ -138,15 +135,16 @@ def add_ssh_key_to_authorized_keys(
 
             # Create temporary key file
             import tempfile
-            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.pub') as tmp:
-                tmp.write(public_key + '\n')
+
+            with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".pub") as tmp:
+                tmp.write(public_key + "\n")
                 tmp_path = tmp.name
 
             try:
                 result = execute_command(
                     f"ssh-copy-id -i {tmp_path} {username}@{remote_host}",
                     check=False,
-                    capture_output=True
+                    capture_output=True,
                 )
 
                 Path(tmp_path).unlink(missing_ok=True)
@@ -178,8 +176,8 @@ def add_ssh_key_to_authorized_keys(
                     return True
 
             # Append key to authorized_keys
-            with open(authorized_keys_path, 'a') as f:
-                f.write(public_key + '\n')
+            with open(authorized_keys_path, "a") as f:
+                f.write(public_key + "\n")
 
             # Set proper permissions
             authorized_keys_path.chmod(0o600)
@@ -256,7 +254,7 @@ def remove_ssh_key_from_authorized_keys(public_key: str) -> bool:
             return True
 
         # Write back
-        authorized_keys_path.write_text('\n'.join(new_lines) + '\n')
+        authorized_keys_path.write_text("\n".join(new_lines) + "\n")
 
         logger.info("SSH key removed from authorized_keys")
         return True
@@ -277,11 +275,7 @@ def get_ssh_key_fingerprint(key_path: Path) -> Optional[str]:
         Optional[str]: Key fingerprint or None if failed
     """
     try:
-        result = execute_command(
-            f"ssh-keygen -lf {key_path}",
-            check=False,
-            capture_output=True
-        )
+        result = execute_command(f"ssh-keygen -lf {key_path}", check=False, capture_output=True)
 
         if result.success:
             return result.stdout.strip()
@@ -328,7 +322,7 @@ def list_ssh_keys(ssh_dir: Path = SSH_DIR) -> list:
         for pattern in ["id_*", "*_rsa", "*_ed25519", "*_ecdsa"]:
             for key_file in ssh_dir.glob(pattern):
                 # Exclude .pub files
-                if not key_file.name.endswith('.pub'):
+                if not key_file.name.endswith(".pub"):
                     keys.append(key_file)
 
         return keys
