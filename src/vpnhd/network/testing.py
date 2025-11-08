@@ -8,6 +8,7 @@ from typing import Optional, List
 from ..utils.logging import get_logger
 from ..utils.constants import PORT_CHECK_SERVICES
 from ..system.commands import execute_command
+from ..security.validators import is_valid_hostname, is_valid_ip
 
 
 logger = get_logger("network.testing")
@@ -70,21 +71,39 @@ def test_port_open(host: str, port: int, timeout: int = 5) -> bool:
 
 def ping_host(host: str, count: int = 4, timeout: int = 5) -> bool:
     """
-    Ping a host.
+    Ping a host to test connectivity.
 
     Args:
-        host: Host to ping
+        host: Hostname or IP address to ping
         count: Number of ping packets
         timeout: Timeout in seconds
 
     Returns:
-        bool: True if ping successful
+        bool: True if host responds to ping, False otherwise
     """
+    # Validate host input
+    if not (is_valid_hostname(host) or is_valid_ip(host)):
+        logger.error(f"Invalid hostname or IP address: {host}")
+        return False
+
+    # Validate count and timeout
+    if not (1 <= count <= 100):
+        logger.error(f"Invalid ping count: {count}")
+        return False
+
+    if not (1 <= timeout <= 60):
+        logger.error(f"Invalid timeout: {timeout}")
+        return False
+
+    # Execute ping command safely
     result = execute_command(
-        f"ping -c {count} -W {timeout} {host}",
+        ["ping", "-c", str(count), "-W", str(timeout), host],
         check=False,
         capture_output=True
     )
+
+    if result.success:
+        logger.debug(f"Successfully pinged {host}")
 
     return result.success
 
@@ -170,21 +189,35 @@ def traceroute(host: str, max_hops: int = 30) -> Optional[str]:
     Perform traceroute to a host.
 
     Args:
-        host: Destination host
+        host: Destination hostname or IP address
         max_hops: Maximum number of hops
 
     Returns:
         Optional[str]: Traceroute output or None if failed
     """
+    # Validate host input
+    if not (is_valid_hostname(host) or is_valid_ip(host)):
+        logger.error(f"Invalid hostname or IP address for traceroute: {host}")
+        return None
+
+    # Validate max_hops
+    if not (1 <= max_hops <= 255):
+        logger.error(f"Invalid max_hops value: {max_hops}")
+        return None
+
+    # Execute traceroute command safely
     result = execute_command(
-        f"traceroute -m {max_hops} {host}",
+        ["traceroute", "-m", str(max_hops), host],
         check=False,
         capture_output=True,
         timeout=60
     )
 
     if result.success:
+        logger.debug(f"Traceroute to {host} completed successfully")
         return result.stdout
+    else:
+        logger.warning(f"Traceroute to {host} failed: {result.stderr}")
 
     return None
 

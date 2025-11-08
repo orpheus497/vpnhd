@@ -11,8 +11,11 @@ from ..utils.constants import (
     FAIL2BAN_SSH_BAN_TIME,
     FAIL2BAN_SSH_MAX_RETRY,
     FAIL2BAN_WIREGUARD_BAN_TIME,
-    FAIL2BAN_WIREGUARD_MAX_RETRY
+    FAIL2BAN_WIREGUARD_MAX_RETRY,
+    DEFAULT_WIREGUARD_PORT,
+    DEFAULT_SSH_PORT
 )
+from ..security.validators import is_valid_port
 
 logger = get_logger(__name__)
 
@@ -74,26 +77,47 @@ class Phase8Security(Phase):
             return False
 
     def _configure_ufw(self) -> None:
-        """Configure UFW firewall."""
+        """Configure UFW firewall with validated inputs."""
         from ..system.commands import execute_command
 
         self.display.info("Configuring UFW firewall...")
 
+        # Get and validate ports
+        wg_port = self.config.get("network.wireguard_port", DEFAULT_WIREGUARD_PORT)
+        ssh_port = self.config.get("network.ssh_port", DEFAULT_SSH_PORT)
+
+        # Validate port numbers
+        if not is_valid_port(wg_port):
+            logger.error(f"Invalid WireGuard port: {wg_port}")
+            self.display.error(f"Invalid WireGuard port: {wg_port}")
+            return
+
+        if not is_valid_port(ssh_port):
+            logger.error(f"Invalid SSH port: {ssh_port}")
+            self.display.error(f"Invalid SSH port: {ssh_port}")
+            return
+
         # Default policies
-        execute_command("ufw default deny incoming", sudo=True, check=False)
-        execute_command("ufw default allow outgoing", sudo=True, check=False)
+        execute_command(["ufw", "default", "deny", "incoming"], sudo=True, check=False)
+        execute_command(["ufw", "default", "allow", "outgoing"], sudo=True, check=False)
 
         # Allow WireGuard
-        wg_port = self.config.get("network.wireguard_port", 51820)
-        execute_command(f"ufw allow {wg_port}/udp comment 'WireGuard VPN'", sudo=True, check=False)
+        execute_command(
+            ["ufw", "allow", f"{int(wg_port)}/udp", "comment", "WireGuard VPN"],
+            sudo=True,
+            check=False
+        )
 
         # Allow SSH from VPN
         vpn_network = self.config.get("network.vpn.network", "10.66.66.0/24")
-        ssh_port = self.config.get("network.ssh_port", 22)
-        execute_command(f"ufw allow from {vpn_network} to any port {ssh_port} proto tcp comment 'SSH from VPN'", sudo=True, check=False)
+        execute_command(
+            ["ufw", "allow", "from", vpn_network, "to", "any", "port", str(ssh_port), "proto", "tcp", "comment", "SSH from VPN"],
+            sudo=True,
+            check=False
+        )
 
         # Enable UFW
-        execute_command("ufw --force enable", sudo=True, check=False)
+        execute_command(["ufw", "--force", "enable"], sudo=True, check=False)
 
         self.config.set("security.firewall_enabled", True)
         self.config.set("phases.phase8_security.ufw_configured", True)
@@ -156,7 +180,12 @@ class Phase8Security(Phase):
         from ..system.commands import execute_command
 
         # Check UFW is enabled
-        result = execute_command("ufw status")
+        result = execute_command(
+            ["ufw", "status"],
+            sudo=True,
+            check=False,
+            capture_output=True
+        )
         if not result.success or "Status: active" not in result.stdout:
             return False
 
@@ -173,7 +202,7 @@ class Phase8Security(Phase):
             from ..system.commands import execute_command
 
             # Disable UFW
-            execute_command("ufw --force disable", sudo=True)
+            execute_command(["ufw", "--force", "disable"], sudo=True, check=False)
             logger.info("UFW disabled")
 
             # Stop fail2ban
