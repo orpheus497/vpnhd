@@ -228,6 +228,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added documentation for QR code usage
 - Added documentation for automated SSH configuration
 - Added documentation for fail2ban custom jails
+- Added comprehensive Debian 13 (Trixie) compatibility section to README (Phase 3: Full Debian 13 Integration)
+- Updated Python version requirement documentation (3.11+ enforced)
+- Created Debian 12/13 upgrade guide in README
+- Updated version-specific notes clarifying Debian 11 end-of-support
+- Updated Python version badges from 3.10+ to 3.11+ in README shields
+- Added Debian version badge showing 12 | 13 support
+- Updated setup.py python_requires from >=3.10 to >=3.11
+- Updated pyproject.toml requires-python from >=3.10 to >=3.11
+- Updated Python classifiers in setup.py (removed 3.10, added 3.13)
+- Updated Python classifiers in pyproject.toml (removed 3.10, added 3.13)
+- Updated Black target-version from py310 to py311 in pyproject.toml
+- Updated mypy python_version from 3.10 to 3.11 in pyproject.toml
+- Documented key Debian 13 compatibility features (version detection, package management)
+- Added upgrade instructions for existing Debian 12 users
+- Clarified that VPNHD auto-detects Debian version (no manual configuration needed)
 
 ## [v1.0.0] - 2025-11-08
 

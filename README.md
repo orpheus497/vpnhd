@@ -3,7 +3,8 @@
 **Automate your privacy-focused home VPN setup**
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Debian 13](https://img.shields.io/badge/debian-12%20|%2013-red.svg)](https://www.debian.org/)
 [![FOSS](https://img.shields.io/badge/FOSS-100%25-green.svg)](https://www.gnu.org/philosophy/free-sw.html)
 
 ## Overview
@@ -47,11 +48,13 @@ VPNHD is an interactive command-line tool that automates the complete setup of a
 
 ### System Requirements
 
-- **Server**: Debian 12+ (Bookworm) x86_64
+- **Server**: Debian 12 (Bookworm) or Debian 13 (Trixie) x86_64
 - **Desktop Clients**: Any modern Linux distribution (Fedora, Ubuntu, Debian, Pop!_OS, elementary OS, Linux Mint, Arch, Manjaro, etc.)
 - **Mobile Clients**: Android or iOS devices
-- **Python**: 3.10 or higher
+- **Python**: 3.11 or higher (required for Debian 13 compatibility)
 - **Root Access**: Required for system configuration
+
+**Note**: Python 3.11+ is required to ensure compatibility with Debian 13 (Trixie). Debian 12 (Bookworm) users should verify their Python version meets this requirement.
 
 ### Quick Install
 
@@ -79,6 +82,40 @@ VPNHD requires the following system packages:
 - `python3-pip` - Python package manager
 
 Python dependencies are automatically installed from `requirements.txt`.
+
+## Debian 13 (Trixie) Compatibility
+
+VPNHD fully supports Debian 13 (Trixie), the latest stable release of Debian Linux.
+
+### Key Compatibility Features
+
+- **Native Debian 13 Support**: Full compatibility with Debian 13 (Trixie) and Debian 12 (Bookworm)
+- **Python 3.11+ Requirement**: Updated minimum Python version to 3.11 for Debian 13 compatibility
+- **Version Detection**: Automatic detection and validation of Debian 12 or 13
+- **Package Management**: Updated package installation for both Debian releases
+- **Security Hardening**: All security features fully compatible with Debian 13
+
+### Upgrading from Debian 12 to Debian 13
+
+If you're upgrading your server from Debian 12 to Debian 13:
+
+1. **Verify Python Version**: Ensure Python 3.11+ is installed
+   ```bash
+   python3 --version  # Should show 3.11 or higher
+   ```
+
+2. **No VPNHD Changes Required**: VPNHD automatically detects the Debian version
+
+3. **Test Your Configuration**: After OS upgrade, verify VPN connectivity
+   ```bash
+   sudo vpnhd --review  # Review current configuration
+   ```
+
+### Version-Specific Notes
+
+- **Debian 12 (Bookworm)**: Fully supported, requires Python 3.11+
+- **Debian 13 (Trixie)**: Fully supported, Python 3.11+ included by default
+- **Debian 11 (Bullseye)**: No longer supported (use VPNHD v1.0 for Debian 11)
 
 ## Quick Start
 
@@ -178,7 +215,7 @@ vpnhd/
 
 ### Technology Stack
 
-- **Python 3.10+** - Core application
+- **Python 3.11+** - Core application (Debian 13 compatible)
 - **Rich** - Terminal UI and formatting
 - **Click** - CLI framework
 - **Jinja2** - Configuration templating

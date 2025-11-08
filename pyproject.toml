@@ -7,7 +7,7 @@ name = "vpnhd"
 version = "1.0.0"
 description = "Privacy-first home VPN setup automation"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = {text = "GPL-3.0"}
 authors = [
     {name = "orpheus497", email = "vpnhd@example.com"}
@@ -30,9 +30,9 @@ classifiers = [
     "Natural Language :: English",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: System :: Networking",
     "Topic :: System :: Systems Administration",
     "Topic :: Utilities"
@@ -81,7 +81,7 @@ vpnhd = ["py.typed"]
 # Black configuration
 [tool.black]
 line-length = 100
-target-version = ["py310"]
+target-version = ["py311"]
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -112,7 +112,7 @@ known_third_party = ["rich", "click", "yaml", "jinja2"]
 
 # mypy configuration
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
