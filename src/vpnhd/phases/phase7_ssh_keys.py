@@ -2,7 +2,11 @@
 
 from pathlib import Path
 from .base import Phase
-from ..crypto.ssh import generate_ssh_keypair, get_ssh_public_key, add_ssh_key_to_authorized_keys
+from ..crypto.ssh import generate_ssh_keypair, get_ssh_public_key, add_ssh_key_to_authorized_keys, test_ssh_key_auth
+from ..system.ssh_config import SSHConfigManager
+from ..utils.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class Phase7SSHKeys(Phase):
@@ -71,17 +75,52 @@ class Phase7SSHKeys(Phase):
             return False
 
     def _disable_password_auth(self) -> None:
-        """Disable SSH password authentication."""
+        """Disable SSH password authentication programmatically."""
         self.display.warning("Disabling password authentication...")
-        from ..system.files import FileManager
-        file_mgr = FileManager()
 
-        ssh_config_path = Path("/etc/ssh/sshd_config")
-        if file_mgr.backup_file(ssh_config_path):
-            self.display.success("Backed up sshd_config")
+        ssh_config_mgr = SSHConfigManager()
 
-        # This would modify sshd_config to disable password auth
-        self.display.info("Manual step: Edit /etc/ssh/sshd_config")
-        self.display.info("Set: PasswordAuthentication no")
+        # Create backup
+        backup_path = ssh_config_mgr.backup_ssh_config()
+        if backup_path:
+            self.display.success(f"Backed up sshd_config to {backup_path}")
+            self.config.set("phases.phase7_ssh_keys.sshd_config_backup", backup_path)
+        else:
+            self.display.error("Failed to backup sshd_config")
+            if not self.prompts.confirm("Continue without backup?", default=False):
+                return
 
-        self.config.set("security.ssh_password_auth_disabled", True)
+        # Disable password authentication
+        if ssh_config_mgr.disable_password_auth():
+            self.display.success("SSH password authentication disabled successfully")
+            self.config.set("security.ssh_password_auth_disabled", True)
+        else:
+            self.display.error("Failed to disable password authentication")
+            self.display.info("You may need to manually edit /etc/ssh/sshd_config")
+            self.display.info("Set: PasswordAuthentication no")
+
+    def verify(self) -> bool:
+        """Verify that SSH keys are properly configured."""
+        ssh_key_path = Path(self.config.get("phases.phase7_ssh_keys.ssh_key_path", "~/.ssh/id_ed25519"))
+        ssh_key_path = ssh_key_path.expanduser()
+        return ssh_key_path.exists()
+
+    def rollback(self) -> bool:
+        """Rollback SSH key configuration changes."""
+        try:
+            # Restore sshd_config if backup exists
+            backup_path = self.config.get("phases.phase7_ssh_keys.sshd_config_backup")
+            if backup_path:
+                ssh_config_mgr = SSHConfigManager()
+                if ssh_config_mgr.restore_ssh_config(backup_path):
+                    logger.info("Restored sshd_config from backup")
+                else:
+                    logger.error("Failed to restore sshd_config")
+                    return False
+
+            self.config.set("security.ssh_password_auth_disabled", False)
+            self.config.save()
+            return True
+        except Exception as e:
+            logger.exception(f"Error during rollback: {e}")
+            return False

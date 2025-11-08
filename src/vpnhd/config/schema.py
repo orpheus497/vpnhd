@@ -28,17 +28,17 @@ def get_default_config() -> Dict[str, Any]:
                 "subnet_mask": "255.255.255.0",
                 "server_ip": "10.66.66.1",
                 "clients": {
-                    "fedora": {
+                    "linux_desktop_always_on": {
                         "ip": "10.66.66.2",
-                        "name": "fedora-laptop"
+                        "name": "linux-desktop-1"
                     },
-                    "popos": {
+                    "linux_desktop_on_demand": {
                         "ip": "10.66.66.3",
-                        "name": "popos-laptop"
+                        "name": "linux-desktop-2"
                     },
-                    "termux": {
+                    "mobile": {
                         "ip": "10.66.66.10",
-                        "name": "android-phone"
+                        "name": "mobile-device"
                     }
                 }
             },
@@ -59,18 +59,18 @@ def get_default_config() -> Dict[str, Any]:
         },
 
         "clients": {
-            "fedora": {
-                "name": "fedora-laptop",
-                "os": "fedora",
+            "linux_desktop_always_on": {
+                "name": "linux-desktop-1",
+                "os": "",  # User will specify: fedora, ubuntu, debian, pop, etc.
                 "vpn_mode": "always-on",
                 "vpn_ip": "10.66.66.2",
                 "public_key": None,
                 "private_key_path": "",
                 "configured": False
             },
-            "popos": {
-                "name": "popos-laptop",
-                "os": "popos",
+            "linux_desktop_on_demand": {
+                "name": "linux-desktop-2",
+                "os": "",  # User will specify
                 "vpn_mode": "on-demand",
                 "vpn_ip": "10.66.66.3",
                 "public_key": None,
@@ -78,13 +78,14 @@ def get_default_config() -> Dict[str, Any]:
                 "isolated": True,
                 "configured": False
             },
-            "termux": {
-                "name": "android-phone",
-                "os": "android",
+            "mobile": {
+                "name": "mobile-device",
+                "os": "android",  # or ios
                 "vpn_mode": "on-demand",
                 "vpn_ip": "10.66.66.10",
                 "public_key": None,
                 "private_key_path": "",
+                "qr_code_path": "",
                 "configured": False
             }
         },
@@ -94,6 +95,8 @@ def get_default_config() -> Dict[str, Any]:
             "ssh_password_auth_disabled": False,
             "firewall_enabled": False,
             "fail2ban_enabled": False,
+            "fail2ban_ssh_jail_configured": False,
+            "fail2ban_wireguard_jail_configured": False,
             "wireguard_running": False
         },
 
@@ -101,48 +104,63 @@ def get_default_config() -> Dict[str, Any]:
             "phase1_debian": {
                 "completed": False,
                 "date_completed": None,
-                "notes": ""
+                "notes": "",
+                "rollback_data": {}
             },
             "phase2_wireguard_server": {
                 "completed": False,
                 "date_completed": None,
                 "server_private_key_path": "/etc/wireguard/server_private.key",
                 "server_public_key": None,
-                "notes": ""
+                "notes": "",
+                "rollback_data": {}
             },
             "phase3_router": {
                 "completed": False,
                 "date_completed": None,
                 "port_forwarding_verified": False,
-                "notes": ""
+                "notes": "",
+                "rollback_data": {}
             },
-            "phase4_fedora": {
+            "phase4_linux_client": {
                 "completed": False,
                 "date_completed": None,
-                "notes": ""
+                "distribution": "",
+                "notes": "",
+                "rollback_data": {}
             },
-            "phase5_popos": {
+            "phase5_linux_client_ondemand": {
                 "completed": False,
                 "date_completed": None,
-                "notes": ""
+                "distribution": "",
+                "notes": "",
+                "rollback_data": {}
             },
-            "phase6_termux": {
+            "phase6_mobile": {
                 "completed": False,
                 "date_completed": None,
-                "notes": ""
+                "platform": "",  # android or ios
+                "qr_code_generated": False,
+                "notes": "",
+                "rollback_data": {}
             },
             "phase7_ssh_keys": {
                 "completed": False,
                 "date_completed": None,
                 "ssh_key_path": "~/.ssh/id_ed25519",
-                "notes": ""
+                "sshd_config_backup": "",
+                "notes": "",
+                "rollback_data": {}
             },
             "phase8_security": {
                 "completed": False,
                 "date_completed": None,
                 "ufw_configured": False,
                 "fail2ban_configured": False,
-                "notes": ""
+                "ssh_jail_configured": False,
+                "wireguard_jail_configured": False,
+                "notes": "",
+                "rollback_data": {}
             }
         },
 
@@ -150,7 +168,9 @@ def get_default_config() -> Dict[str, Any]:
             "wireguard_config_dir": "/etc/wireguard",
             "wireguard_server_config": "/etc/wireguard/wg0.conf",
             "ssh_config": "/etc/ssh/sshd_config",
-            "backup_dir": "~/.config/vpnhd/backups"
+            "backup_dir": "~/.config/vpnhd/backups",
+            "qr_code_dir": "~/.config/vpnhd/qrcodes",
+            "fail2ban_jail_dir": "/etc/fail2ban/jail.d"
         }
     }
 

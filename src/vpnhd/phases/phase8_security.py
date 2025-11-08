@@ -5,6 +5,16 @@ from jinja2 import Template
 from .base import Phase
 from ..system.packages import PackageManager
 from ..system.services import ServiceManager
+from ..system.fail2ban_config import Fail2banConfigManager
+from ..utils.logging import get_logger
+from ..utils.constants import (
+    FAIL2BAN_SSH_BAN_TIME,
+    FAIL2BAN_SSH_MAX_RETRY,
+    FAIL2BAN_WIREGUARD_BAN_TIME,
+    FAIL2BAN_WIREGUARD_MAX_RETRY
+)
+
+logger = get_logger(__name__)
 
 
 class Phase8Security(Phase):
@@ -90,16 +100,93 @@ class Phase8Security(Phase):
         self.display.success("UFW configured and enabled")
 
     def _configure_fail2ban(self) -> None:
-        """Configure fail2ban."""
-        from ..system.services import ServiceManager
-
+        """Configure fail2ban with custom jails for SSH and WireGuard."""
         self.display.info("Configuring fail2ban...")
 
+        fail2ban_mgr = Fail2banConfigManager()
         svc_mgr = ServiceManager()
+
+        # Ensure fail2ban service is running
         svc_mgr.enable_service("fail2ban")
         svc_mgr.start_service("fail2ban")
 
-        if svc_mgr.is_service_active("fail2ban"):
+        if not svc_mgr.is_service_active("fail2ban"):
+            self.display.error("Failed to start fail2ban service")
+            return
+
+        # Create SSH jail
+        ssh_port = self.config.get("network.ssh_port", 22)
+        if fail2ban_mgr.create_ssh_jail(
+            ban_time=FAIL2BAN_SSH_BAN_TIME,
+            find_time=600,
+            max_retry=FAIL2BAN_SSH_MAX_RETRY,
+            port=ssh_port
+        ):
+            self.display.success("✓ SSH jail configured")
+            self.config.set("security.fail2ban_ssh_jail_configured", True)
+            self.config.set("phases.phase8_security.ssh_jail_configured", True)
+        else:
+            self.display.warning("Failed to configure SSH jail")
+
+        # Create WireGuard jail
+        wg_port = self.config.get("network.wireguard_port", 51820)
+        if fail2ban_mgr.create_wireguard_jail(
+            ban_time=FAIL2BAN_WIREGUARD_BAN_TIME,
+            find_time=600,
+            max_retry=FAIL2BAN_WIREGUARD_MAX_RETRY,
+            port=wg_port
+        ):
+            self.display.success("✓ WireGuard jail configured")
+            self.config.set("security.fail2ban_wireguard_jail_configured", True)
+            self.config.set("phases.phase8_security.wireguard_jail_configured", True)
+        else:
+            self.display.warning("Failed to configure WireGuard jail")
+
+        # Final status
+        if fail2ban_mgr.is_fail2ban_running():
             self.config.set("security.fail2ban_enabled", True)
             self.config.set("phases.phase8_security.fail2ban_configured", True)
-            self.display.success("fail2ban is running")
+            self.display.success("fail2ban is running with custom jails")
+            self.display.newline()
+            self.display.info(f"SSH protection: Ban after {FAIL2BAN_SSH_MAX_RETRY} failures for {FAIL2BAN_SSH_BAN_TIME}s")
+            self.display.info(f"WireGuard protection: Ban after {FAIL2BAN_WIREGUARD_MAX_RETRY} failures for {FAIL2BAN_WIREGUARD_BAN_TIME}s")
+
+    def verify(self) -> bool:
+        """Verify that security hardening was successful."""
+        from ..system.commands import execute_command
+
+        # Check UFW is enabled
+        result = execute_command("ufw status")
+        if not result.success or "Status: active" not in result.stdout:
+            return False
+
+        # Check fail2ban is running
+        fail2ban_mgr = Fail2banConfigManager()
+        if not fail2ban_mgr.is_fail2ban_running():
+            return False
+
+        return True
+
+    def rollback(self) -> bool:
+        """Rollback security hardening changes."""
+        try:
+            from ..system.commands import execute_command
+
+            # Disable UFW
+            execute_command("ufw --force disable", sudo=True)
+            logger.info("UFW disabled")
+
+            # Stop fail2ban
+            svc_mgr = ServiceManager()
+            svc_mgr.stop_service("fail2ban")
+            svc_mgr.disable_service("fail2ban")
+            logger.info("fail2ban stopped")
+
+            self.config.set("security.firewall_enabled", False)
+            self.config.set("security.fail2ban_enabled", False)
+            self.config.save()
+
+            return True
+        except Exception as e:
+            logger.exception(f"Error during rollback: {e}")
+            return False

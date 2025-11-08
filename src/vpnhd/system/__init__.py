@@ -4,6 +4,8 @@ from .commands import execute_command, execute_commands, check_command_exists, C
 from .packages import PackageManager
 from .services import ServiceManager
 from .files import FileManager
+from .ssh_config import SSHConfigManager
+from .fail2ban_config import Fail2banConfigManager
 
 __all__ = [
     'execute_command',
@@ -12,5 +14,7 @@ __all__ = [
     'CommandResult',
     'PackageManager',
     'ServiceManager',
-    'FileManager'
+    'FileManager',
+    'SSHConfigManager',
+    'Fail2banConfigManager'
 ]

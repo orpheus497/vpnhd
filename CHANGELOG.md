@@ -7,6 +7,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- WireGuard server peer management with automatic client registration
+- ServerConfigManager module for adding/removing peers and reloading WireGuard
+- QR code generation for mobile clients using qrencode
+- qrcode.py module with terminal and file-based QR code generation
+- Automated SSH configuration management (SSHConfigManager)
+- Programmatic sshd_config modification for disabling password authentication
+- fail2ban custom jail configuration for SSH and WireGuard protection
+- Fail2banConfigManager with SSH and WireGuard jail creation
+- Distribution-agnostic Linux client support (Phases 4 and 5)
+- Support for Fedora, Ubuntu, Debian, Pop!_OS, elementary OS, Linux Mint, CentOS, RHEL, Arch, and Manjaro
+- Mobile client support for both Android and iOS with QR code scanning
+- Rollback functionality for all phases with state tracking
+- Verify methods for all phases to validate successful completion
+- Template path constants using absolute paths from utils/constants.py
+- QR code directory path configuration
+- fail2ban configuration constants (ban times, max retries)
+- Supported client distributions mapping with package managers
+- WireGuard package names per distribution
+
+### Changed
+- Phase 4 renamed from "Fedora Client" to "Linux Desktop Client (Always-On)"
+- Phase 5 renamed from "Pop!_OS Client" to "Linux Desktop Client (On-Demand)"
+- Phase 6 renamed from "Termux/Android" to "Mobile Client (Android/iOS)"
+- Phase 4, 5, 6 now support multiple Linux distributions instead of being distribution-specific
+- Phase 7 now automatically disables SSH password authentication (not just manual instructions)
+- Phase 8 now creates custom fail2ban jails for SSH and WireGuard protection
+- Configuration schema updated with new phase names and rollback data tracking
+- Client configuration keys changed from distribution-specific to role-based
+- VPN client IP assignments changed to role-based (linux_desktop_always_on, linux_desktop_on_demand, mobile)
+- Template paths now use absolute paths from constants module
+- Phase names updated to be distribution-agnostic in constants.py
+
+### Fixed
+- Template path resolution issues in Phases 2, 4, 5, and 6
+- Server configuration not being updated when clients are added
+- WireGuard server not reloading when new peers are added
+- SSH password authentication requiring manual configuration file edits
+- fail2ban lacking custom jail configurations for enhanced security
+
+### Enhanced
+- Phase 4 (Linux Desktop Client Always-On) now automatically adds peer to server
+- Phase 5 (Linux Desktop Client On-Demand) now automatically adds peer to server with isolation
+- Phase 6 (Mobile Client) now generates QR codes and automatically adds peer to server
+- Phase 7 (SSH Keys) now includes automated sshd_config modification and rollback support
+- Phase 8 (Security Hardening) now creates fail2ban jails for both SSH and WireGuard
+
+### Technical
+- Added ServerConfigManager class with peer management methods
+- Added SSHConfigManager class with automated configuration modification
+- Added Fail2banConfigManager class with jail creation and management
+- Added QR code generation utilities with terminal display support
+- Updated crypto/__init__.py to export ServerConfigManager and QR code functions
+- Updated system/__init__.py to export SSHConfigManager and Fail2banConfigManager
+- Updated phases/__init__.py to reference new phase classes
+- Maintained backward compatibility with legacy phase imports (deprecated)
+- Added comprehensive logging throughout new modules
+- Added error handling and validation for all new functionality
+
+### Documentation
+- Updated README.md with distribution-agnostic language
+- Updated phase descriptions to reflect multi-distribution support
+- Updated example workflow with clearer phase purposes
+- Updated system requirements to list multiple supported distributions
+- Added documentation for QR code usage
+- Added documentation for automated SSH configuration
+- Added documentation for fail2ban custom jails
+
 ## [v1.0.0] - 2025-11-08
 
 ### Added

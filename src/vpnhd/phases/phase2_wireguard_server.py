@@ -4,8 +4,13 @@ from pathlib import Path
 from jinja2 import Template
 from .base import Phase
 from ..crypto.wireguard import generate_keypair, save_private_key, derive_public_key
+from ..crypto.server_config import ServerConfigManager
 from ..network.interfaces import InterfaceManager
 from ..system.services import ServiceManager
+from ..utils.constants import WIREGUARD_SERVER_TEMPLATE
+from ..utils.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class Phase2WireGuardServer(Phase):
@@ -90,9 +95,10 @@ class Phase2WireGuardServer(Phase):
 
     def _create_wireguard_config(self, private_key: str) -> None:
         """Create WireGuard server configuration."""
-        template_path = Path(__file__).parent.parent / "config" / "templates" / "wireguard_server.conf.j2"
+        if not WIREGUARD_SERVER_TEMPLATE.exists():
+            raise FileNotFoundError(f"Template not found: {WIREGUARD_SERVER_TEMPLATE}")
 
-        with open(template_path) as f:
+        with open(WIREGUARD_SERVER_TEMPLATE) as f:
             template = Template(f.read())
 
         config = template.render(
