@@ -234,7 +234,7 @@ class SSHConfigManager:
                 # systemctl status returns 0-4 for loaded services, >4 for not found
                 if result.exit_code <= 4:
                     # Restart the service
-                    if self.service_manager.restart(service_name):
+                    if self.service_manager.restart_service(service_name):
                         logger.info(f"SSH service ({service_name}) restarted successfully")
                         return True
 
