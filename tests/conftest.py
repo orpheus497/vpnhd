@@ -24,7 +24,13 @@ def mock_config(temp_dir):
     config = ConfigManager(config_path=config_file)
 
     # Initialize with minimal config
-    config.data = {"version": "1.0.0", "phases": {}, "server": {}, "network": {}, "clients": {}}
+    config.config = {
+        "version": "1.0.0",
+        "phases": {},
+        "server": {},
+        "network": {},
+        "clients": {},
+    }
     config.save()
 
     return config

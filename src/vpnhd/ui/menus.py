@@ -54,7 +54,10 @@ class MainMenu:
         completion = self.config.get_completion_percentage()
         self.display.newline()
         self.display.print(
-            f"Progress: {completion:.0f}% complete ({sum(1 for i in range(1, 9) if self.config.is_phase_complete(i))}/8 phases)",
+            (
+                f"Progress: {completion:.0f}% complete "
+                f"({sum(1 for i in range(1, 9) if self.config.is_phase_complete(i))}/8 phases)"
+            ),
             style="yellow",
         )
 
@@ -135,7 +138,10 @@ class MainMenu:
             status = "Configured" if client_data.get("configured", False) else "Not configured"
             self.display.key_value(
                 name,
-                f"IP: {client_data.get('vpn_ip', 'N/A')} - Mode: {client_data.get('vpn_mode', 'N/A')} - {status}",
+                (
+                    f"IP: {client_data.get('vpn_ip', 'N/A')} - "
+                    f"Mode: {client_data.get('vpn_mode', 'N/A')} - {status}"
+                ),
             )
 
         # Security

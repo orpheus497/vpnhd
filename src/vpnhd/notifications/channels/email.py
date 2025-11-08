@@ -144,17 +144,50 @@ To configure notifications, use: vpnhd config notifications
 <html>
 <head>
     <style>
-        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        body {{
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }}
         .container {{ max-width: 600px; margin: 0 auto; }}
-        .header {{ background-color: {color}; color: white; padding: 20px; border-radius: 5px 5px 0 0; }}
+        .header {{
+            background-color: {color};
+            color: white;
+            padding: 20px;
+            border-radius: 5px 5px 0 0;
+        }}
         .header h2 {{ margin: 0; }}
-        .content {{ background-color: #f9f9f9; padding: 20px; border: 1px solid #ddd; }}
-        .details {{ background-color: white; padding: 15px; margin-top: 15px; border-left: 4px solid {color}; }}
+        .content {{
+            background-color: #f9f9f9;
+            padding: 20px;
+            border: 1px solid #ddd;
+        }}
+        .details {{
+            background-color: white;
+            padding: 15px;
+            margin-top: 15px;
+            border-left: 4px solid {color};
+        }}
         .details table {{ width: 100%; border-collapse: collapse; }}
         .details td {{ padding: 8px; border-bottom: 1px solid #eee; }}
         .details td:first-child {{ font-weight: bold; width: 30%; }}
-        .footer {{ background-color: #f0f0f0; padding: 15px; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 5px 5px; }}
-        .badge {{ display: inline-block; padding: 4px 8px; border-radius: 3px; font-size: 11px; font-weight: bold; background-color: {color}; color: white; }}
+        .footer {{
+            background-color: #f0f0f0;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-radius: 0 0 5px 5px;
+        }}
+        .badge {{
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            background-color: {color};
+            color: white;
+        }}
     </style>
 </head>
 <body>

@@ -243,6 +243,35 @@ def set_nested_value(data: Dict[str, Any], key_path: str, value: Any) -> None:
     current[keys[-1]] = value
 
 
+def delete_nested_value(data: Dict[str, Any], key_path: str) -> bool:
+    """
+    Delete value from nested dictionary using dot notation.
+
+    Args:
+        data: Dictionary to modify
+        key_path: Dot-separated key path (e.g., "clients.fedora")
+
+    Returns:
+        bool: True if key was found and deleted, False otherwise
+    """
+    keys = key_path.split(".")
+    current = data
+
+    # Navigate to parent of final key
+    for key in keys[:-1]:
+        if key not in current:
+            return False
+        current = current[key]
+
+    # Delete final key if it exists
+    final_key = keys[-1]
+    if final_key in current:
+        del current[final_key]
+        return True
+
+    return False
+
+
 def format_bytes(bytes_count: int) -> str:
     """
     Format bytes into human-readable string.

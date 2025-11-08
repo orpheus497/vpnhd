@@ -185,10 +185,12 @@ class Phase8Security(Phase):
             self.display.success("fail2ban is running with custom jails")
             self.display.newline()
             self.display.info(
-                f"SSH protection: Ban after {FAIL2BAN_SSH_MAX_RETRY} failures for {FAIL2BAN_SSH_BAN_TIME}s"
+                f"SSH protection: Ban after {FAIL2BAN_SSH_MAX_RETRY} failures "
+                f"for {FAIL2BAN_SSH_BAN_TIME}s"
             )
             self.display.info(
-                f"WireGuard protection: Ban after {FAIL2BAN_WIREGUARD_MAX_RETRY} failures for {FAIL2BAN_WIREGUARD_BAN_TIME}s"
+                f"WireGuard protection: Ban after {FAIL2BAN_WIREGUARD_MAX_RETRY} "
+                f"failures for {FAIL2BAN_WIREGUARD_BAN_TIME}s"
             )
 
     def verify(self) -> bool:

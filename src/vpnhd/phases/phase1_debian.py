@@ -3,6 +3,9 @@
 from pathlib import Path
 from .base import Phase
 from ..system.commands import execute_command
+from ..utils.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class Phase1Debian(Phase):
@@ -23,9 +26,12 @@ class Phase1Debian(Phase):
 
     @property
     def long_description(self) -> str:
-        return """Debian is like the foundation of your house - it's the operating system that
-        runs on your server computer. Think of it as the base layer that everything else sits on top of.
-        We need this installed before we can build your VPN system."""
+        return (
+            "Debian is like the foundation of your house - it's the operating system "
+            "that runs on your server computer. Think of it as the base layer that "
+            "everything else sits on top of. We need this installed before we can "
+            "build your VPN system."
+        )
 
     def check_prerequisites(self) -> bool:
         """No prerequisites for Phase 1."""

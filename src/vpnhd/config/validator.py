@@ -177,7 +177,8 @@ class ConfigValidator:
                                 client_config["ip"], vpn["network"]
                             ):
                                 errors.append(
-                                    f"Client IP {client_config['ip']} for {client_name} is not in VPN network"
+                                    f"Client IP {client_config['ip']} for {client_name} "
+                                    f"is not in VPN network"
                                 )
 
         # Validate ports

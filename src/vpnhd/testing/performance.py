@@ -319,7 +319,8 @@ class PerformanceTester:
             )
 
             logger.info(
-                f"Stability test complete: uptime={uptime_percent:.1f}%, disconnections={disconnections}"
+                f"Stability test complete: uptime={uptime_percent:.1f}%, "
+                f"disconnections={disconnections}"
             )
             return result
 

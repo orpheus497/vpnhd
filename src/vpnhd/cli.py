@@ -424,8 +424,8 @@ def show_client(ctx, name, show_keys):
         f"[cyan]VPN IP:[/cyan] {client.vpn_ip}",
         f"[cyan]Device Type:[/cyan] {client.device_type or 'Unknown'}",
         f"[cyan]OS:[/cyan] {client.os or 'Unknown'}",
-        f"[cyan]Status:[/cyan] {'[green]Enabled[/green]' if client.enabled else '[red]Disabled[/red]'}",
-        f"[cyan]Connected:[/cyan] {'[green]Yes[/green]' if connected else '[red]No[/red]'}",
+        f"[cyan]Status:[/cyan] {'[green]Enabled[/green]' if client.enabled else '[red]Disabled[/red]'}",  # noqa: E501
+        f"[cyan]Connected:[/cyan] {'[green]Yes[/green]' if connected else '[red]No[/red]'}",  # noqa: E501
         f"[cyan]Created:[/cyan] {client.created_at[:19] if client.created_at else 'Unknown'}",
     ]
 

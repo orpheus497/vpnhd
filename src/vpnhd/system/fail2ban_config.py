@@ -5,7 +5,7 @@ for SSH and WireGuard protection.
 """
 
 from pathlib import Path
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Any
 from jinja2 import Template
 
 from .commands import execute_command
@@ -377,7 +377,7 @@ backend = systemd
         """
         return self.service_manager.get_service_status("fail2ban") == ServiceStatus.ACTIVE
 
-    def get_jail_status(self, jail_name: str) -> Optional[Dict[str, any]]:
+    def get_jail_status(self, jail_name: str) -> Optional[Dict[str, Any]]:
         """Get detailed status of a specific jail.
 
         Args:

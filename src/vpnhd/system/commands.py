@@ -2,6 +2,7 @@
 
 import subprocess
 import shlex
+import asyncio
 from dataclasses import dataclass
 from typing import Optional, List, Union
 from pathlib import Path
@@ -128,7 +129,10 @@ def execute_command(
             if not _has_sensitive_params(command_list):
                 logger.warning(f"Command failed with exit code {result.returncode}: {command_str}")
             else:
-                logger.warning(f"Command with sensitive parameters failed with exit code {result.returncode}")
+                logger.warning(
+                    f"Command with sensitive parameters failed with "
+                    f"exit code {result.returncode}"
+                )
             if result.stderr:
                 logger.warning(f"  stderr: {result.stderr.strip()}")
 
@@ -340,3 +344,115 @@ def get_command_version(command: str, version_flag: str = "--version") -> Option
         return result.stdout.strip().split("\n")[0]
 
     return None
+
+
+async def execute_command_async(
+    command: Union[str, List[str]],
+    sudo: bool = False,
+    check: bool = True,
+    timeout: Optional[int] = None,
+    cwd: Optional[Path] = None,
+    env: Optional[dict] = None,
+) -> CommandResult:
+    """
+    Execute command asynchronously without shell injection vulnerabilities.
+
+    Args:
+        command: Command to execute (string or list of arguments)
+        sudo: Whether to use sudo
+        check: Raise exception on non-zero exit
+        timeout: Command timeout in seconds
+        cwd: Working directory
+        env: Environment variables
+
+    Returns:
+        CommandResult: Execution result
+
+    Security:
+        This function uses array-based command execution to prevent
+        command injection attacks. Commands are never executed through
+        a shell.
+    """
+    logger = get_logger("commands")
+
+    # Parse command if string
+    if isinstance(command, str):
+        command_list = shlex.split(command)
+    else:
+        command_list = list(command)
+
+    # Prepend sudo if requested
+    if sudo:
+        command_list = ["sudo"] + command_list
+
+    # Use default timeout if not specified
+    if timeout is None:
+        timeout = COMMAND_TIMEOUT_DEFAULT
+
+    # Log command for debugging (only if it doesn't contain sensitive parameters)
+    command_str = " ".join(command_list)
+    if not _has_sensitive_params(command_list):
+        logger.debug(f"Executing async command: {command_str}")
+    else:
+        logger.debug("Executing async command with sensitive parameters (not logged)")
+
+    try:
+        # Execute command safely using asyncio subprocess
+        process = await asyncio.create_subprocess_exec(
+            *command_list,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            cwd=cwd,
+            env=env,
+        )
+
+        # Wait for process with timeout
+        try:
+            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout)
+        except asyncio.TimeoutError:
+            process.kill()
+            await process.wait()
+            if not _has_sensitive_params(command_list):
+                logger.error(f"Async command timed out after {timeout}s: {command_str}")
+            else:
+                logger.error(f"Async command with sensitive parameters timed out")
+            return CommandResult(
+                exit_code=-1,
+                stdout="",
+                stderr=f"Command timed out after {timeout} seconds",
+                success=False,
+                command=command_str,
+            )
+
+        exit_code = process.returncode
+        success = exit_code == 0
+
+        stdout_str = stdout.decode() if stdout else ""
+        stderr_str = stderr.decode() if stderr else ""
+
+        if not success:
+            if not _has_sensitive_params(command_list):
+                logger.warning(f"Async command failed with exit code {exit_code}: {command_str}")
+            else:
+                logger.warning(f"Async command with sensitive parameters failed")
+            if stderr_str:
+                logger.warning(f"  stderr: {stderr_str.strip()}")
+
+        if check and not success:
+            raise subprocess.CalledProcessError(
+                exit_code, command_str, output=stdout_str, stderr=stderr_str
+            )
+
+        return CommandResult(
+            exit_code=exit_code,
+            stdout=stdout_str,
+            stderr=stderr_str,
+            success=success,
+            command=command_str,
+        )
+
+    except Exception as e:
+        logger.error(f"Error executing async command: {e}")
+        return CommandResult(
+            exit_code=-1, stdout="", stderr=str(e), success=False, command=command_str
+        )

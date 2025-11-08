@@ -145,7 +145,8 @@ def derive_public_key(private_key: str) -> Optional[str]:
         Optional[str]: Public key or None if failed
     """
     try:
-        # Use wg pubkey command to derive public key via stdin (prevents key exposure in process list)
+        # Use wg pubkey command to derive public key via stdin
+        # (prevents key exposure in process list)
         result = run_command_with_input(
             ["wg", "pubkey"], input_data=private_key + "\n", check=False, capture_output=True
         )

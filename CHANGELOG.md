@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (Latest)
+- Fixed missing logger import in phases/phase1_debian.py causing AttributeError
+- Implemented execute_command_async() function in system/commands.py for async operations
+- Added ConfigManager.delete() method and delete_nested_value() helper function
+- Fixed type hint error in system/fail2ban_config.py (lowercase 'any' changed to 'Any')
+- Fixed test fixture in tests/conftest.py (config.data changed to config.config)
+- Fixed all Black formatting violations (17 lines exceeding 100 characters)
+- Aligned Pillow dependency version in pyproject.toml (~=10.2.0 for consistency)
+- Fixed syntax error in tests/unit/test_packages.py (incorrect indentation)
+- Applied Black formatting to entire codebase (88 files formatted)
+
 ### Version 2.0.0 - Major Modernization Release
 
 This release represents a comprehensive modernization and enhancement of VPNHD with 66+ new features, architectural improvements, and infrastructure upgrades. The project has been rebuilt from the ground up with modern Python practices, async/await support, and enterprise-grade capabilities while maintaining 100% FOSS compliance.
