@@ -1,0 +1,86 @@
+[run]
+# Coverage.py configuration for VPNHD
+
+# Source code to measure
+source = src/vpnhd
+
+# Omit files from coverage measurement
+omit =
+    # Test files
+    tests/*
+    # Setup files
+    setup.py
+    # Virtual environments
+    venv/*
+    .venv/*
+    # Build artifacts
+    build/*
+    dist/*
+    *.egg-info/*
+    # Cache
+    __pycache__/*
+    .pytest_cache/*
+    # Examples and scripts
+    examples/*
+    scripts/*
+
+# Branch coverage (stricter than line coverage)
+branch = True
+
+# Parallel mode for concurrent test execution
+parallel = False
+
+[report]
+# Reporting options
+
+# Precision for coverage percentage
+precision = 2
+
+# Show missing lines
+show_missing = True
+
+# Skip covered files in report
+skip_covered = False
+
+# Skip empty files
+skip_empty = True
+
+# Fail if coverage is below 80%
+fail_under = 80.0
+
+# Exclude lines from coverage
+exclude_lines =
+    # Standard pragma
+    pragma: no cover
+    # Don't complain about missing debug code
+    def __repr__
+    # Don't complain if tests don't hit defensive assertion code
+    raise AssertionError
+    raise NotImplementedError
+    # Don't complain if non-runnable code isn't run
+    if __name__ == .__main__.:
+    # Don't complain about abstract methods
+    @abstractmethod
+    @abc.abstractmethod
+    # Don't complain about type checking code
+    if TYPE_CHECKING:
+    # Don't complain about protocol methods
+    \.\.\.
+
+# Sort report by coverage percentage
+sort = Cover
+
+[html]
+# HTML report options
+directory = htmlcov
+title = VPNHD Test Coverage Report
+
+[xml]
+# XML report options (for CI/CD)
+output = coverage.xml
+
+[paths]
+# Path mapping for combining coverage from different environments
+source =
+    src/vpnhd
+    */vpnhd
