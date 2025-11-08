@@ -6,6 +6,7 @@ from .base import Phase
 from ..system.packages import PackageManager
 from ..system.services import ServiceManager
 from ..system.fail2ban_config import Fail2banConfigManager
+from ..system.commands import execute_command
 from ..utils.logging import get_logger
 from ..utils.constants import (
     FAIL2BAN_SSH_BAN_TIME,
@@ -78,8 +79,6 @@ class Phase8Security(Phase):
 
     def _configure_ufw(self) -> None:
         """Configure UFW firewall with validated inputs."""
-        from ..system.commands import execute_command
-
         self.display.info("Configuring UFW firewall...")
 
         # Get and validate ports
@@ -177,8 +176,6 @@ class Phase8Security(Phase):
 
     def verify(self) -> bool:
         """Verify that security hardening was successful."""
-        from ..system.commands import execute_command
-
         # Check UFW is enabled
         result = execute_command(
             ["ufw", "status"],
@@ -199,8 +196,6 @@ class Phase8Security(Phase):
     def rollback(self) -> bool:
         """Rollback security hardening changes."""
         try:
-            from ..system.commands import execute_command
-
             # Disable UFW
             execute_command(["ufw", "--force", "disable"], sudo=True, check=False)
             logger.info("UFW disabled")
