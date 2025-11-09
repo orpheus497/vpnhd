@@ -12,7 +12,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-PYTHON_MIN_VERSION="3.10"
+PYTHON_MIN_VERSION="3.11"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
@@ -211,7 +211,7 @@ verify_installation() {
     print_header "Verifying Installation"
 
     print_info "Checking Python packages..."
-    python3 -c "import rich; import click; import yaml; import jsonschema; import jinja2; import netifaces" 2>/dev/null && \
+    python3 -c "import rich; import click; import yaml; import pydantic; import jinja2; import psutil" 2>/dev/null && \
         print_success "All Python packages verified" || {
         print_error "Some Python packages are missing"
         exit 1
