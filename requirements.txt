@@ -23,7 +23,7 @@ dnspython~=2.5.0          # DNS resolution and DDNS (ISC)
 
 # Cryptography & Security
 qrcode[pil]~=7.4.2        # QR code generation (BSD)
-Pillow~=10.2.0            # Image processing for QR codes (HPND)
+Pillow>=10.3.0            # Image processing for QR codes (HPND)
 cryptography~=42.0.0      # Advanced cryptography (Apache-2.0/BSD)
 
 # Logging & Monitoring

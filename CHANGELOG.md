@@ -14,12 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed type hint error in system/fail2ban_config.py (lowercase 'any' changed to 'Any')
 - Fixed test fixture in tests/conftest.py (config.data changed to config.config)
 - Fixed all Black formatting violations (17 lines exceeding 100 characters)
-- Aligned Pillow dependency version in pyproject.toml (~=10.2.0 for consistency)
 - Fixed syntax error in tests/unit/test_packages.py (incorrect indentation)
 - Applied Black formatting to entire codebase (88 files formatted)
 - Fixed import errors in crypto/rotation.py and monitoring/collector.py (utils.command -> system.commands)
 - Applied isort to entire codebase for consistent import ordering (75+ files formatted)
 - Temporarily disabled test_interfaces.py (incompatible with current InterfaceManager API)
+- Removed 10 unused imports flagged by CodeQL (backup, client, config, crypto, network, system, testing, ui, utils modules)
+- Upgraded Pillow to >=10.3.0 for Python 3.13 compatibility (fixes build errors on Python 3.13)
 
 ### Version 2.0.0 - Major Modernization Release
 
