@@ -1,10 +1,10 @@
 """Service management utilities for VPNHD."""
 
-from typing import Optional, List
 from enum import Enum
+from typing import List, Optional
 
 from ..utils.logging import get_logger
-from .commands import execute_command, check_command_exists
+from .commands import check_command_exists, execute_command
 
 
 class ServiceStatus(Enum):

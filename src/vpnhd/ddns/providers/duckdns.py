@@ -1,8 +1,9 @@
 """Duck DNS provider implementation."""
 
 import httpx
-from .base import DDNSProvider
+
 from ...utils.logging import get_logger
+from .base import DDNSProvider
 
 logger = get_logger(__name__)
 

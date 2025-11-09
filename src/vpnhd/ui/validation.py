@@ -1,7 +1,7 @@
 """Input validation utilities for VPNHD UI."""
 
 import re
-from typing import Optional, Callable
+from typing import Callable, Optional
 
 from ..network.validation import validate_ip_address, validate_network
 from ..utils.helpers import validate_hostname as validate_hostname_helper

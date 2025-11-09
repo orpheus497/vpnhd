@@ -5,8 +5,9 @@ particularly the prevention of command injection through interface names.
 """
 
 import pytest
-from vpnhd.network.interfaces import NetworkInterface
+
 from vpnhd.exceptions import ValidationError
+from vpnhd.network.interfaces import NetworkInterface
 
 
 class TestNetworkInterfaceValidation:

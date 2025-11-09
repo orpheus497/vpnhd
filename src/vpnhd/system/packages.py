@@ -1,17 +1,17 @@
 """Package management utilities for VPNHD."""
 
-from typing import List, Optional, Tuple
 import platform
+from typing import List, Tuple
 
-from ..utils.logging import get_logger
+from ..exceptions import ValidationError
+from ..security.validators import is_valid_package_name
 from ..utils.constants import (
+    COMMAND_TIMEOUT_INSTALL,
     REQUIRED_PACKAGES_DEBIAN,
     REQUIRED_PACKAGES_FEDORA,
-    COMMAND_TIMEOUT_INSTALL,
 )
-from ..security.validators import is_valid_package_name
-from ..exceptions import ValidationError
-from .commands import execute_command, check_command_exists
+from ..utils.logging import get_logger
+from .commands import check_command_exists, execute_command
 
 
 class PackageManager:

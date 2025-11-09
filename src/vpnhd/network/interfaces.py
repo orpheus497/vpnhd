@@ -1,19 +1,18 @@
 """Network interface management utilities for VPNHD."""
 
-from typing import Optional, List
 from pathlib import Path
+from typing import List, Optional
 
-from ..utils.logging import get_logger
-from ..system.commands import execute_command
+from ..exceptions import ValidationError
 from ..security.validators import (
+    is_valid_cidr,
     is_valid_interface_name,
     is_valid_ip,
-    is_valid_cidr,
     is_valid_netmask,
 )
-from ..exceptions import ValidationError
+from ..system.commands import execute_command
+from ..utils.logging import get_logger
 from .discovery import get_interface_by_name
-
 
 logger = get_logger("network.interfaces")
 

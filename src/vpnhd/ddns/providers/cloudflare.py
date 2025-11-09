@@ -1,9 +1,11 @@
 """Cloudflare DDNS provider implementation."""
 
-import httpx
 from typing import Optional
-from .base import DDNSProvider
+
+import httpx
+
 from ...utils.logging import get_logger
+from .base import DDNSProvider
 
 logger = get_logger(__name__)
 

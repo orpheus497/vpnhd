@@ -5,8 +5,9 @@ particularly the prevention of command injection through package names.
 """
 
 import pytest
-from vpnhd.system.packages import PackageManager
+
 from vpnhd.exceptions import ValidationError
+from vpnhd.system.packages import PackageManager
 
 
 class TestPackageManagerInitialization:
@@ -276,8 +277,8 @@ class TestInstallPackage:
 
     def test_install_without_assume_yes(self, mocker):
         """Test installation without -y flag."""
-         _ = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
-         _ = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
+        _ = mocker.patch("builtins.open", mocker.mock_open(read_data="ID=debian"))
+        _ = mocker.patch("vpnhd.system.packages.check_command_exists", return_value=True)
         mock_cmd = mocker.patch("vpnhd.system.packages.execute_command")
         mock_cmd.return_value = mocker.Mock(success=True, exit_code=0, stdout="", stderr="")
 

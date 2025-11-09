@@ -1,16 +1,18 @@
 """Phase 4: Linux Desktop Client Setup (Always-On)."""
 
 from pathlib import Path
+
 from jinja2 import Template
-from .base import Phase
-from ..crypto.wireguard import generate_keypair
+
 from ..crypto.server_config import ServerConfigManager
+from ..crypto.wireguard import generate_keypair
 from ..utils.constants import TEMPLATE_DIR
-from ..utils.logging import get_logger
 from ..utils.distribution_helpers import (
-    prompt_for_distribution,
     generate_wireguard_install_instructions,
+    prompt_for_distribution,
 )
+from ..utils.logging import get_logger
+from .base import Phase
 
 logger = get_logger(__name__)
 

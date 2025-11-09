@@ -4,9 +4,9 @@ This module handles adding/removing peers to the WireGuard server configuration
 and reloading the service without disconnecting existing peers.
 """
 
-from pathlib import Path
-from typing import Optional, List, Dict
 import re
+from pathlib import Path
+from typing import Dict, List, Optional
 
 from ..system.commands import execute_command, run_command_with_input
 from ..system.files import FileManager

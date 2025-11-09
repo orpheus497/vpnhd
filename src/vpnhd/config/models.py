@@ -4,12 +4,13 @@ This module replaces the old jsonschema-based validation with Pydantic v2,
 providing type-safe configuration management with better IDE support.
 """
 
-from typing import Optional, Dict, Any, List
+import ipaddress
 from datetime import datetime
 from pathlib import Path
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic_settings import BaseSettings
-import ipaddress
 
 
 class NetworkLANConfig(BaseModel):

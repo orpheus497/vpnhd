@@ -4,17 +4,16 @@ This module provides comprehensive performance testing for VPN connections inclu
 bandwidth, latency, jitter, packet loss, and connection stability measurements.
 """
 
-import time
-import subprocess
+import json
 import statistics
-from dataclasses import dataclass, asdict
+import time
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Any, Optional
-import json
+from typing import Any, Dict, List, Optional
 
-from ..utils.logging import get_logger
 from ..system.commands import execute_command
+from ..utils.logging import get_logger
 
 logger = get_logger(__name__)
 
@@ -319,7 +318,8 @@ class PerformanceTester:
             )
 
             logger.info(
-                f"Stability test complete: uptime={uptime_percent:.1f}%, disconnections={disconnections}"
+                f"Stability test complete: uptime={uptime_percent:.1f}%, "
+                f"disconnections={disconnections}"
             )
             return result
 

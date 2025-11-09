@@ -1,8 +1,8 @@
 """Base class for all setup phases."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, TYPE_CHECKING
 from enum import Enum
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from ..utils.logging import get_logger
 

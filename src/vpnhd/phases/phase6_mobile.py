@@ -1,19 +1,21 @@
 """Phase 6: Mobile Client Setup (Android/iOS)."""
 
 from pathlib import Path
+
 from jinja2 import Template
-from .base import Phase
-from ..crypto.wireguard import generate_keypair
-from ..crypto.server_config import ServerConfigManager
+
 from ..crypto.qrcode import (
-    generate_qr_code,
-    display_qr_terminal,
     create_qr_with_metadata,
-    verify_qrcode_available,
+    display_qr_terminal,
+    generate_qr_code,
     install_qrencode,
+    verify_qrcode_available,
 )
-from ..utils.constants import TEMPLATE_DIR, QR_CODE_DIR
+from ..crypto.server_config import ServerConfigManager
+from ..crypto.wireguard import generate_keypair
+from ..utils.constants import QR_CODE_DIR, TEMPLATE_DIR
 from ..utils.logging import get_logger
+from .base import Phase
 
 logger = get_logger(__name__)
 

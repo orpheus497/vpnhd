@@ -1,22 +1,24 @@
 """Phase 8: Security Hardening."""
 
 from pathlib import Path
+
 from jinja2 import Template
-from .base import Phase
+
+from ..security.validators import is_valid_port
+from ..system.commands import execute_command
+from ..system.fail2ban_config import Fail2banConfigManager
 from ..system.packages import PackageManager
 from ..system.services import ServiceManager
-from ..system.fail2ban_config import Fail2banConfigManager
-from ..system.commands import execute_command
-from ..utils.logging import get_logger
 from ..utils.constants import (
+    DEFAULT_SSH_PORT,
+    DEFAULT_WIREGUARD_PORT,
     FAIL2BAN_SSH_BAN_TIME,
     FAIL2BAN_SSH_MAX_RETRY,
     FAIL2BAN_WIREGUARD_BAN_TIME,
     FAIL2BAN_WIREGUARD_MAX_RETRY,
-    DEFAULT_WIREGUARD_PORT,
-    DEFAULT_SSH_PORT,
 )
-from ..security.validators import is_valid_port
+from ..utils.logging import get_logger
+from .base import Phase
 
 logger = get_logger(__name__)
 
@@ -185,10 +187,12 @@ class Phase8Security(Phase):
             self.display.success("fail2ban is running with custom jails")
             self.display.newline()
             self.display.info(
-                f"SSH protection: Ban after {FAIL2BAN_SSH_MAX_RETRY} failures for {FAIL2BAN_SSH_BAN_TIME}s"
+                f"SSH protection: Ban after {FAIL2BAN_SSH_MAX_RETRY} failures "
+                f"for {FAIL2BAN_SSH_BAN_TIME}s"
             )
             self.display.info(
-                f"WireGuard protection: Ban after {FAIL2BAN_WIREGUARD_MAX_RETRY} failures for {FAIL2BAN_WIREGUARD_BAN_TIME}s"
+                f"WireGuard protection: Ban after {FAIL2BAN_WIREGUARD_MAX_RETRY} "
+                f"failures for {FAIL2BAN_WIREGUARD_BAN_TIME}s"
             )
 
     def verify(self) -> bool:

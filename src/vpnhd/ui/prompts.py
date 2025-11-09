@@ -1,8 +1,9 @@
 """User input prompts for VPNHD."""
 
-from typing import Optional, List, Callable
-from rich.prompt import Prompt, Confirm, IntPrompt
+from typing import Callable, List, Optional
+
 from rich.console import Console
+from rich.prompt import Confirm, Prompt
 
 from .validation import InputValidator
 
@@ -217,8 +218,8 @@ class Prompts:
         Returns:
             str: Selected option key
         """
-        from rich.table import Table
         from rich import box
+        from rich.table import Table
 
         # Display menu title
         self.console.print(f"\n[bold cyan]{title}[/bold cyan]\n")

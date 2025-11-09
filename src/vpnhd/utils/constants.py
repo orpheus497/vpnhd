@@ -1,7 +1,7 @@
 """Constants used throughout the VPNHD application."""
 
-from pathlib import Path
 import os
+from pathlib import Path
 
 # Application Information
 APP_NAME = "VPNHD"

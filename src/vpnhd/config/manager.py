@@ -1,18 +1,19 @@
 """Configuration manager for VPNHD."""
 
-from pathlib import Path
-from typing import Any, Optional, Dict, List
 import shutil
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-from ..utils.constants import CONFIG_FILE, BACKUP_DIR
+from ..utils.constants import BACKUP_DIR, CONFIG_FILE
 from ..utils.helpers import (
+    delete_nested_value,
     ensure_directory_exists,
-    read_json_file,
-    write_json_file,
+    get_nested_value,
     get_timestamp,
     get_timestamp_filename,
-    get_nested_value,
+    read_json_file,
     set_nested_value,
+    write_json_file,
 )
 from ..utils.logging import get_logger
 from .schema import get_default_config
@@ -109,6 +110,18 @@ class ConfigManager:
             value: Value to set
         """
         set_nested_value(self.config, key, value)
+
+    def delete(self, key: str) -> bool:
+        """
+        Delete configuration value using dot notation.
+
+        Args:
+            key: Dot-notation key (e.g., "clients.fedora")
+
+        Returns:
+            bool: True if key was found and deleted, False otherwise
+        """
+        return delete_nested_value(self.config, key)
 
     def mark_phase_complete(self, phase_number: int, notes: str = "") -> None:
         """
@@ -396,4 +409,5 @@ class ConfigManager:
 
     def __repr__(self) -> str:
         """String representation of ConfigManager."""
-        return f"ConfigManager(config_path={self.config_path}, phases_complete={sum(1 for i in range(1, 9) if self.is_phase_complete(i))}/8)"
+        completed = sum(1 for i in range(1, 9) if self.is_phase_complete(i))
+        return f"ConfigManager(config_path={self.config_path}, phases_complete={completed}/8)"

@@ -1,15 +1,16 @@
 """DDNS manager for coordinating dynamic DNS updates."""
 
 import asyncio
-from typing import Optional, Dict, Any, Type
 from datetime import datetime
-from ..utils.logging import get_logger
+from typing import Any, Dict, Optional, Type
+
 from ..config.manager import ConfigManager
+from ..utils.logging import get_logger
+from .detector import IPChangeDetector
 from .providers.base import DDNSProvider
 from .providers.cloudflare import CloudflareDDNS
 from .providers.duckdns import DuckDNS
 from .providers.noip import NoIPDDNS
-from .detector import IPChangeDetector
 
 logger = get_logger(__name__)
 

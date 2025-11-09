@@ -4,18 +4,20 @@ This test suite ensures that the command execution module properly prevents
 command injection attacks by using array-based commands with shell=False.
 """
 
-import pytest
 import subprocess
 from pathlib import Path
+
+import pytest
+
 from vpnhd.system.commands import (
     CommandResult,
+    check_command_exists,
+    command_exists_any,
     execute_command,
     execute_commands,
-    check_command_exists,
-    run_command_with_input,
     get_command_output,
-    command_exists_any,
     get_command_version,
+    run_command_with_input,
 )
 
 

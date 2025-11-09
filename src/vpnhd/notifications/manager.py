@@ -1,15 +1,15 @@
 """Notification manager for alerts and events."""
 
-from typing import Dict, Any, List, Optional
-from datetime import datetime
 import asyncio
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from ..utils.logging import get_logger
 from ..config.manager import ConfigManager
+from ..utils.logging import get_logger
 from .channels.base import NotificationChannel
 from .channels.email import EmailChannel
 from .channels.webhook import WebhookChannel
-from .events import NotificationEvent, EventType
+from .events import EventType, NotificationEvent
 
 logger = get_logger(__name__)
 

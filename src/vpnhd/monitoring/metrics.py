@@ -1,5 +1,7 @@
 """Prometheus metrics definitions for VPNHD."""
 
+from typing import Any, Dict
+
 from prometheus_client import (
     Counter,
     Gauge,
@@ -7,7 +9,6 @@ from prometheus_client import (
     Info,
     Summary,
 )
-from typing import Dict, Any
 
 # =============================================================================
 # Server Metrics

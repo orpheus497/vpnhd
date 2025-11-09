@@ -2,11 +2,11 @@
 
 import logging
 import sys
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Optional
-from logging.handlers import RotatingFileHandler
 
-from .constants import LOG_DIR, LOG_FILE, APP_NAME
+from .constants import APP_NAME, LOG_DIR, LOG_FILE
 
 
 def setup_logging(

@@ -2,13 +2,13 @@
 
 import socket
 from dataclasses import dataclass
-from typing import List, Dict, Optional
+from typing import List, Optional
+
 import psutil
 
-from ..utils.logging import get_logger
 from ..system.commands import execute_command, get_command_output
-from .validation import validate_ip_address, calculate_subnet
-
+from ..utils.logging import get_logger
+from .validation import calculate_subnet, validate_ip_address
 
 logger = get_logger("network.discovery")
 

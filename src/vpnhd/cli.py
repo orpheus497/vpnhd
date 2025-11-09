@@ -1,20 +1,21 @@
 """Main CLI entry point for VPNHD."""
 
 import sys
-import click
 from pathlib import Path
 
-from .config.manager import ConfigManager
-from .ui.display import Display
-from .ui.prompts import Prompts
-from .ui.menus import MainMenu
-from .phases import get_phase_class
-from .client import ClientManager
-from .testing import PerformanceTester
-from .backup import BackupManager
-from .utils.logging import setup_logging, get_logger
-from .utils.constants import APP_NAME, APP_VERSION
+import click
+
 from .__version__ import __version__
+from .backup import BackupManager
+from .client import ClientManager
+from .config.manager import ConfigManager
+from .phases import get_phase_class
+from .testing import PerformanceTester
+from .ui.display import Display
+from .ui.menus import MainMenu
+from .ui.prompts import Prompts
+from .utils.constants import APP_NAME, APP_VERSION
+from .utils.logging import get_logger, setup_logging
 
 
 @click.group(invoke_without_command=True)
@@ -293,8 +294,8 @@ def list_clients(ctx, enabled, device_type, os, connected, format):
             status = "✓" if client.enabled else "✗"
             click.echo(f"{status} {client.name} ({client.vpn_ip}) - {client.device_type}")
     else:  # table
-        from rich.table import Table
         from rich.console import Console
+        from rich.table import Table
 
         table = Table(title="VPN Clients")
         table.add_column("Name", style="cyan")
@@ -411,8 +412,8 @@ def show_client(ctx, name, show_keys):
         display.error(f"Client '{name}' not found")
         sys.exit(1)
 
-    from rich.panel import Panel
     from rich.console import Console
+    from rich.panel import Panel
 
     # Get connection status
     status = client_manager.get_client_status(name)
@@ -424,8 +425,8 @@ def show_client(ctx, name, show_keys):
         f"[cyan]VPN IP:[/cyan] {client.vpn_ip}",
         f"[cyan]Device Type:[/cyan] {client.device_type or 'Unknown'}",
         f"[cyan]OS:[/cyan] {client.os or 'Unknown'}",
-        f"[cyan]Status:[/cyan] {'[green]Enabled[/green]' if client.enabled else '[red]Disabled[/red]'}",
-        f"[cyan]Connected:[/cyan] {'[green]Yes[/green]' if connected else '[red]No[/red]'}",
+        f"[cyan]Status:[/cyan] {'[green]Enabled[/green]' if client.enabled else '[red]Disabled[/red]'}",  # noqa: E501
+        f"[cyan]Connected:[/cyan] {'[green]Yes[/green]' if connected else '[red]No[/red]'}",  # noqa: E501
         f"[cyan]Created:[/cyan] {client.created_at[:19] if client.created_at else 'Unknown'}",
     ]
 
@@ -467,8 +468,8 @@ def client_status(ctx, all):
     client_manager = ctx.obj["client_manager"]
     display = ctx.obj["display"]
 
-    from rich.table import Table
     from rich.console import Console
+    from rich.table import Table
 
     clients = client_manager.list_clients()
 
@@ -578,8 +579,8 @@ def client_stats(ctx):
     """Show client statistics."""
     client_manager = ctx.obj["client_manager"]
 
-    from rich.panel import Panel
     from rich.console import Console
+    from rich.panel import Panel
 
     stats = client_manager.get_statistics()
 
@@ -634,8 +635,8 @@ def test_latency(ctx, count, server):
     result = perf_tester.test_latency(count=count)
 
     if result:
-        from rich.panel import Panel
         from rich.console import Console
+        from rich.panel import Panel
 
         lines = [
             f"[cyan]Min:[/cyan] {result.min_ms:.2f} ms",
@@ -675,8 +676,8 @@ def test_stability(ctx, duration, interval, server):
     )
 
     if result:
-        from rich.panel import Panel
         from rich.console import Console
+        from rich.panel import Panel
 
         lines = [
             f"[cyan]Test Duration:[/cyan] {result.test_duration_seconds} seconds",
@@ -721,8 +722,8 @@ def full_test(ctx, iperf_server, latency_count, stability_duration, server):
         stability_duration=stability_duration,
     )
 
-    from rich.table import Table
     from rich.console import Console
+    from rich.table import Table
 
     table = Table(title="Performance Test Results")
     table.add_column("Test", style="cyan")
@@ -757,8 +758,8 @@ def list_reports(ctx):
         ctx.obj["display"].info("No performance reports found")
         return
 
-    from rich.table import Table
     from rich.console import Console
+    from rich.table import Table
 
     table = Table(title="Performance Reports")
     table.add_column("Report File", style="cyan")
@@ -835,8 +836,8 @@ def list_backups(ctx):
         ctx.obj["display"].info("No backups found")
         return
 
-    from rich.table import Table
     from rich.console import Console
+    from rich.table import Table
 
     table = Table(title="Backups")
     table.add_column("ID", style="cyan")

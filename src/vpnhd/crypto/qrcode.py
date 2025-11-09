@@ -6,7 +6,6 @@ making it easy to configure mobile devices by scanning.
 
 from pathlib import Path
 from typing import Optional
-import io
 
 try:
     import qrcode

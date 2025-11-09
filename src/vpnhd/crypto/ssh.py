@@ -3,10 +3,9 @@
 from pathlib import Path
 from typing import Optional, Tuple
 
-from ..utils.logging import get_logger
-from ..utils.constants import SSH_DIR, SSH_KEY_DEFAULT_TYPE, SSH_KEY_RSA_BITS
 from ..system.commands import execute_command
-
+from ..utils.constants import SSH_DIR, SSH_KEY_DEFAULT_TYPE, SSH_KEY_RSA_BITS
+from ..utils.logging import get_logger
 
 logger = get_logger("crypto.ssh")
 
@@ -48,6 +47,7 @@ def generate_ssh_keypair(
         else:
             # Use default comment (user@hostname)
             import socket
+
             from ..utils.helpers import get_username
 
             comment = f"{get_username()}@{socket.gethostname()}"

@@ -1,14 +1,16 @@
 """Phase 2: WireGuard Server Setup."""
 
 from pathlib import Path
+
 from jinja2 import Template
-from .base import Phase
-from ..crypto.wireguard import generate_keypair, save_private_key, derive_public_key
+
 from ..crypto.server_config import ServerConfigManager
+from ..crypto.wireguard import derive_public_key, generate_keypair, save_private_key
 from ..network.interfaces import InterfaceManager
 from ..system.services import ServiceManager
 from ..utils.constants import WIREGUARD_SERVER_TEMPLATE
 from ..utils.logging import get_logger
+from .base import Phase
 
 logger = get_logger(__name__)
 
