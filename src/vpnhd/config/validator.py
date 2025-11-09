@@ -2,7 +2,7 @@
 
 import ipaddress
 import re
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 from ..utils.helpers import validate_hostname, validate_port
 

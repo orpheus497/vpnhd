@@ -6,7 +6,7 @@ including disabling password authentication and enabling key-based authenticatio
 
 import re
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 from ..utils.logging import get_logger
 from .commands import execute_command

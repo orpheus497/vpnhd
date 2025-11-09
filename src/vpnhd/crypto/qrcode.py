@@ -4,7 +4,6 @@ This module handles generating QR codes from WireGuard client configurations,
 making it easy to configure mobile devices by scanning.
 """
 
-import io
 from pathlib import Path
 from typing import Optional
 

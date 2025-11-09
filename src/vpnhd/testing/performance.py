@@ -6,7 +6,6 @@ bandwidth, latency, jitter, packet loss, and connection stability measurements.
 
 import json
 import statistics
-import subprocess
 import time
 from dataclasses import asdict, dataclass
 from datetime import datetime

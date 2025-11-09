@@ -1,7 +1,7 @@
 """Package management utilities for VPNHD."""
 
 import platform
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 from ..exceptions import ValidationError
 from ..security.validators import is_valid_package_name

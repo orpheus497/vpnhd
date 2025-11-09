@@ -2,7 +2,7 @@
 
 import socket
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 import psutil
 

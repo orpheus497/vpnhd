@@ -3,7 +3,7 @@
 from typing import Callable, List, Optional
 
 from rich.console import Console
-from rich.prompt import Confirm, IntPrompt, Prompt
+from rich.prompt import Confirm, Prompt
 
 from .validation import InputValidator
 

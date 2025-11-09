@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional
 from jinja2 import Template
 
 from ..config.manager import ConfigManager
-from ..crypto.qrcode import create_qr_with_metadata, generate_qr_code
+from ..crypto.qrcode import create_qr_with_metadata
 from ..crypto.server_config import ServerConfigManager
 from ..crypto.wireguard import generate_keypair
 from ..utils.constants import QR_CODE_DIR, TEMPLATE_DIR

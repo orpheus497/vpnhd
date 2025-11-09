@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from ..client import ClientManager
-from ..config.manager import ConfigManager
 from ..utils.logging import get_logger
 
 logger = get_logger(__name__)
