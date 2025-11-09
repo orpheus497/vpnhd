@@ -2,13 +2,14 @@
 
 import asyncio
 import signal
-from typing import Optional
-from prometheus_client import REGISTRY, generate_latest
-from http.server import HTTPServer, BaseHTTPRequestHandler
 import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from typing import Optional
 
-from ..utils.logging import get_logger
+from prometheus_client import REGISTRY, generate_latest
+
 from ..config.manager import ConfigManager
+from ..utils.logging import get_logger
 from .collector import MetricsCollector
 
 logger = get_logger(__name__)

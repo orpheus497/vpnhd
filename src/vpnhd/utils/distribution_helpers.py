@@ -1,6 +1,7 @@
 """Distribution-related helper utilities for Linux client setup."""
 
 from typing import Tuple
+
 from .constants import SUPPORTED_CLIENT_DISTROS, WIREGUARD_PACKAGES
 
 

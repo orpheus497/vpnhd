@@ -1,10 +1,10 @@
 """Menu systems for VPNHD."""
 
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
+from ..utils.constants import PHASE_NAMES
 from .display import Display
 from .prompts import Prompts
-from ..utils.constants import PHASE_NAMES
 
 if TYPE_CHECKING:
     from ..config.manager import ConfigManager

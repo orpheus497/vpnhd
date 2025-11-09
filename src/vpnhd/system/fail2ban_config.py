@@ -5,13 +5,14 @@ for SSH and WireGuard protection.
 """
 
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Optional
+
 from jinja2 import Template
 
+from ..utils.logging import get_logger
 from .commands import execute_command
 from .files import FileManager
 from .services import ServiceManager, ServiceStatus
-from ..utils.logging import get_logger
 
 logger = get_logger(__name__)
 

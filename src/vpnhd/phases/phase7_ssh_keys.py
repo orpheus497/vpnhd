@@ -1,15 +1,16 @@
 """Phase 7: SSH Key Authentication."""
 
 from pathlib import Path
-from .base import Phase
+
 from ..crypto.ssh import (
+    add_ssh_key_to_authorized_keys,
     generate_ssh_keypair,
     get_ssh_public_key,
-    add_ssh_key_to_authorized_keys,
     test_ssh_key_auth,
 )
 from ..system.ssh_config import SSHConfigManager
 from ..utils.logging import get_logger
+from .base import Phase
 
 logger = get_logger(__name__)
 

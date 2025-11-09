@@ -2,13 +2,14 @@
 
 import asyncio
 import time
-import psutil
-from typing import Optional, Dict
 from pathlib import Path
+from typing import Dict, Optional
 
-from ..utils.logging import get_logger
+import psutil
+
 from ..config.manager import ConfigManager
-from ..utils.command import execute_command_async
+from ..system.commands import execute_command_async
+from ..utils.logging import get_logger
 from . import metrics
 
 logger = get_logger(__name__)

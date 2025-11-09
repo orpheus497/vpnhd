@@ -1,10 +1,12 @@
 """No-IP DDNS provider implementation."""
 
-import httpx
 import base64
 from typing import Optional
-from .base import DDNSProvider
+
+import httpx
+
 from ...utils.logging import get_logger
+from .base import DDNSProvider
 
 logger = get_logger(__name__)
 

@@ -1,8 +1,8 @@
 """Configuration validation for VPNHD."""
 
 import ipaddress
-from typing import Dict, Any, List, Optional, Tuple
 import re
+from typing import Any, Dict, List, Optional, Tuple
 
 from ..utils.helpers import validate_hostname, validate_port
 

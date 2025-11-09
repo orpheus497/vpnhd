@@ -4,11 +4,13 @@ These tests verify that multiple components work together correctly
 and that the security measures are properly integrated throughout the workflow.
 """
 
-import pytest
 from pathlib import Path
+
+import pytest
+
+from vpnhd.exceptions import ValidationError
 from vpnhd.phases.phase1_debian import Phase1Debian
 from vpnhd.phases.phase2_wireguard_server import Phase2WireGuardServer
-from vpnhd.exceptions import ValidationError
 
 
 class TestPhase1Integration:
@@ -228,8 +230,8 @@ class TestErrorHandlingIntegration:
 
     def test_validation_error_propagation(self, mocker):
         """Test that ValidationError propagates correctly."""
-        from vpnhd.network.interfaces import NetworkInterface
         from vpnhd.exceptions import ValidationError
+        from vpnhd.network.interfaces import NetworkInterface
 
         # Attempt to create interface with invalid name
         with pytest.raises(ValidationError) as exc_info:
@@ -527,8 +529,9 @@ class TestRobustnessAndRecovery:
 
     def test_timeout_handling(self, mocker):
         """Test handling of command timeouts."""
-        from vpnhd.system.commands import execute_command
         import subprocess
+
+        from vpnhd.system.commands import execute_command
 
         mock_run = mocker.patch("subprocess.run")
         mock_run.side_effect = subprocess.TimeoutExpired(cmd="long-running-command", timeout=1)

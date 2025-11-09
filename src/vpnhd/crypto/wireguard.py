@@ -1,12 +1,11 @@
 """WireGuard key management utilities for VPNHD."""
 
 from pathlib import Path
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
-from ..utils.logging import get_logger
-from ..utils.constants import PERM_PRIVATE_KEY, WG_KEY_LENGTH
 from ..system.commands import execute_command, get_command_output, run_command_with_input
-
+from ..utils.constants import PERM_PRIVATE_KEY, WG_KEY_LENGTH
+from ..utils.logging import get_logger
 
 logger = get_logger("crypto.wireguard")
 

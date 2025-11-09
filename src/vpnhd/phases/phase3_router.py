@@ -1,7 +1,7 @@
 """Phase 3: Router Port Forwarding."""
 
-from .base import Phase
 from ..network.testing import get_public_ip
+from .base import Phase
 
 
 class Phase3Router(Phase):

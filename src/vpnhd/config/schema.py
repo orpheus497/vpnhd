@@ -1,6 +1,7 @@
 """Configuration schema and default configuration for VPNHD."""
 
-from typing import Dict, Any
+from typing import Any, Dict
+
 from ..utils.helpers import get_timestamp
 
 

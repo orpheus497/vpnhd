@@ -1,9 +1,10 @@
 """Phase 1: Debian Server Installation."""
 
 from pathlib import Path
-from .base import Phase
+
 from ..system.commands import execute_command
 from ..utils.logging import get_logger
+from .base import Phase
 
 logger = get_logger(__name__)
 

@@ -1,11 +1,11 @@
 """Testing module for VPNHD."""
 
 from .performance import (
-    PerformanceTester,
     BandwidthResult,
-    LatencyResult,
     ConnectionStabilityResult,
+    LatencyResult,
     PerformanceReport,
+    PerformanceTester,
 )
 
 __all__ = [

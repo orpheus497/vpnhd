@@ -1,11 +1,12 @@
 """Email notification channel."""
 
 import smtplib
-from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from .base import NotificationChannel
-from ..events import NotificationEvent
+from email.mime.text import MIMEText
+
 from ...utils.logging import get_logger
+from ..events import NotificationEvent
+from .base import NotificationChannel
 
 logger = get_logger(__name__)
 

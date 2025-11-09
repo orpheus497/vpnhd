@@ -1,6 +1,7 @@
 """Base notification channel interface."""
 
 from abc import ABC, abstractmethod
+
 from ...utils.logging import get_logger
 from ..events import NotificationEvent
 

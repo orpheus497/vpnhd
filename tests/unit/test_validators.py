@@ -5,20 +5,21 @@ with special focus on preventing command injection attacks.
 """
 
 import pytest
+
 from vpnhd.security.validators import (
+    is_safe_path,
+    is_valid_cidr,
     is_valid_hostname,
+    is_valid_interface_name,
     is_valid_ip,
     is_valid_ipv4,
-    is_valid_cidr,
-    is_valid_port,
     is_valid_mac_address,
-    is_safe_path,
-    is_valid_wireguard_key,
-    is_valid_interface_name,
-    is_valid_package_name,
     is_valid_netmask,
-    sanitize_hostname,
+    is_valid_package_name,
+    is_valid_port,
+    is_valid_wireguard_key,
     sanitize_filename,
+    sanitize_hostname,
     sanitize_interface_name,
     sanitize_package_name,
     validate_email,

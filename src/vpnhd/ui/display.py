@@ -1,25 +1,26 @@
 """Display utilities for VPNHD using Rich library."""
 
-from typing import Optional, List, Dict, Any
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
-from rich.markdown import Markdown
-from rich.syntax import Syntax
+from typing import Any, Dict, List, Optional
+
 from rich import box
+from rich.console import Console
+from rich.markdown import Markdown
+from rich.panel import Panel
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
+from rich.syntax import Syntax
+from rich.table import Table
 
 from ..utils.constants import (
-    SYMBOL_COMPLETE,
-    SYMBOL_INCOMPLETE,
-    SYMBOL_IN_PROGRESS,
-    SYMBOL_ERROR,
-    SYMBOL_WARNING,
-    COLOR_SUCCESS,
     COLOR_ERROR,
-    COLOR_WARNING,
-    COLOR_INFO,
     COLOR_HEADING,
+    COLOR_INFO,
+    COLOR_SUCCESS,
+    COLOR_WARNING,
+    SYMBOL_COMPLETE,
+    SYMBOL_ERROR,
+    SYMBOL_IN_PROGRESS,
+    SYMBOL_INCOMPLETE,
+    SYMBOL_WARNING,
 )
 
 

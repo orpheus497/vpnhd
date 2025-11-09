@@ -7,7 +7,7 @@ Author: orpheus497
 License: GPL-3.0
 """
 
+from .__version__ import __author__, __version__
 from .cli import main
-from .__version__ import __version__, __author__
 
 __all__ = ["main", "__version__", "__author__"]

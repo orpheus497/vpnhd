@@ -1,11 +1,13 @@
 """IP change detection for DDNS updates."""
 
 import asyncio
-import httpx
-from typing import Optional, List, Dict, Any, Callable, Awaitable
 from datetime import datetime
-from ..utils.logging import get_logger
+from typing import Any, Awaitable, Callable, Dict, List, Optional
+
+import httpx
+
 from ..config.manager import ConfigManager
+from ..utils.logging import get_logger
 
 logger = get_logger(__name__)
 

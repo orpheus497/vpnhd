@@ -5,8 +5,9 @@ particularly the prevention of command injection through package names.
 """
 
 import pytest
-from vpnhd.system.packages import PackageManager
+
 from vpnhd.exceptions import ValidationError
+from vpnhd.system.packages import PackageManager
 
 
 class TestPackageManagerInitialization:

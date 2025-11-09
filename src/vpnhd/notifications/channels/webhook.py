@@ -1,10 +1,12 @@
 """Webhook notification channel."""
 
+from typing import Any, Dict
+
 import httpx
-from typing import Dict, Any
-from .base import NotificationChannel
-from ..events import NotificationEvent
+
 from ...utils.logging import get_logger
+from ..events import NotificationEvent
+from .base import NotificationChannel
 
 logger = get_logger(__name__)
 

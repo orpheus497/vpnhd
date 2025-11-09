@@ -1,15 +1,14 @@
 """Safe command execution utilities for VPNHD."""
 
-import subprocess
-import shlex
 import asyncio
+import shlex
+import subprocess
 from dataclasses import dataclass
-from typing import Optional, List, Union
 from pathlib import Path
+from typing import List, Optional, Union
 
-from ..utils.logging import get_logger
 from ..utils.constants import COMMAND_TIMEOUT_DEFAULT
-
+from ..utils.logging import get_logger
 
 # Sensitive parameter patterns that should be redacted in logs
 SENSITIVE_PARAMS = {

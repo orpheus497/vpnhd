@@ -1,15 +1,14 @@
 """Network connectivity testing utilities for VPNHD."""
 
 import socket
-import urllib.request
 import urllib.error
-from typing import Optional, List
+import urllib.request
+from typing import List, Optional
 
-from ..utils.logging import get_logger
-from ..utils.constants import PORT_CHECK_SERVICES
-from ..system.commands import execute_command
 from ..security.validators import is_valid_hostname, is_valid_ip
-
+from ..system.commands import execute_command
+from ..utils.constants import PORT_CHECK_SERVICES
+from ..utils.logging import get_logger
 
 logger = get_logger("network.testing")
 

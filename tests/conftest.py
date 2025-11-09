@@ -1,11 +1,12 @@
 """Pytest configuration and fixtures for VPNHD tests."""
 
-import pytest
-from pathlib import Path
-import tempfile
 import json
-from unittest.mock import MagicMock, Mock
+import tempfile
 from dataclasses import dataclass
+from pathlib import Path
+from unittest.mock import MagicMock, Mock
+
+import pytest
 
 
 @pytest.fixture

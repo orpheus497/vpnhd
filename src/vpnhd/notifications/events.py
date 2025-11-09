@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class EventType(str, Enum):

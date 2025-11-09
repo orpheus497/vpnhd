@@ -1,6 +1,7 @@
 """Base interface for DDNS providers."""
 
 from abc import ABC, abstractmethod
+
 from ...utils.logging import get_logger
 
 logger = get_logger(__name__)

@@ -1,5 +1,5 @@
 """Client management module."""
 
-from .manager import ClientManager, ClientInfo
+from .manager import ClientInfo, ClientManager
 
 __all__ = ["ClientManager", "ClientInfo"]
