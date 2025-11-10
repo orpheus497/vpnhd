@@ -16,6 +16,7 @@ python-dotenv~=1.0.1      # Environment variable management (BSD-3-Clause)
 # Async & I/O
 aiofiles~=23.2.1          # Async file I/O (Apache-2.0)
 httpx~=0.26.0             # Async HTTP client (BSD-3-Clause)
+asyncssh~=2.14.2          # Async SSH client for multi-server management (EPL-2.0)
 
 # Network & System
 psutil~=5.9.8             # Network interface discovery (BSD-3-Clause)
