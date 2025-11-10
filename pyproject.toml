@@ -52,6 +52,7 @@ dependencies = [
     "python-dotenv~=1.0.1",
     "aiofiles~=23.2.1",
     "httpx~=0.26.0",
+    "asyncssh~=2.14.2",
     "psutil~=5.9.8",
     "dnspython~=2.5.0",
     "qrcode[pil]~=7.4.2",
