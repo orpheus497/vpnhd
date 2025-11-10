@@ -6,7 +6,7 @@ from pathlib import Path
 # Application Information
 APP_NAME = "VPNHD"
 APP_FULL_NAME = "VPN Helper Daemon"
-APP_VERSION = "1.0.0"
+APP_VERSION = "2.0.0"
 APP_LICENSE = "GPL-3.0"
 APP_AUTHOR = "orpheus497"
 

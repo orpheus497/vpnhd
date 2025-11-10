@@ -102,7 +102,7 @@ Documentation = "https://github.com/orpheus497/vpnhd/tree/main/docs"
 "Source Code" = "https://github.com/orpheus497/vpnhd"
 
 [project.scripts]
-vpnhd = "vpnhd.cli.main:main"
+vpnhd = "vpnhd.cli:main"
 vpnhd-metrics = "vpnhd.monitoring.exporter:main"
 
 [tool.setuptools]
