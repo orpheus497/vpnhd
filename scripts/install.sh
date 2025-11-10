@@ -218,7 +218,7 @@ verify_installation() {
     }
 
     print_info "Checking system commands..."
-    for cmd in python3 pip wireguard ssh ufw fail2ban-client; do
+    for cmd in python3 pip wg ssh ufw fail2ban-client; do
         if command -v "$cmd" &> /dev/null; then
             print_success "$cmd available"
         else

@@ -530,8 +530,8 @@ def export_client_config(ctx, name, output, qr):
 
     # Generate QR code if requested
     if qr:
-        from ..crypto.qrcode import create_qr_with_metadata
-        from ..utils.constants import QR_CODE_DIR
+        from .crypto.qrcode import create_qr_with_metadata
+        from .utils.constants import QR_CODE_DIR
 
         config_text = Path(config_path).read_text()
         qr_path = create_qr_with_metadata(
