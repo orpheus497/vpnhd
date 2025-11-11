@@ -147,7 +147,11 @@ class PerformanceTester:
             # Parse timing: min/avg/max/stddev
             # Example: "rtt min/avg/max/mdev = 10.123/15.456/20.789/2.345 ms"
             times_part = stats_line.split("=")[1].strip() if "=" in stats_line else stats_line
-            times = times_part.split()[0].split("/")
+            times_parts = times_part.split()
+            if not times_parts:
+                logger.error(f"Invalid ping statistics format: {stats_line}")
+                return None
+            times = times_parts[0].split("/")
 
             if len(times) < 4:
                 logger.error(f"Invalid ping statistics format: {stats_line}")
@@ -169,12 +173,26 @@ class PerformanceTester:
                     parts = line.split(",")
                     for part in parts:
                         if "transmitted" in part:
-                            packets_sent = int(part.split()[0])
+                            words = part.split()
+                            if words:
+                                try:
+                                    packets_sent = int(words[0])
+                                except (ValueError, IndexError):
+                                    pass
                         elif "received" in part:
-                            packets_received = int(part.split()[0])
+                            words = part.split()
+                            if words:
+                                try:
+                                    packets_received = int(words[0])
+                                except (ValueError, IndexError):
+                                    pass
                         elif "packet loss" in part or "loss" in part:
-                            loss_str = part.split("%")[0].strip().split()[-1]
-                            packet_loss = float(loss_str)
+                            try:
+                                loss_words = part.split("%")[0].strip().split()
+                                if loss_words:
+                                    packet_loss = float(loss_words[-1])
+                            except (ValueError, IndexError):
+                                pass
                     break
 
             result = LatencyResult(
@@ -284,9 +302,14 @@ class PerformanceTester:
                     # Extract latency
                     for line in result.stdout.split("\n"):
                         if "time=" in line:
-                            time_part = line.split("time=")[1].split()[0]
-                            latency = float(time_part)
-                            latencies.append(latency)
+                            try:
+                                time_parts = line.split("time=")[1].split()
+                                if time_parts:
+                                    time_part = time_parts[0]
+                                    latency = float(time_part)
+                                    latencies.append(latency)
+                            except (ValueError, IndexError):
+                                pass
                             break
 
                     if not was_connected:
@@ -405,19 +428,19 @@ class PerformanceTester:
             with open(filepath, "r") as f:
                 data = json.load(f)
 
-            bandwidth = BandwidthResult(**data["bandwidth"]) if data["bandwidth"] else None
-            latency = LatencyResult(**data["latency"]) if data["latency"] else None
+            bandwidth = BandwidthResult(**data["bandwidth"]) if data.get("bandwidth") else None
+            latency = LatencyResult(**data["latency"]) if data.get("latency") else None
             stability = (
-                ConnectionStabilityResult(**data["stability"]) if data["stability"] else None
+                ConnectionStabilityResult(**data["stability"]) if data.get("stability") else None
             )
 
             return PerformanceReport(
                 bandwidth=bandwidth,
                 latency=latency,
                 stability=stability,
-                test_date=data["test_date"],
-                vpn_interface=data["vpn_interface"],
-                test_server=data["test_server"],
+                test_date=data.get("test_date", ""),
+                vpn_interface=data.get("vpn_interface", ""),
+                test_server=data.get("test_server", ""),
             )
         except Exception as e:
             logger.exception(f"Error loading report: {e}")

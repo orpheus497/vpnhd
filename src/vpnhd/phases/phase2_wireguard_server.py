@@ -10,7 +10,7 @@ from ..network.interfaces import InterfaceManager
 from ..system.services import ServiceManager
 from ..utils.constants import WIREGUARD_SERVER_TEMPLATE
 from ..utils.logging import get_logger
-from .base import Phase
+from .base import Phase, PhaseStatus
 
 logger = get_logger(__name__)
 
@@ -45,7 +45,7 @@ class Phase2WireGuardServer(Phase):
     def execute(self) -> bool:
         """Execute Phase 2."""
         try:
-            self.status = self.status.IN_PROGRESS
+            self.status = PhaseStatus.IN_PROGRESS
             self.show_introduction()
 
             # Install WireGuard
