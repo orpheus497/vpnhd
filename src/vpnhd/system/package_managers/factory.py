@@ -4,7 +4,7 @@ from typing import Optional, Type, List
 from .base import PackageManager
 from .apt import APTPackageManager
 from .dnf import DNFPackageManager
-from ...utils.logging import get_logger
+from vpnhd.utils.logging import get_logger
 
 logger = get_logger(__name__)
 

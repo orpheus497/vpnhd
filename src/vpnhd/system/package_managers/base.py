@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from typing import List, Optional, Dict, Any
-from ...utils.logging import get_logger
+from vpnhd.utils.logging import get_logger
 
 logger = get_logger(__name__)
 

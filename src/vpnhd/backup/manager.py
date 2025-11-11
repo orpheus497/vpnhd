@@ -73,6 +73,7 @@ class BackupManager:
         Returns:
             Backup ID if successful, None otherwise
         """
+        temp_dir = None
         try:
             # Generate backup ID
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -179,7 +180,7 @@ class BackupManager:
             logger.exception(f"Error creating backup: {e}")
 
             # Clean up on error
-            if temp_dir.exists():
+            if temp_dir and temp_dir.exists():
                 shutil.rmtree(temp_dir)
 
             return None
@@ -206,6 +207,7 @@ class BackupManager:
         Returns:
             True if successful, False otherwise
         """
+        temp_dir = None
         try:
             logger.info(f"Restoring backup: {backup_id}")
 
@@ -293,7 +295,7 @@ class BackupManager:
             logger.exception(f"Error restoring backup: {e}")
 
             # Clean up on error
-            if temp_dir.exists():
+            if temp_dir and temp_dir.exists():
                 shutil.rmtree(temp_dir)
 
             return False

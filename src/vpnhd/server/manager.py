@@ -335,11 +335,30 @@ class ServerManager:
                     # Invalid number format, keep default 0
                     pass
 
-            # Get traffic statistics (simplified - would need parsing)
-            # This is a placeholder for actual metric collection
+            # Get traffic statistics using wg show transfer
+            transfer_output = await self.execute_command(
+                server_name, f"wg show {profile.vpn_interface} transfer"
+            )
+
+            bytes_received = 0
+            bytes_transmitted = 0
+
+            if transfer_output:
+                # Parse transfer output: <public_key> <received_bytes> <transmitted_bytes>
+                for line in transfer_output.strip().split('\n'):
+                    parts = line.split()
+                    if len(parts) >= 3:
+                        try:
+                            bytes_received += int(parts[1])
+                            bytes_transmitted += int(parts[2])
+                        except (ValueError, IndexError):
+                            # Skip malformed lines
+                            continue
 
             profile.update_metrics(
                 active_clients=active_clients,
+                bytes_received=bytes_received,
+                bytes_transmitted=bytes_transmitted,
             )
 
             self.logger.debug(f"Collected metrics for {server_name}")

@@ -2,7 +2,7 @@
 
 from typing import List, Optional
 from .base import PackageManager
-from ...utils.command import execute_command_async
+from vpnhd.system.commands import execute_command_async
 
 
 class DNFPackageManager(PackageManager):

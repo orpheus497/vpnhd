@@ -4,7 +4,7 @@ from pathlib import Path
 
 from ..system.commands import execute_command
 from ..utils.logging import get_logger
-from .base import Phase
+from .base import Phase, PhaseStatus
 
 logger = get_logger(__name__)
 
@@ -41,7 +41,7 @@ class Phase1Debian(Phase):
     def execute(self) -> bool:
         """Execute Phase 1: Debian installation guide."""
         try:
-            self.status = self.status.IN_PROGRESS
+            self.status = PhaseStatus.IN_PROGRESS
             self.show_introduction()
 
             # Check if Debian is already installed
