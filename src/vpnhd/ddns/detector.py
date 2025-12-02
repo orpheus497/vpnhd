@@ -7,6 +7,7 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 import httpx
 
 from ..config.manager import ConfigManager
+from ..events import EventType, IPChangeEvent, event_bus
 from ..utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -49,7 +50,7 @@ class IPChangeDetector:
         self.current_ipv6: Optional[str] = None
         self.last_check: Optional[datetime] = None
 
-        # Callbacks for IP change events
+        # Callbacks for IP change events (deprecated - use event bus)
         self.ipv4_change_callbacks: List[Callable[[str, Optional[str]], Awaitable[None]]] = []
         self.ipv6_change_callbacks: List[Callable[[str, Optional[str]], Awaitable[None]]] = []
 
@@ -159,7 +160,16 @@ class IPChangeDetector:
             result["ipv4_new"] = new_ipv4
             self.logger.info(f"IPv4 change detected: {self.current_ipv4} -> {new_ipv4}")
 
-            # Trigger callbacks
+            # Publish event to event bus (new method)
+            event = IPChangeEvent(
+                old_ip=self.current_ipv4,
+                new_ip=new_ipv4,
+                ip_version=4,
+                data={"result": result},
+            )
+            event_bus.publish(event)
+
+            # Call legacy callbacks for backward compatibility
             for callback in self.ipv4_change_callbacks:
                 try:
                     await callback(new_ipv4, self.current_ipv4)
@@ -175,7 +185,16 @@ class IPChangeDetector:
             result["ipv6_new"] = new_ipv6
             self.logger.info(f"IPv6 change detected: {self.current_ipv6} -> {new_ipv6}")
 
-            # Trigger callbacks
+            # Publish event to event bus (new method)
+            event = IPChangeEvent(
+                old_ip=self.current_ipv6,
+                new_ip=new_ipv6,
+                ip_version=6,
+                data={"result": result},
+            )
+            event_bus.publish(event)
+
+            # Call legacy callbacks for backward compatibility
             for callback in self.ipv6_change_callbacks:
                 try:
                     await callback(new_ipv6, self.current_ipv6)

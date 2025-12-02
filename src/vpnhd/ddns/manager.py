@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Any, Dict, Optional, Type
 
 from ..config.manager import ConfigManager
+from ..events import EventType, IPChangeEvent, event_bus
 from ..utils.logging import get_logger
 from .detector import IPChangeDetector
 from .providers.base import DDNSProvider
@@ -50,10 +51,13 @@ class DDNSManager:
         # IP change detector
         self.detector = IPChangeDetector(config_manager=self.config, check_interval=check_interval)
 
-        # Register IP change callbacks
+        # Register IP change callbacks (legacy method)
         if self.provider:
             self.detector.on_ipv4_change(self._on_ipv4_change)
             self.detector.on_ipv6_change(self._on_ipv6_change)
+
+        # Subscribe to IP change events from event bus (new method)
+        event_bus.subscribe_async(EventType.IP_CHANGED, self._on_ip_change_event)
 
         # Update history
         self.update_history: list[Dict[str, Any]] = []
@@ -335,6 +339,87 @@ class DDNSManager:
             List of update history entries
         """
         return self.update_history[-limit:] if self.update_history else []
+
+    async def _on_ip_change_event(self, event: IPChangeEvent) -> None:
+        """Handle IP change event from event bus.
+
+        Args:
+            event: IP change event from event bus
+        """
+        if not self.provider:
+            self.logger.warning("No DDNS provider configured, ignoring IP change event")
+            return
+
+        self.logger.info(
+            f"Received IP change event: IPv{event.ip_version} changed from "
+            f"{event.old_ip} to {event.new_ip}"
+        )
+
+        # Determine record type based on IP version
+        record_type = "A" if event.ip_version == 4 else "AAAA"
+
+        # Check if provider supports IPv6 (if needed)
+        if event.ip_version == 6:
+            if not await self.provider.supports_ipv6():
+                self.logger.warning(
+                    f"Provider {self.provider.provider_name} does not support IPv6"
+                )
+                return
+
+        try:
+            success = await self.provider.update_record(event.new_ip, record_type=record_type)
+
+            timestamp = datetime.now()
+            if success:
+                if event.ip_version == 4:
+                    self.last_ipv4_update = timestamp
+                else:
+                    self.last_ipv6_update = timestamp
+                self.logger.info(
+                    f"DNS record ({record_type}) updated successfully to {event.new_ip} via event bus"
+                )
+
+                # Verify update
+                await asyncio.sleep(5)  # Wait for DNS propagation
+                verified = await self.provider.verify_record(event.new_ip)
+                if verified:
+                    self.logger.info(f"DNS record ({record_type}) verified: {event.new_ip}")
+                else:
+                    self.logger.warning(
+                        f"DNS record ({record_type}) verification failed for {event.new_ip}"
+                    )
+            else:
+                self.logger.error(
+                    f"Failed to update DNS record ({record_type}) to {event.new_ip}"
+                )
+
+            # Record in history
+            self._add_to_history(
+                {
+                    "timestamp": timestamp,
+                    "record_type": record_type,
+                    "old_ip": event.old_ip,
+                    "new_ip": event.new_ip,
+                    "success": success,
+                    "provider": self.provider.provider_name,
+                    "source": "event_bus",
+                }
+            )
+
+        except Exception as e:
+            self.logger.exception(f"Error updating DNS record via event bus: {e}")
+            self._add_to_history(
+                {
+                    "timestamp": datetime.now(),
+                    "record_type": record_type,
+                    "old_ip": event.old_ip,
+                    "new_ip": event.new_ip,
+                    "success": False,
+                    "provider": self.provider.provider_name if self.provider else "unknown",
+                    "error": str(e),
+                    "source": "event_bus",
+                }
+            )
 
     @classmethod
     def get_available_providers(cls) -> list[str]:
