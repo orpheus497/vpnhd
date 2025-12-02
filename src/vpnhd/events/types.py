@@ -63,7 +63,6 @@ class Event:
             self.timestamp = datetime.now()
 
 
-@dataclass
 class SystemEvent(Event):
     """System-level events."""
 
@@ -71,12 +70,8 @@ class SystemEvent(Event):
         super().__init__(event_type=event_type, timestamp=datetime.now(), data=data, source=source)
 
 
-@dataclass
 class PhaseEvent(Event):
     """Phase execution events."""
-
-    phase_number: int
-    phase_name: str
 
     def __init__(
         self,
@@ -95,11 +90,8 @@ class PhaseEvent(Event):
         self.phase_name = phase_name
 
 
-@dataclass
 class ClientEvent(Event):
     """Client-related events."""
-
-    client_name: str
 
     def __init__(
         self, event_type: EventType, client_name: str, data: Optional[Dict[str, Any]] = None
@@ -110,13 +102,8 @@ class ClientEvent(Event):
         self.client_name = client_name
 
 
-@dataclass
 class IPChangeEvent(Event):
     """IP address change events."""
-
-    old_ip: Optional[str]
-    new_ip: str
-    ip_version: int  # 4 or 6
 
     def __init__(
         self, old_ip: Optional[str], new_ip: str, ip_version: int, data: Optional[Dict[str, Any]] = None
@@ -132,11 +119,8 @@ class IPChangeEvent(Event):
         self.ip_version = ip_version
 
 
-@dataclass
 class KeyRotationEvent(Event):
     """Key rotation events."""
-
-    key_type: str  # "wireguard" or "ssh"
 
     def __init__(self, event_type: EventType, key_type: str, data: Optional[Dict[str, Any]] = None):
         super().__init__(
@@ -145,13 +129,8 @@ class KeyRotationEvent(Event):
         self.key_type = key_type
 
 
-@dataclass
 class MonitoringEvent(Event):
     """Monitoring and metrics events."""
-
-    metric_name: str
-    value: float
-    threshold: Optional[float] = None
 
     def __init__(
         self,
