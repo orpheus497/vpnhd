@@ -102,7 +102,13 @@ def is_valid_cidr(cidr: str) -> bool:
         True
         >>> is_valid_cidr("10.0.0.0/99")
         False
+        >>> is_valid_cidr("10.0.0.0")
+        False
     """
+    # CIDR notation MUST include a slash and prefix length
+    if "/" not in cidr:
+        return False
+    
     try:
         ipaddress.ip_network(cidr, strict=False)
         return True
@@ -174,17 +180,26 @@ def is_safe_path(path: str) -> bool:
         False
     """
     try:
-        # Resolve path and check for traversal
-        p = Path(path).resolve()
-
-        # Check for common dangerous patterns
-        dangerous_patterns = ["..", "~"]
-        path_str = str(p)
-
+        # Check for dangerous patterns BEFORE resolving
+        # This prevents Path.resolve() from normalizing away the attack
+        dangerous_patterns = ["..", "~", "//"]
+        
+        # Check original path string for traversal attempts
         for pattern in dangerous_patterns:
-            if pattern in path_str:
+            if pattern in path:
+                logger.warning(f"Dangerous pattern '{pattern}' detected in path: {path}")
                 return False
-
+        
+        # Check for absolute vs relative path manipulation
+        # Reject paths that try to escape by going relative then absolute
+        if path.startswith("..") or "/.." in path:
+            logger.warning(f"Path traversal attempt detected: {path}")
+            return False
+        
+        # Additional check: ensure resolved path doesn't escape base directory
+        # if a base directory is meant to be enforced
+        # (For now, we just ensure no traversal patterns exist)
+        
         return True
 
     except Exception as e:
@@ -209,9 +224,21 @@ def is_valid_wireguard_key(key: str) -> bool:
     if len(key) != 44:
         return False
 
-    # Check base64 format
-    pattern = r"^[A-Za-z0-9+/]{43}=$"
-    return bool(re.match(pattern, key))
+    # Check base64 format - WireGuard uses standard base64 with padding
+    # Pattern: 42 or 43 base64 chars followed by 1 or 2 '=' for padding
+    # Total must be 44 characters
+    pattern = r"^[A-Za-z0-9+/]{42,43}=*$"
+    if not re.match(pattern, key):
+        return False
+    
+    # Verify it's valid base64 that can be decoded
+    try:
+        import base64
+        decoded = base64.b64decode(key)
+        # WireGuard keys are 32 bytes (256 bits)
+        return len(decoded) == 32
+    except Exception:
+        return False
 
 
 def sanitize_hostname(hostname: str) -> str:
