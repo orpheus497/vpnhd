@@ -144,6 +144,19 @@ class Phase(ABC):
         self.config.mark_phase_complete(self.number, notes)
         self.config.save()
         self.logger.info(f"Phase {self.number} marked as complete")
+        
+        # Publish PHASE_COMPLETED event
+        try:
+            from ..events import PhaseEvent, EventType, event_bus
+            event = PhaseEvent(
+                EventType.PHASE_COMPLETED,
+                self.number,
+                self.name,
+                {"notes": notes}
+            )
+            event_bus.publish(event)
+        except Exception as e:
+            self.logger.warning(f"Failed to publish PHASE_COMPLETED event: {e}")
 
     def mark_failed(self, error: str) -> None:
         """
@@ -155,6 +168,19 @@ class Phase(ABC):
         self.status = PhaseStatus.FAILED
         self.error_message = error
         self.logger.error(f"Phase {self.number} failed: {error}")
+        
+        # Publish PHASE_FAILED event
+        try:
+            from ..events import PhaseEvent, EventType, event_bus
+            event = PhaseEvent(
+                EventType.PHASE_FAILED,
+                self.number,
+                self.name,
+                {"error": error}
+            )
+            event_bus.publish(event)
+        except Exception as e:
+            self.logger.warning(f"Failed to publish PHASE_FAILED event: {e}")
 
     def is_complete(self) -> bool:
         """

@@ -163,7 +163,19 @@ class KeyRotationManager:
 
             self.logger.info("WireGuard server keys rotated successfully")
 
-            # Send notification
+            # Publish KEY_ROTATION_COMPLETED event
+            try:
+                from ..events import KeyRotationEvent, EventType, event_bus
+                event = KeyRotationEvent(
+                    EventType.KEY_ROTATION_COMPLETED,
+                    "wireguard",
+                    {"new_public_key": keypair["public_key"]}
+                )
+                event_bus.publish(event)
+            except Exception as e:
+                self.logger.warning(f"Failed to publish KEY_ROTATION_COMPLETED event: {e}")
+
+            # Send notification (old way)
             if self.notifications:
                 await self.notifications.send_notification(
                     event_type="key_rotation",
@@ -180,7 +192,19 @@ class KeyRotationManager:
         except Exception as e:
             self.logger.exception(f"WireGuard key rotation failed: {e}")
 
-            # Send error notification
+            # Publish KEY_ROTATION_FAILED event
+            try:
+                from ..events import KeyRotationEvent, EventType, event_bus
+                event = KeyRotationEvent(
+                    EventType.KEY_ROTATION_FAILED,
+                    "wireguard",
+                    {"error": str(e)}
+                )
+                event_bus.publish(event)
+            except Exception as err:
+                self.logger.warning(f"Failed to publish KEY_ROTATION_FAILED event: {err}")
+
+            # Send error notification (old way)
             if self.notifications:
                 await self.notifications.send_notification(
                     event_type="error",
