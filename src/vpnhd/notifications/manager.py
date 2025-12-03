@@ -5,11 +5,13 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from ..config.manager import ConfigManager
+from ..events import EventType, event_bus
 from ..utils.logging import get_logger
 from .channels.base import NotificationChannel
 from .channels.email import EmailChannel
 from .channels.webhook import WebhookChannel
-from .events import EventType, NotificationEvent
+from .events import EventType as NotifEventType
+from .events import NotificationEvent
 
 logger = get_logger(__name__)
 
@@ -26,6 +28,7 @@ class NotificationManager:
         self.config = config_manager or ConfigManager()
         self.channels: List[NotificationChannel] = []
         self._initialize_channels()
+        self._register_event_handlers()
 
     def _initialize_channels(self):
         """Initialize enabled notification channels."""
@@ -46,6 +49,92 @@ class NotificationManager:
             webhook_channel = WebhookChannel(self.config)
             self.channels.append(webhook_channel)
             logger.info("Webhook notifications enabled")
+
+    def _register_event_handlers(self):
+        """Register handlers for system events."""
+        # Subscribe to relevant events from the event bus
+        event_bus.subscribe_async(EventType.CLIENT_ADDED, self._on_client_added)
+        event_bus.subscribe_async(EventType.CLIENT_REMOVED, self._on_client_removed)
+        event_bus.subscribe_async(EventType.CLIENT_CONNECTED, self._on_client_connected)
+        event_bus.subscribe_async(EventType.CLIENT_DISCONNECTED, self._on_client_disconnected)
+        event_bus.subscribe_async(EventType.IP_CHANGED, self._on_ip_changed)
+        event_bus.subscribe_async(EventType.KEY_ROTATION_COMPLETED, self._on_key_rotation)
+        event_bus.subscribe_async(EventType.KEY_ROTATION_FAILED, self._on_key_rotation_failed)
+        event_bus.subscribe_async(EventType.SYSTEM_ERROR, self._on_system_error)
+        
+        logger.info("Notification manager subscribed to system events")
+
+    async def _on_client_added(self, event):
+        """Handle client added event."""
+        await self.send_notification(
+            event_type="client_added",
+            message=f"New client added: {event.client_name}",
+            details=event.data,
+            severity="info",
+        )
+
+    async def _on_client_removed(self, event):
+        """Handle client removed event."""
+        await self.send_notification(
+            event_type="client_removed",
+            message=f"Client removed: {event.client_name}",
+            details=event.data,
+            severity="warning",
+        )
+
+    async def _on_client_connected(self, event):
+        """Handle client connected event."""
+        await self.send_notification(
+            event_type="client_connected",
+            message=f"Client connected: {event.client_name}",
+            details=event.data,
+            severity="info",
+        )
+
+    async def _on_client_disconnected(self, event):
+        """Handle client disconnected event."""
+        await self.send_notification(
+            event_type="client_disconnected",
+            message=f"Client disconnected: {event.client_name}",
+            details=event.data,
+            severity="info",
+        )
+
+    async def _on_ip_changed(self, event):
+        """Handle IP change event."""
+        await self.send_notification(
+            event_type="ip_changed",
+            message=f"Public IP changed to: {event.new_ip}",
+            details={"old_ip": event.old_ip, "new_ip": event.new_ip, "version": event.ip_version},
+            severity="info",
+        )
+
+    async def _on_key_rotation(self, event):
+        """Handle key rotation completion event."""
+        await self.send_notification(
+            event_type="key_rotation_completed",
+            message=f"Key rotation completed: {event.key_type}",
+            details=event.data,
+            severity="info",
+        )
+
+    async def _on_key_rotation_failed(self, event):
+        """Handle key rotation failure event."""
+        await self.send_notification(
+            event_type="key_rotation_failed",
+            message=f"Key rotation failed: {event.key_type}",
+            details=event.data,
+            severity="error",
+        )
+
+    async def _on_system_error(self, event):
+        """Handle system error event."""
+        await self.send_notification(
+            event_type="system_error",
+            message=f"System error: {event.data.get('message', 'Unknown error')}",
+            details=event.data,
+            severity="error",
+        )
 
     async def send_notification(
         self,

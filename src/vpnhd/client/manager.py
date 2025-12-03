@@ -226,6 +226,19 @@ class ClientManager:
             self._save_clients_db()
 
             logger.info(f"Client '{name}' added successfully")
+            
+            # Publish CLIENT_ADDED event
+            try:
+                from ..events import ClientEvent, EventType, event_bus
+                event = ClientEvent(
+                    EventType.CLIENT_ADDED,
+                    name,
+                    {"vpn_ip": vpn_ip, "device_type": device_type, "os": os}
+                )
+                event_bus.publish(event)
+            except Exception as e:
+                logger.warning(f"Failed to publish CLIENT_ADDED event: {e}")
+            
             return client_info
 
         except Exception as e:
@@ -261,6 +274,19 @@ class ClientManager:
             self.config_manager.save()
 
             logger.info(f"Client '{name}' removed successfully")
+            
+            # Publish CLIENT_REMOVED event
+            try:
+                from ..events import ClientEvent, EventType, event_bus
+                event = ClientEvent(
+                    EventType.CLIENT_REMOVED,
+                    name,
+                    {"vpn_ip": client.vpn_ip}
+                )
+                event_bus.publish(event)
+            except Exception as e:
+                logger.warning(f"Failed to publish CLIENT_REMOVED event: {e}")
+            
             return True
 
         except Exception as e:

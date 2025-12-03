@@ -71,8 +71,13 @@ def mock_execute_command(mocker):
 
 @pytest.fixture
 def sample_wireguard_key():
-    """Provide a sample WireGuard key (format valid, but not real)."""
-    return "cGFzc3dvcmQxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OQ=="
+    """Provide a sample WireGuard key (format valid, but not real).
+    
+    WireGuard keys are 32 bytes (256 bits) encoded in base64, resulting in 44 characters.
+    This is a properly formatted test key.
+    """
+    # This is a properly formatted WireGuard key: 32 bytes -> 44 base64 characters
+    return "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY="
 
 
 @pytest.fixture
